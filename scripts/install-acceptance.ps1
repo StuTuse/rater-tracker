@@ -1,6 +1,9 @@
+param([string]$PreviousInstaller)
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$installerFile = Join-Path $projectRoot 'release\Rater-Tracker-0.1.0-alpha.1-Setup.exe'
+$currentVersion = (Get-Content -Raw (Join-Path $projectRoot 'VERSION')).Trim()
+$installerFile = Join-Path $projectRoot ('release\Rater-Tracker-' + $currentVersion + '-Setup.exe')
+$initialInstaller = if ($PreviousInstaller) { (Resolve-Path -LiteralPath $PreviousInstaller).Path } else { $installerFile }
 $installDirectory = [IO.Path]::GetFullPath((Join-Path $projectRoot 'runtime-data\install-check'))
 $testDataDirectory = Join-Path $projectRoot 'runtime-data\desktop-smoke'
 $reportDirectory = Join-Path $projectRoot 'output\install'
@@ -8,7 +11,7 @@ if (-not $installDirectory.StartsWith($projectRoot + [IO.Path]::DirectorySeparat
 $existing = Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object DisplayName -eq 'Rater & Tracker'
 if ($existing) { throw 'An existing user installation was found; preserve it and skip isolated installer acceptance.' }
 New-Item -ItemType Directory -Path $reportDirectory -Force | Out-Null
-$installer = Start-Process -FilePath $installerFile -ArgumentList ('/S /D=' + $installDirectory) -WindowStyle Hidden -PassThru
+$installer = Start-Process -FilePath $initialInstaller -ArgumentList ('/S /D=' + $installDirectory) -WindowStyle Hidden -PassThru
 if (-not $installer.WaitForExit(60000) -or $installer.ExitCode -ne 0) { throw 'Installer failed or timed out' }
 $applicationFile = Join-Path $installDirectory 'Rater & Tracker.exe'
 if (-not (Test-Path -LiteralPath $applicationFile)) { throw 'Installed executable missing' }
@@ -30,14 +33,17 @@ try {
   if (-not $second.WaitForExit(10000) -or $first.HasExited -or $second.ExitCode -ne 0) { throw 'Single instance check failed' }
   $first.CloseMainWindow() | Out-Null
   if (-not $first.WaitForExit(10000)) { $first.Kill(); $first.WaitForExit() }
-  # Reinstall the same build to exercise the actual NSIS update path without rewriting user data.
+  # Install the current build over the initial build with the same isolated data directory.
   $reinstall = Start-Process -FilePath $installerFile -ArgumentList ('/S /D=' + $installDirectory) -WindowStyle Hidden -PassThru
   if (-not $reinstall.WaitForExit(60000) -or $reinstall.ExitCode -ne 0) { throw 'Reinstall failed' }
   & node (Join-Path $projectRoot 'scripts\desktop-smoke.mjs') $applicationFile
   if ($LASTEXITCODE -ne 0) { throw 'Application after reinstall failed' }
   $after = Get-Content -Raw (Join-Path $projectRoot 'output\desktop\report.json') | ConvertFrom-Json
   if ($before.persisted -ne $after.persisted -or $before.revision -ne $after.revision -or $before.userData -ne $after.userData) { throw 'Data changed after reinstall' }
-  $result = @{ installed = $true; desktopShortcut = $true; shortcutTarget = $shortcut.TargetPath; singleInstance = $true; reinstalledDataPreserved = $true; xpUnits = $after.persisted; revision = $after.revision; userData = $after.userData; version = $after.version; crossVersionUpgrade = 'not tested'; installationDirectory = $installDirectory }
+  if ($after.version -ne $currentVersion) { throw 'Installed version does not match VERSION' }
+  if ($PreviousInstaller -and $before.version -eq $after.version) { throw 'Cross-version fixture must use different versions' }
+  $upgradeCheck = if ($PreviousInstaller) { $true } else { 'not tested' }
+  $result = @{ installed = $true; desktopShortcut = $true; shortcutTarget = $shortcut.TargetPath; singleInstance = $true; reinstalledDataPreserved = $true; xpUnits = $after.persisted; revision = $after.revision; userData = $after.userData; version = $after.version; previousVersion = $before.version; crossVersionUpgrade = $upgradeCheck; installationDirectory = $installDirectory }
   $result | ConvertTo-Json | Set-Content -Encoding utf8 (Join-Path $reportDirectory 'report.json')
   $result | ConvertTo-Json
 } finally {

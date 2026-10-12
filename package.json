@@ -1,6 +1,6 @@
 {
   "name": "rater-tracker",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "离线每日评分与任务成长记录器",
   "author": "Rater & Tracker (local)",
   "private": true,
@@ -20,14 +20,29 @@
     "electron-builder": "26.15.3",
     "@playwright/cli": "0.1.22"
   },
-  "overrides": { "global-agent": "4.1.3" },
+  "overrides": {
+    "global-agent": "4.1.3"
+  },
   "build": {
     "appId": "local.ratertracker.desktop",
     "productName": "Rater & Tracker",
-    "directories": { "output": "release", "buildResources": "assets" },
-    "files": ["src/**/*", "assets/**/*", "electron/**/*", "index.html", "VERSION", "package.json"],
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "electron/**/*",
+      "index.html",
+      "VERSION",
+      "package.json"
+    ],
     "asar": true,
-    "win": { "target": "nsis", "icon": "assets/app.ico" },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/app.ico"
+    },
     "nsis": {
       "oneClick": false,
       "perMachine": false,

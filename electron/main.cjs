@@ -73,8 +73,10 @@ else {
           await window.raterReload();
           const assets = await Promise.all(Array.from(document.images).map(async i => { try { await i.decode(); return i.naturalWidth > 0; } catch { return false; } }));
           const { BADGES } = await import('./src/badges.js');
-          const badgeAssets = await Promise.all(BADGES.map(async b => { const response = await fetch('assets/badges/'+b.id+'.svg'); return response.ok && (await response.text()).includes('<svg'); }));
-          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && badgeAssets.every(Boolean), badgeAssetCount:badgeAssets.filter(Boolean).length, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          const { ART_ASSETS, badgeArt } = await import('./src/art.js');
+          const generatedAssets = await Promise.all(ART_ASSETS.map(async file => { const image = new Image(); image.src = file; try { await image.decode(); return image.naturalWidth > 0; } catch { return false; } }));
+          const badgeAssets = await Promise.all(BADGES.map(async b => { const response = await fetch(badgeArt(b.id)); return response.ok; }));
+          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
         const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
         await fs.mkdir(directory, { recursive: true });

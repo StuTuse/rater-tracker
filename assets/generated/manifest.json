@@ -1,0 +1,315 @@
+{
+  "generator": "built-in image_gen",
+  "date": "2026-10-12",
+  "status": "complete",
+  "badgePromptPrefix": "Use case: stylized-concept. Asset type: a single collectible badge illustration for Rater & Tracker desktop app. Style: exquisite handmade pencil and softly painted gouache, clean warm sepia contours with tiny natural variation, matte pale buttery yellow and golden ochre fills, warm ivory highlights; sage green only as a small accent. Not photorealistic or 3D. Composition: centered one clearly recognizable subject filling about 68% of a square canvas, generous clean transparent margin, all contours contained, readable at 80px. A subtle imperfect pale yellow watercolor medallion behind the subject, NO hard enclosing border. Real transparent background outside paint, no opaque white rectangle, no checkerboard. Elegant grown-up journal stationery feel, precise silhouette and restrained texture. No words, letters, numbers, name label, logo or watermark. 1024x1024. ",
+  "promptRule": "Badge full prompt = badgePromptPrefix + prompt. Other assets use prompt verbatim.",
+  "assets": [
+    {
+      "id": "journal-pattern",
+      "path": "assets/generated/journal-pattern.png",
+      "prompt": "Use case: stylized-concept. Asset type: seamless repeating background tile for a private offline journaling desktop app Rater & Tracker. Create a square seamlessly tileable wallpaper, delicate hand-drawn pencil doodles on uniform warm ivory cream #faf8ef, inspired by the airy feel of a messaging wallpaper but original. Small scattered four-point stars, curved constellation lines, open books, short pencils, little flags, simple mugs and occasional sage-green leaves. Very sparse, 75% empty space, extremely low contrast pale ochre lines, tiny soft pale yellow watercolor hints, green under 8% of visible marks. Fine natural strokes, elegant and quiet, no central composition, no shading gradients at edges, uniform distribution, opposing edges match exactly. Actual app background, reading text and white cards placed above it; wallpaper must be unobtrusive. No text, letters, numbers, watermark, logo, border, UI or drop shadows. 1024x1024.",
+      "generated": true
+    },
+    {
+      "id": "empty-task",
+      "prompt": "Use case: illustration-story. Asset type: task empty-state illustration in a personal growth journal desktop app. A small open blank notebook with a short ochre pencil resting diagonally across its lower corner, one tiny four-point gold star above and a single small sage-green leaf beside it. Exquisite handmade sepia pencil outlines and light yellow gouache, restrained paper texture contained inside painted areas, warm ivory highlights, mostly golden yellow with minimal green. Clean centered compact composition, generous margin, every object fully visible, readable at 140px wide. Real transparent background, no enclosing badge, no text or scribbled letters, no human, no face, logo, watermark, UI or shadow halo. Square 1024.",
+      "path": "assets/generated/empty-task.png",
+      "generated": true
+    },
+    {
+      "id": "empty-ledger",
+      "prompt": "Use case: illustration-story. Asset type: experience ledger empty-state illustration in a private journaling desktop app. A gentle small cluster of THREE differently sized four-point golden stars resting above a softly curling unmarked paper receipt, two thin curved sepia pencil lines suggesting a trace, one tiny sage-green leaf. Exquisite handmade pencil outlines and pale yellow gouache, ivory highlights, yellow as main color and green very small. Centered complete objects with generous clear margin, readable at 140px, airy quiet grown-up stationery feel. Real transparent background, no badge frame, no numbers, text, letter marks, logo, watermark, UI, face or opaque background. Square 1024.",
+      "path": "assets/generated/empty-ledger.png",
+      "generated": true
+    },
+    {
+      "id": "stars-01",
+      "path": "assets/generated/badges/stars-01.png",
+      "prompt": "Subject: a single four-point golden star with short fine rays. Only one four-point star is the main subject. This is tier 1, very simple.",
+      "generated": true
+    },
+    {
+      "id": "stars-02",
+      "path": "assets/generated/badges/stars-02.png",
+      "prompt": "Subject specification (Chinese): 大小双星交错，细弧连接. Badge name for semantic context only, DO NOT render text: 双星相伴. Tier 2 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "stars-03",
+      "path": "assets/generated/badges/stars-03.png",
+      "prompt": "Subject specification (Chinese): 带三条拖尾的流星. Badge name for semantic context only, DO NOT render text: 流星划过. Tier 3 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "stars-04",
+      "path": "assets/generated/badges/stars-04.png",
+      "prompt": "Subject specification (Chinese): 菱形星核，倾斜双轨道环. Badge name for semantic context only, DO NOT render text: 星环初成. Tier 4 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "stars-05",
+      "path": "assets/generated/badges/stars-05.png",
+      "prompt": "Subject specification (Chinese): 五个星点连成独特星座. Badge name for semantic context only, DO NOT render text: 连成星座. Tier 5 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "stars-06",
+      "path": "assets/generated/badges/stars-06.png",
+      "prompt": "Subject specification (Chinese): 螺旋星云，中心亮点. Badge name for semantic context only, DO NOT render text: 星云汇聚. Tier 6 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "stars-07",
+      "path": "assets/generated/badges/stars-07.png",
+      "prompt": "Subject specification (Chinese): 横向拱形银河，散落星点. Badge name for semantic context only, DO NOT render text: 银河长桥. Tier 7 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "stars-08",
+      "path": "assets/generated/badges/stars-08.png",
+      "prompt": "Subject specification (Chinese): 八芒星冠，放射状日冕. Badge name for semantic context only, DO NOT render text: 星耀之冠. Tier 8 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-01",
+      "path": "assets/generated/badges/study-01.png",
+      "prompt": "Subject specification (Chinese): 垂直书签，底部燕尾切口. Badge name for semantic context only, DO NOT render text: 留下书签. Tier 1 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-02",
+      "path": "assets/generated/badges/study-02.png",
+      "prompt": "Subject specification (Chinese): 打开的单册书，清晰书脊. Badge name for semantic context only, DO NOT render text: 翻开一页. Tier 2 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-03",
+      "path": "assets/generated/badges/study-03.png",
+      "prompt": "Subject specification (Chinese): 斜置羽毛笔，墨滴. Badge name for semantic context only, DO NOT render text: 落笔求知. Tier 3 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-04",
+      "path": "assets/generated/badges/study-04.png",
+      "prompt": "Subject specification (Chinese): 放大镜覆盖有标注的纸页. Badge name for semantic context only, DO NOT render text: 追问细节. Tier 4 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-05",
+      "path": "assets/generated/badges/study-05.png",
+      "prompt": "Subject specification (Chinese): 横向展开的卷轴，两端卷边. Badge name for semantic context only, DO NOT render text: 知识成卷. Tier 5 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-06",
+      "path": "assets/generated/badges/study-06.png",
+      "prompt": "Subject specification (Chinese): 三本错落书籍，顶端书页. Badge name for semantic context only, DO NOT render text: 积书成塔. Tier 6 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-07",
+      "path": "assets/generated/badges/study-07.png",
+      "prompt": "Subject specification (Chinese): 书页根系向上长成枝叶树. Badge name for semantic context only, DO NOT render text: 知识生长. Tier 7 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "study-08",
+      "path": "assets/generated/badges/study-08.png",
+      "prompt": "Subject specification (Chinese): 窄高灯塔，向两侧照出光束. Badge name for semantic context only, DO NOT render text: 求知灯塔. Tier 8 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-01",
+      "path": "assets/generated/badges/work-01.png",
+      "prompt": "Subject specification (Chinese): 短铅笔，旁边一道新画线. Badge name for semantic context only, DO NOT render text: 第一笔. Tier 1 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-02",
+      "path": "assets/generated/badges/work-02.png",
+      "prompt": "Subject specification (Chinese): 张开的剪刀，弧形纸片. Badge name for semantic context only, DO NOT render text: 剪出轮廓. Tier 2 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-03",
+      "path": "assets/generated/badges/work-03.png",
+      "prompt": "Subject specification (Chinese): 三角尺配几何设计稿. Badge name for semantic context only, DO NOT render text: 构思成形. Tier 3 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-04",
+      "path": "assets/generated/badges/work-04.png",
+      "prompt": "Subject specification (Chinese): 相机机身，大圆镜头. Badge name for semantic context only, DO NOT render text: 捕捉画面. Tier 4 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-05",
+      "path": "assets/generated/badges/work-05.png",
+      "prompt": "Subject specification (Chinese): 斜条纹场记板，上板抬起. Badge name for semantic context only, DO NOT render text: 镜头开场. Tier 5 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-06",
+      "path": "assets/generated/badges/work-06.png",
+      "prompt": "Subject specification (Chinese): 多轨剪辑时间线，独立片段块. Badge name for semantic context only, DO NOT render text: 编织片段. Tier 6 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-07",
+      "path": "assets/generated/badges/work-07.png",
+      "prompt": "Subject specification (Chinese): 画架上的完整画布，角落签名笔触. Badge name for semantic context only, DO NOT render text: 作品登场. Tier 7 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "work-08",
+      "path": "assets/generated/badges/work-08.png",
+      "prompt": "Subject specification (Chinese): 金色奖杯内嵌画笔，弧形双柄. Badge name for semantic context only, DO NOT render text: 创作匠心. Tier 8 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "health-01",
+      "path": "assets/generated/badges/health-01.png",
+      "prompt": "Subject specification (Chinese): 一片舒展叶子，清晰叶脉. Badge name for semantic context only, DO NOT render text: 活力萌发. Tier 1 of 8: simple clear silhouette. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-02",
+      "path": "assets/generated/badges/health-02.png",
+      "prompt": "Subject specification (Chinese): 透明水杯，水滴与水面. Badge name for semantic context only, DO NOT render text: 补充能量. Tier 2 of 8: simple clear silhouette. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-03",
+      "path": "assets/generated/badges/health-03.png",
+      "prompt": "Subject specification (Chinese): 侧面运动鞋，鞋带与鞋底. Badge name for semantic context only, DO NOT render text: 迈出步伐. Tier 3 of 8: a few finely chosen details. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-04",
+      "path": "assets/generated/badges/health-04.png",
+      "prompt": "Subject specification (Chinese): 心形轮廓内穿过心电线. Badge name for semantic context only, DO NOT render text: 稳定心跳. Tier 4 of 8: a few finely chosen details. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-05",
+      "path": "assets/generated/badges/health-05.png",
+      "prompt": "Subject specification (Chinese): 两端配重的短哑铃. Badge name for semantic context only, DO NOT render text: 力量积累. Tier 5 of 8: a few finely chosen details. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-06",
+      "path": "assets/generated/badges/health-06.png",
+      "prompt": "Subject specification (Chinese): 骑行车轮配踏板，运动弧线. Badge name for semantic context only, DO NOT render text: 律动前行. Tier 6 of 8: richer but still readable structure. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-07",
+      "path": "assets/generated/badges/health-07.png",
+      "prompt": "Subject specification (Chinese): 伸展人物，两侧平衡弧. Badge name for semantic context only, DO NOT render text: 身心平衡. Tier 7 of 8: richer but still readable structure. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "health-08",
+      "path": "assets/generated/badges/health-08.png",
+      "prompt": "Subject specification (Chinese): 盾牌包围人体剪影与叶片. Badge name for semantic context only, DO NOT render text: 健康守护. Tier 8 of 8: richer but still readable structure. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-01",
+      "path": "assets/generated/badges/life-01.png",
+      "prompt": "Subject specification (Chinese): 有把手的杯子，升起蒸汽. Badge name for semantic context only, DO NOT render text: 一杯日常. Tier 1 of 8: simple clear silhouette. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-02",
+      "path": "assets/generated/badges/life-02.png",
+      "prompt": "Subject specification (Chinese): 小烛台与独立火焰. Badge name for semantic context only, DO NOT render text: 点亮片刻. Tier 2 of 8: simple clear silhouette. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-03",
+      "path": "assets/generated/badges/life-03.png",
+      "prompt": "Subject specification (Chinese): 陶制花盆，三枝不同叶片. Badge name for semantic context only, DO NOT render text: 照料小绿. Tier 3 of 8: a few finely chosen details. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-04",
+      "path": "assets/generated/badges/life-04.png",
+      "prompt": "Subject specification (Chinese): 带双耳的汤锅，半开的锅盖. Badge name for semantic context only, DO NOT render text: 温暖一餐. Tier 4 of 8: a few finely chosen details. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-05",
+      "path": "assets/generated/badges/life-05.png",
+      "prompt": "Subject specification (Chinese): 圆背扶手椅，方形靠垫. Badge name for semantic context only, DO NOT render text: 安顿一角. Tier 5 of 8: a few finely chosen details. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-06",
+      "path": "assets/generated/badges/life-06.png",
+      "prompt": "Subject specification (Chinese): 方窗与打开的窗帘，斜照光线. Badge name for semantic context only, DO NOT render text: 家中有光. Tier 6 of 8: richer but still readable structure. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-07",
+      "path": "assets/generated/badges/life-07.png",
+      "prompt": "Subject specification (Chinese): 栏杆阳台与攀缘花枝. Badge name for semantic context only, DO NOT render text: 日子开花. Tier 7 of 8: richer but still readable structure. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "life-08",
+      "path": "assets/generated/badges/life-08.png",
+      "prompt": "Subject specification (Chinese): 花园拱门、两侧绿篱与小径. Badge name for semantic context only, DO NOT render text: 生活成园. Tier 8 of 8: richer but still readable structure. The main object remains pale yellow or ivory with sage-green natural leaf accents, sepia outlines.",
+      "generated": true
+    },
+    {
+      "id": "tasks-01",
+      "path": "assets/generated/badges/tasks-01.png",
+      "prompt": "Subject specification (Chinese): 方形完成框，大勾号. Badge name for semantic context only, DO NOT render text: 首次交付. Tier 1 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-02",
+      "path": "assets/generated/badges/tasks-02.png",
+      "prompt": "Subject specification (Chinese): 竖直沙漏，上下分量不同. Badge name for semantic context only, DO NOT render text: 把握节奏. Tier 2 of 8: simple clear silhouette. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-03",
+      "path": "assets/generated/badges/tasks-03.png",
+      "prompt": "Subject specification (Chinese): 地面上的单面小旗. Badge name for semantic context only, DO NOT render text: 立下里程. Tier 3 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-04",
+      "path": "assets/generated/badges/tasks-04.png",
+      "prompt": "Subject specification (Chinese): 大小两个相扣齿轮. Badge name for semantic context only, DO NOT render text: 持续运转. Tier 4 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-05",
+      "path": "assets/generated/badges/tasks-05.png",
+      "prompt": "Subject specification (Chinese): 有桥墩的弧桥，跨过一条沟谷. Badge name for semantic context only, DO NOT render text: 跨越阶段. Tier 5 of 8: a few finely chosen details. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-06",
+      "path": "assets/generated/badges/tasks-06.png",
+      "prompt": "Subject specification (Chinese): 三层靶心，斜插箭矢. Badge name for semantic context only, DO NOT render text: 命中目标. Tier 6 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-07",
+      "path": "assets/generated/badges/tasks-07.png",
+      "prompt": "Subject specification (Chinese): 向上火箭，双侧翼与尾焰. Badge name for semantic context only, DO NOT render text: 交付加速. Tier 7 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    },
+    {
+      "id": "tasks-08",
+      "path": "assets/generated/badges/tasks-08.png",
+      "prompt": "Subject specification (Chinese): 山峰剪影，顶端旗帜与上行路径. Badge name for semantic context only, DO NOT render text: 百次登顶. Tier 8 of 8: richer but still readable structure. Predominantly warm yellow and gold; green limited to tiny optional accents.",
+      "generated": true
+    }
+  ]
+}
