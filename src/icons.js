@@ -6,6 +6,8 @@ const paths = {
   life: 'M4 11 12 3l8 8v10H4ZM9 21v-8h6v8M6 8V4h3',
   tasks: 'M4 4h16v17H4ZM7 9l2 2 3-4M14 9h3M7 16l2 2 3-4m2 2h3',
   history: 'M4 7a9 9 0 1 1-1 8M4 2v5h5M12 7v6l4 2',
+  calendar: 'M5 5h14q2 0 2 2v12q0 2-2 2H5q-2 0-2-2V7q0-2 2-2ZM7 3v4m10-4v4M3 10h18M7 14h2m4 0h2m-8 3h2m4 0h2',
+  chevron: 'M6 9q3 2 6 6 3-4 6-6',
   rewards: 'M5 16 2 7l6 4 4-8 4 8 6-4-3 9ZM5 20h14',
   settings: 'M12 3l3 1 1 3 3 1 1 3-1 3-3 1-1 3-3 1-3-1-1-3-3-1-1-3 1-3 3-1 1-3ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z',
   star: 'M12 2 15 9l7 1-5 5 1 7-6-4-7 4 1-7-5-5 8-1Z',

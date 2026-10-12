@@ -20,8 +20,8 @@ async page => {
       s.revision=old.revision+1;await db.write(s,old.revision);db.close();await window.raterReload();
     });
     await page.getByRole('button',{name:'今日',exact:true}).click();
-    await page.getByLabel('评分日期').fill(await page.evaluate(async()=>{const c=await import('./src/core.js');return c.hongKong().date;}));
-    await page.getByLabel('评分日期').dispatchEvent('change');
+    await page.getByRole('button',{name:/^评分日期，当前/}).click();
+    await page.getByRole('button',{name:'回到今天',exact:true}).click();
     await page.evaluate(()=>Promise.all(document.getAnimations().filter(a=>a.effect.getComputedTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{}))));
     await page.evaluate(()=>{
       window.uiProbe={cards:[...document.querySelectorAll('.rating-card')],button:document.querySelector('.star-button[data-dimension="study"][data-stars="5"]'),note:document.querySelector('.rating-note[data-dimension="study"]'),animations:[],entrances:new Set(document.querySelector('#content').getAnimations({subtree:true}).filter(a=>a instanceof CSSAnimation)),animate:Element.prototype.animate,put:IDBObjectStore.prototype.put};
@@ -67,11 +67,11 @@ async page => {
     await page.getByRole('button',{name:'关闭',exact:true}).click();
     await page.getByRole('button',{name:'设置',exact:true}).click();
     const ref=page.locator('#references-form [name="study"]');await ref.fill('未提交的参照草稿');
-    await page.getByLabel('动效强度').selectOption('off');await page.waitForFunction(()=>document.documentElement.dataset.motion==='off');
+    await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'关闭 · 保留数值反馈',exact:true}).click();await page.waitForFunction(()=>document.documentElement.dataset.motion==='off');
     report.settingsDraftSurvives=await ref.inputValue()==='未提交的参照草稿';
     await page.getByRole('button',{name:'今日',exact:true}).click();await stars(5).click();await committed(5);
     report.offHasNoStarAnimations=await page.evaluate(()=>document.querySelector('.ratings-grid').getAnimations({subtree:true}).length===0);
-    await page.getByRole('button',{name:'设置',exact:true}).click();await page.getByLabel('动效强度').selectOption('full');await page.waitForFunction(()=>document.documentElement.dataset.motion==='full');
+    await page.getByRole('button',{name:'设置',exact:true}).click();await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'完整 · 金色成长反馈',exact:true}).click();await page.waitForFunction(()=>document.documentElement.dataset.motion==='full');
     await page.getByRole('button',{name:'今日',exact:true}).click();
     await page.screenshot({path:'output/playwright/alpha4-today.png',fullPage:true});
   } catch(error) {

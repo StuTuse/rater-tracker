@@ -172,3 +172,71 @@ html[data-motion=off] .nav-link:hover,html[data-motion=gentle] .nav-link:hover{t
 html[data-motion=off] .star-button:active .icon{scale:1}
 @media(prefers-reduced-motion:reduce){.badge-card:hover,.badge-card:hover img,.nav-link:hover{transform:none}}
 .static-update .star-button .icon{transition:none!important;animation:none!important}
+
+/* App-owned controls and secondary-surface motion. */
+html{scrollbar-width:none;interpolate-size:allow-keywords}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
+dialog,.table-scroll{scrollbar-width:none}
+dialog::-webkit-scrollbar,.table-scroll::-webkit-scrollbar{display:none;width:0;height:0}
+body:has(dialog[open]){overflow:hidden}
+.native-control-source{position:absolute!important;width:1px!important;height:1px!important;margin:0!important;padding:0!important;opacity:0!important;pointer-events:none!important;clip-path:inset(50%);overflow:hidden}
+.control-trigger{width:100%;min-height:43px;justify-content:space-between;border:1px solid #e2e3d6;background:#fffefa;padding:10px 12px;color:var(--ink);box-shadow:0 1px 0 #7e6a2410;text-align:left}
+.control-trigger:hover:not(:disabled){background:#fffdf4;border-color:#d2bd75;box-shadow:0 4px 12px #735d1110;transform:none}
+.control-trigger:focus-visible,.control-trigger.is-open{outline:0;border-color:#c19b32;box-shadow:0 0 0 3px #e8c25126;background:#fffdf5}
+.control-trigger-value{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.control-trigger-icon{display:flex;align-items:center;justify-content:center;color:#a28734;transition:transform .22s var(--ease-soft);flex:0 0 auto}
+.control-trigger-icon .icon{width:17px;height:17px}
+.control-trigger.is-open .control-trigger-icon{transform:rotate(180deg)}
+.control-trigger.is-open .is-calendar-icon{transform:none}
+.control-trigger.is-placeholder{color:#a3a493}
+.date-switch{gap:2px}
+.date-switch .control-trigger{width:148px;min-height:32px;border:0;background:transparent;padding:5px 8px;font-size:12px;box-shadow:none}
+.date-switch .control-trigger:hover:not(:disabled),.date-switch .control-trigger.is-open{background:#f7f1dc;box-shadow:none}
+#control-layer{position:fixed;inset:0;z-index:1000;pointer-events:none}
+.control-popover[popover]{position:fixed;inset:auto;margin:0;padding:6px;border:1px solid #ded9c4;border-radius:14px;background:#fffef8;color:var(--ink);box-shadow:0 18px 50px #45401f24,0 3px 10px #66561514;pointer-events:auto;opacity:0;transform:translateY(-6px) scale(.975);transform-origin:var(--popover-origin-x) top;transition:opacity .18s ease,transform .22s var(--ease-soft);overflow:hidden}
+.control-popover[popover]::backdrop{display:none}
+.control-popover.is-open{opacity:1;transform:translateY(0) scale(1)}
+.control-popover.is-closing{opacity:0;transform:translateY(-4px) scale(.985);pointer-events:none}
+.control-menu{display:flex;flex-direction:column;gap:3px;max-height:min(320px,55vh);overflow:auto;scrollbar-width:none}
+.control-menu::-webkit-scrollbar{display:none}
+.control-option{width:100%;min-height:39px;justify-content:space-between;padding:9px 10px;border-radius:9px;font-size:13px;color:#68705e;text-align:left}
+.control-option:hover:not(:disabled),.control-option:focus-visible{background:#f6efd8;transform:none;outline:0}
+.control-option.is-selected{background:#f5e6b9;color:#795f1f;font-weight:600}
+.control-option-check{display:flex;width:17px;color:#8d7d42}
+.control-option-check .icon{width:15px;height:15px}
+.date-popover{padding:12px!important}
+.control-popover .calendar-panel{padding:0;background:transparent;border:0;box-shadow:none;animation:none}
+.control-popover .calendar-head{margin:0 0 8px}
+.control-popover .calendar-head strong{font-size:13px;color:#695a2e}
+.control-popover .calendar-nav{width:35px;height:35px;padding:0;border-radius:10px;font-size:22px;color:#897532}
+.control-popover .calendar-nav:hover:not(:disabled),.control-popover .calendar-nav:focus-visible{background:#f4e7bb;transform:none;outline:0}
+.calendar-weekdays,.control-popover .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.calendar-weekdays span{padding:5px 0 7px;font-size:11px;color:#89917a}
+.control-popover .calendar-day{height:37px;min-width:0;padding:0;border:1px solid transparent;border-radius:10px;font-size:13px;color:#6f7564;display:inline-flex;align-items:center;justify-content:center}
+.control-popover .calendar-day:hover:not(:disabled),.control-popover .calendar-day:focus-visible{background:#f7edcd;border-color:#e2ca79;box-shadow:none;transform:none;outline:0}
+.control-popover .calendar-day.is-today{border-color:#dcc56f;color:#8a6a19;font-weight:600}
+.control-popover .calendar-day.is-selected{background:#eecb58;border-color:#d6ae31;color:#51431c;box-shadow:0 3px 9px #b18a1724;font-weight:650}
+.control-popover .calendar-day:disabled{opacity:.22}
+.calendar-blank{height:37px}
+.calendar-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 4px 1px;border-top:1px solid #ece8d8;font-size:11px;color:#89917a}
+.calendar-today{padding:5px 8px;border-radius:7px;color:#856b28;font-size:11px}
+.calendar-today:hover:not(:disabled),.calendar-today:focus-visible{background:#f4e7bb;transform:none;outline:0}
+.segmented{position:relative;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;isolation:isolate}
+.segmented::-webkit-scrollbar{display:none}
+.segmented button{position:relative;z-index:1;flex-shrink:0;background:transparent!important;box-shadow:none!important;transition:color .2s var(--ease-soft),transform .16s var(--ease-soft)}
+.segmented button.selected{color:#6f581a}
+.segment-indicator{position:absolute;z-index:0;left:0;top:0;width:var(--segment-width,0);height:var(--segment-height,0);transform:translate3d(var(--segment-x,0),var(--segment-y,0),0);border:1px solid #e5d293;border-radius:8px;background:#fffdf5;box-shadow:0 2px 8px #4b50200f;opacity:0;pointer-events:none}
+.segment-indicator.is-visible{opacity:1}
+.segment-indicator.is-ready{transition:width .28s var(--ease-soft),height .28s var(--ease-soft),transform .32s var(--ease-soft),opacity .16s}
+details::details-content{block-size:0;opacity:0;overflow-y:clip;transform:translateY(-4px);transition:block-size .28s var(--ease-soft),opacity .2s ease,transform .28s var(--ease-soft),content-visibility .28s allow-discrete}
+details[open]::details-content{block-size:auto;opacity:1;transform:translateY(0)}
+summary:after{transition:transform .24s var(--ease-soft),color .18s}
+dialog{animation:none!important;opacity:0;transform:translateY(12px) scale(.985);transition:opacity .2s ease,transform .28s var(--ease-soft),overlay .28s allow-discrete,display .28s allow-discrete}
+dialog[open]{animation:none!important;opacity:1;transform:translateY(0) scale(1)}
+dialog::backdrop{animation:none!important;background:#3b412e44;opacity:0;backdrop-filter:blur(3px);transition:opacity .22s ease,overlay .28s allow-discrete,display .28s allow-discrete}
+dialog[open]::backdrop{opacity:1}
+@starting-style{dialog[open]{opacity:0;transform:translateY(12px) scale(.985)}dialog[open]::backdrop{opacity:0}}
+html[data-motion=gentle] details::details-content,html[data-motion=gentle] dialog::backdrop{transition-duration:.15s!important}
+html[data-motion=off] details::details-content,html[data-motion=off] dialog::backdrop{transition:none!important}
+@media(max-width:620px){.segmented{flex-wrap:nowrap;max-width:100%}.control-popover[popover]{max-width:calc(100vw - 24px)}.date-switch .control-trigger{width:136px}.date-popover{padding:10px!important}}
+@media(prefers-reduced-motion:reduce){.control-popover,.segment-indicator,details::details-content,dialog,dialog::backdrop{transition-duration:.01ms!important}}

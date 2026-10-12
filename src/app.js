@@ -4,6 +4,7 @@ import { icon } from './icons.js';
 import { BADGES } from './badges.js';
 import { ART, badgeArt } from './art.js';
 import { updateDOM } from './dom.js';
+import { closeControlLayer, enhanceControls } from './controls.js';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
@@ -12,7 +13,7 @@ const today = () => hongKong().date;
 const uid = () => crypto.randomUUID();
 const button = (action, label, name = '', extra = '', cls = '') => `<button type="button" class="${cls}" data-action="${action}" ${extra}>${name ? icon(name) : ''}${label}</button>`;
 let store, state, desktopInfo, page = 'today', chosenDate = today(), month = today().slice(0, 7), taskFilter = 'active', taskQuery = '', badgeFilter = 'all', trendRange = 7, rewardTab = 'badges';
-let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer, lastFocused;
+let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer, lastFocused, modalSwapAnimation;
 const growthAnimations = new Set();
 const starAnimations = new Map();
 const drafts = new Map();
@@ -247,6 +248,7 @@ function renderContent(preserveInputs = true, animateChanges = false) {
     content.classList.add('static-update');
   }
   updateDOM(content, ({ today: todayPage, tasks: tasksPage, history: historyPage, rewards: rewardsPage, settings: settingsPage })[page](), { preserveInputs, starChanged: animateChanges ? animateStar : () => {} });
+  enhanceControls(content);
   if (!animateChanges) {
     const star = content.querySelector('.star-button .icon');
     if (star) getComputedStyle(star).fill;
@@ -301,14 +303,20 @@ document.addEventListener('focusout', event => {
   if (control && !control.contains(event.relatedTarget)) previewRating(control, null);
 });
 function openModal(contents, kind = '') {
+  closeControlLayer({ immediate: true });
+  modalSwapAnimation?.cancel();
   const dialog = $('#modal');
-  lastFocused = document.activeElement;
+  const alreadyOpen = dialog.open;
+  if (!alreadyOpen || !dialog.contains(document.activeElement)) lastFocused = document.activeElement;
   dialog.dataset.kind = kind;
+  dialog.setAttribute('aria-labelledby', 'modal-title');
   dialog.innerHTML = contents;
+  enhanceControls(dialog);
   if (!dialog.open) dialog.showModal();
+  else if (motionMode() !== 'off') modalSwapAnimation = dialog.animate([{ opacity: .6, transform: 'translateY(5px) scale(.99)' }, { opacity: 1, transform: 'none' }], { duration: motionMode() === 'gentle' ? 150 : 220, easing: 'cubic-bezier(.22,.8,.25,1)' });
 }
-function closeModal() { $('#modal').close(); $('#modal').dataset.kind = ''; lastFocused?.focus({ preventScroll: true }); }
-const modalHead = (kicker, title) => `<div class="modal-head"><div><h2>${escape(title)}</h2></div>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>`;
+function closeModal() { closeControlLayer({ immediate: true }); modalSwapAnimation?.cancel(); $('#modal').close(); $('#modal').dataset.kind = ''; lastFocused?.focus({ preventScroll: true }); }
+const modalHead = (kicker, title) => `<div class="modal-head"><div><h2 id="modal-title">${escape(title)}</h2></div>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>`;
 function confirmAction(title, body, callback, label = '确认', danger = false) {
   openModal(`${modalHead('请核对这次操作', title)}<p class="confirm-body">${body}</p><div class="modal-actions">${button('close-modal', '取消', '', '', 'secondary')}<button type="button" id="confirm-action" class="${danger ? 'danger' : 'primary'}">${label}</button></div>`, 'confirm');
   $('#confirm-action').onclick = () => { closeModal(); callback(); };
@@ -338,11 +346,13 @@ function detailContents(t) {
 function taskDetail(id) { const task = state.tasks[id]; if (!task || task.deleted) return; openModal(detailContents(task), 'task'); $('#modal').dataset.task = id; }
 function refreshTaskDialog() {
   const modal = $('#modal'); if (!modal.open || modal.dataset.kind !== 'task') return;
+  closeControlLayer({ immediate: true });
   const t = state.tasks[modal.dataset.task]; if (!t || t.deleted) { closeModal(); return; }
   const scroll = modal.scrollTop, values = [...modal.querySelectorAll('form')].map(f => [f.id, Object.fromEntries(new FormData(f))]);
   const focus = document.activeElement, name = focus?.name, formId = focus?.form?.id;
   updateDOM(modal, detailContents(t));
   for (const [id, fields] of values) for (const [name, value] of Object.entries(fields)) { const field = document.getElementById(id)?.elements.namedItem(name); if (field && !(field.type === 'date' && (field.min && value < field.min || field.max && value > field.max))) field.value = value; }
+  enhanceControls(modal);
   modal.scrollTop = scroll;
   if (name && formId) document.getElementById(formId)?.elements.namedItem(name)?.focus({ preventScroll: true });
 }
@@ -449,7 +459,7 @@ window.raterReload = async () => { state = validateState(await store.read()); gr
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.4', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.5', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     setInterval(() => { if (page === 'today' && chosenDate !== today() && !document.hidden && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
   } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }

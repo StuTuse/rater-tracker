@@ -1,11 +1,11 @@
 # SESSION_HANDOFF · 跨会话开发交接
 
-最后更新：2026-10-12，香港时间。产品规范《最终方案》v1.6（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.4**。
+最后更新：2026-10-12，香港时间。产品规范《最终方案》v1.7、视觉 v1.5（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.5**。
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG W009～W013、正式方案，结算特别阅读 4～6 节。
-2. 阅读 `docs/数据契约.md`、`docs/alpha.4验收记录.md`；素材见 `docs/生图素材清单.md`，历史检查见 alpha.2 与 0.1 验收记录。
+1. 读本文件、AGENTS、WORKLOG 最近 W014、正式方案，结算特别阅读 4～6 节。
+2. 阅读 `docs/数据契约.md`、`docs/alpha.5验收记录.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.4 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
 
@@ -18,24 +18,24 @@
 | 工程 | 原生 HTML/CSS/JS，Electron 44.7.0，electron-builder 26.15.3；Windows x64 |
 | 结算 | 评分分批、冻结计划／C、四档窗口、折扣、补录、删除／撤销／恢复、等级与统计；25 项业务测试 |
 | 保存 | IndexedDB 完整快照、原子 revision CAS、串行保存、备份结构校验；真实保存失败与冲突注入 |
-| 界面 | 五页与任务详情；精简装饰文案、原位更新、星级预览和逐颗点亮、悬停／按压／焦点反馈；12 项交互条件 |
+| 界面 | 五页与任务详情；原位更新、局部星级反馈；应用内下拉／月历、横向选中滑块、双向弹窗／折叠动画，隐藏系统滚动条；26 项控件与 12 项交互条件 |
 | 资产 | 48 个逐枚生图的透明 PNG 徽章、底纹与两张插画；旧 SVG 参考＋应用图标；资源与总览检查 |
 | 动效 | 金色液态光层、增长／回退／跨级／MAX；连续显示位置接续；偏好与隐藏暂停；11 项专项与 5 项 MAX 条件 |
 | 桌面 | 本地 app 来源、隔离 preload、单实例、JSON 文件接口；实际打包窗口和截图 |
-| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.3 → alpha.4 升级数据保持；隔离测试副本已卸载 |
+| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.4 → alpha.5 升级数据保持；隔离测试副本已卸载 |
 | 尚未覆盖 | 以后格式迁移、Windows 原生文件对话框全程点击、60 fps 实测、长期大数据性能、完整人工体验验收 |
 
-安装包：`release/Rater-Tracker-0.1.0-alpha.4-Setup.exe`，202,687,807 字节，约 193.3 MiB；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.3验收记录.md`。
+安装包：`release/Rater-Tracker-0.1.0-alpha.5-Setup.exe`，202,693,363 字节，约 193.3 MiB；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.5验收记录.md`。
 
 ## 文件责任与协作
 
-本轮负责 src/app.js、src/dom.js、src/styles.css、浏览器交互验收与版本文档；没有改结算核心、存储契约或生图原图。没有派遣／创建其他会话，没有其他会话登记的修改。
+本轮负责 src/controls.js、app.js、dom.js、styles.css、icons.js、index.html、Electron smoke、浏览器验收和版本文档；没有改结算核心、存储契约或生图原图。接续前次未完成的同一轮改动，没有派遣／创建其他会话。
 
 | 路径 | 用途 |
 | --- | --- |
 | `src/core.js` | 唯一数值／日期／结算定义，纯事务 |
 | `src/storage.js` | 原子保存、备份校验与恢复契约 |
-| `src/app.js`、`src/dom.js`、`src/styles.css` | 五页与详情、真实反馈、动效 |
+| `src/app.js`、`src/dom.js`、`src/controls.js`、`src/styles.css` | 五页与详情、原位更新、应用内菜单／月历／滑块、真实反馈与动效 |
 | `src/art.js`、`src/badges.js`、`assets/generated/` | 51 张生图与入口、徽章元数据、提示词及总览；旧 assets/badges SVG 保留参考 |
 | `src/icons.js`、`assets/app.*` | 矢量图标与安装图标 |
 | `electron/main.cjs`、`electron/preload.cjs` | 桌面来源、窗口、安全与文件接口 |
@@ -71,7 +71,7 @@ npm run dist
 npm run desktop:smoke
 node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.3-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.4-Setup.exe'
 ```
 
 安装验收脚本检测已有用户安装则停止；不为此自动卸载已有版本。源码路径含 `&`，工具入口直接经 Node 启动，避免常规 Windows .cmd 垫片解析错误。沙箱可能阻止 Node 子进程、缓存写入或下载；需要时按实际错误使用受审查的执行权限，不改写工程去关闭安全隔离。
@@ -82,17 +82,19 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 
 ## 检查与后续
 
-本轮 25 项纯业务测试、12 项浏览器条件、12 项交互条件、11 项流光／可读性条件与 5 项 MAX 条件通过；实际安装版 51 张解码、48 枚徽章、光层移动与 alpha.2 → alpha.3 升级通过。alpha.2 的 7 项素材条件为历史检查，本轮未重跑图片 alpha 测量。桌面／安装报告位于 `output/desktop`、`output/install`，截图及 MP4 位于 `output/playwright`；均忽略。主屏幕在实际 Electron 渲染检查过，不以构建成功代替视觉检查。
+本轮 25 项业务、26 项控件、12 项浏览器、12 项 UI、11 项 flow 和 5 项 MAX 条件通过；最终安装 Electron 中新菜单、日历、退出动画、滑块、隐藏滚动条及 51 张解码／48 枚徽章通过。alpha.4 → alpha.5 升级保持 11 XP、revision=1 与数据路径，隔离测试副本已卸载。alpha.2 的图片 alpha 测量为历史检查，本轮未重跑。桌面／安装报告在 output/desktop、output/install，浏览器截图在 output/playwright；均忽略。
 
-仍需人工连续使用、完整动效帧率／GPU 和长列表性能测量、Windows 原生文件对话框点击及完整辅助功能检查。已验证同格式 alpha.1 → alpha.2、alpha.2 → alpha.3 升级，不能推广为以后格式迁移已通过。文字对比是六类抽样；125% 为 CSS zoom，隐藏检查为事件模拟，详细边界见当前验收记录。
+控件浮层必须挂到所属 dialog 内才能接收模态环境真实点击；退出浮层立即 inert／aria-hidden，清理在动画后进行。data-persistent-ui 标记由控件模块管理，DOM 更新跳过这些生成节点，控件增强阶段清理孤立按钮。不要改回按全局字段序号识别控件。桌面 smoke 的后台窗口仅在测试模式禁用节流以避免截图旧帧；不把该检查当成性能测试。
+
+仍需人工连续使用、动效帧率／GPU 和长列表性能测量、Windows 原生文件对话框点击及完整辅助功能检查。已验证多个同格式 alpha 升级，不能推广为以后格式迁移。文字对比是历史六类抽样；125% 为 CSS zoom，隐藏检查为事件模拟。桌面 smoke 使用 DOM 事件，真实菜单鼠标／键盘在浏览器验证，详细边界见当前验收记录。
 
 最具体下一步：安装本预览并按真实日常数据体验评分→推进→完成→备份，记录交互／视觉反馈；补齐原生对话框、长数据与性能检查再进入 beta。51 张原图与安装体积可考虑经独立验收的无损优化。
 
 ## 版本状态
 
-`VERSION`／package／锁文件为 `0.1.0-alpha.4`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.4`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
+`VERSION`／package／锁文件为 `0.1.0-alpha.5`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.5`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
-alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，优化可读性与流光；alpha.4 优化文案与交互，具体当前提交以 Git 查询为准。
+alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，alpha.4 提交 3ba94e1；alpha.5 统一应用内控件与二级界面动效，具体当前提交以 Git 查询为准。
 
 本次工作对应 WORKLOG **W009～W013**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
 

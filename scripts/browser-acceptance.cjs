@@ -37,11 +37,11 @@ async (page) => {
   results.calendarAndTrend = await page.locator('.calendar-day').count()>0 && await page.locator('.trend-line').count()===4;
   await settle(); await page.screenshot({path:'output/playwright/history.png',fullPage:true});
   await page.getByRole('button',{name:'设置',exact:true}).click();
-  await page.getByLabel('动效强度').selectOption('gentle');
+  await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'柔和 · 轻量过渡',exact:true}).click();
   await page.waitForFunction(()=>document.documentElement.dataset.motion==='gentle');
-  await page.getByLabel('动效强度').selectOption('off');
+  await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'关闭 · 保留数值反馈',exact:true}).click();
   await page.waitForFunction(()=>document.documentElement.dataset.motion==='off');
-  await page.getByLabel('动效强度').selectOption('full');
+  await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'完整 · 金色成长反馈',exact:true}).click();
   await page.waitForFunction(()=>document.documentElement.dataset.motion==='full');
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.waitForFunction(()=>document.documentElement.dataset.motion==='gentle');

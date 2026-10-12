@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.4，交互体验更新版。** 精简文案、原位更新、星级悬停预览与逐颗点亮，并保留金色液态经验条；已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.5，应用内控件更新版。** 下拉菜单、日期月历与横向选中滑块使用统一样式；弹窗和折叠详情补齐进出动画，隐藏系统滚动条并保留滚动。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.4-Setup.exe](release/Rater-Tracker-0.1.0-alpha.4-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.5-Setup.exe](release/Rater-Tracker-0.1.0-alpha.5-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -22,7 +22,7 @@
 
 更新前先从设置页导出 JSON，再运行新安装程序。不要删除数据目录。备份包括历史分配、取消痕迹、冻结额度和 C、评分星数批次、设置及规则／格式版本；恢复不会重新发奖。浏览器预览与桌面数据互相独立。
 
-本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装、alpha.1 → alpha.2 与 alpha.2 → alpha.3 升级保持数据；以后格式迁移仍需独立验证。
+本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.4 → alpha.5 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
 
 ## 开发命令
 
@@ -46,7 +46,7 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 ```powershell
 node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.3-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.4-Setup.exe'
 ```
 
 安装验收脚本先确认没有既有用户安装，再在工作区 `runtime-data/install-check` 测试安装、快捷方式、单实例、同版本重装；指定 `PreviousInstaller` 则先安装旧版，再安装当前版并检查数据保持。结束卸载测试副本。测试数据使用 `runtime-data/desktop-smoke`，不写入正常数据目录。如果检测到已有安装，脚本停止，避免覆盖它。
@@ -54,21 +54,23 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 浏览器验收使用 Playwright CLI（先 `npm run dev`），在专用测试浏览器执行：
 
 ```powershell
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check open http://127.0.0.1:4173
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check snapshot
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check run-code --filename=scripts/browser-acceptance.cjs
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check snapshot
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check run-code --filename=scripts/growth-acceptance.cjs
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check snapshot
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check run-code --filename=scripts/flow-acceptance.cjs
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check snapshot
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check run-code --filename=scripts/ui-acceptance.cjs
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check goto http://127.0.0.1:4173/assets/generated/gallery.html
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check run-code --filename=scripts/art-acceptance.cjs
-node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check close
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check open http://127.0.0.1:4173
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/controls-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/browser-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/growth-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/flow-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/ui-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check goto http://127.0.0.1:4173/assets/generated/gallery.html
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/art-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 ```
 
-这些是验收流程而非用户数据操作；第一个会更正测试浏览器的学习评分，MAX 与 flow 流程使用测试快照并在 `finally` 恢复原快照。截图与报告在 `output/`，测试数据、导出和构建产物均不入库。流光是完整模式的循环装饰，验收只等待有限的反馈动画结束。
+这些是验收流程而非用户数据操作；浏览器基础流程会更正测试浏览器的学习评分，controls、UI、MAX 与 flow 流程使用测试快照并在 `finally` 恢复原快照。截图与报告在 `output/`，测试数据、导出和构建产物均不入库。流光是完整模式的循环装饰，验收只等待有限的反馈动画结束。
 
 ## 源码与验证范围
 
@@ -76,7 +78,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check close
 | --- | --- |
 | `src/core.js` | 香港日期、纯事务、整数金额、冻结参数、等级与统计 |
 | `src/storage.js` | IndexedDB 原子事务、revision 冲突校验、完整备份验证 |
-| `src/app.js` / `src/dom.js` / `src/styles.css` | 五页界面、真实状态反馈、动效、任务详情 |
+| `src/app.js` / `src/dom.js` / `src/controls.js` / `src/styles.css` | 五页界面、原位更新、应用内控件、动效与任务详情 |
 | `assets/generated/` / `src/art.js` / `src/badges.js` | 51 张生图素材、资源入口、名称与门槛；旧 SVG 留作参考 |
 | `electron/` | 固定本地来源、安全隔离、单实例、文件对话框 |
 | `test/core.test.mjs` | 正式方案的结算与更正场景 |
@@ -84,13 +86,13 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha4-check close
 | [数据契约.md](docs/数据契约.md) | 金额精度、历史分配、持久化和备份格式 |
 | [0.1验收记录.md](docs/0.1验收记录.md) | 实际检查、产物和未覆盖范围 |
 
-已有验证包含 25 项业务测试、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件、51 张生图资源、实际打包应用和 alpha.3 → alpha.4 安装升级。仍需后续人工体验打磨、长历史量性能检查、60 fps 实测、原生文件对话框完整点击验收及以后数据格式迁移验证。具体范围见 [alpha.4 验收](docs/alpha.4验收记录.md)。
+已有验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源。桌面／安装结果与检查边界见 [alpha.5 验收](docs/alpha.5验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.6](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.7](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
-本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.4`。未配置 GitHub 远程或推送。
+本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.5`。未配置 GitHub 远程或推送。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 

@@ -60,11 +60,11 @@ async page => {
     await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
     stage='off';
     await page.getByRole('button',{name:'设置',exact:true}).click();
-    await page.getByLabel('动效强度').selectOption('off');
+    await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'关闭 · 保留数值反馈',exact:true}).click();
     await page.waitForFunction(()=>document.documentElement.dataset.motion==='off');
     report.offStopsAllGrowth=await page.evaluate(()=>document.querySelector('#growth').getAnimations({subtree:true}).length===0);
     stage='full';
-    await page.getByLabel('动效强度').selectOption('full');
+    await page.getByRole('button',{name:/^动效强度，当前/}).click();await page.getByRole('option',{name:'完整 · 金色成长反馈',exact:true}).click();
     await page.waitForFunction(()=>document.documentElement.dataset.motion==='full');
     await page.getByRole('button',{name:'今日',exact:true}).click();
     stage='zero';

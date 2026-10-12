@@ -45,14 +45,20 @@ export function updateDOM(parent, markup, { preserveInputs = true, starChanged =
     if (isStar && wasLit !== old.classList.contains('lit')) starChanged(old, old.classList.contains('lit'));
   };
   const children = (old, next) => {
-    const available = [...old.childNodes];
-    let cursor = old.firstChild;
+    const persistent = node => node.nodeType === 1 && node.hasAttribute('data-persistent-ui');
+    const available = [...old.childNodes].filter(node => !persistent(node));
+    const nextManaged = node => {
+      let nextNode = node;
+      while (nextNode && persistent(nextNode)) nextNode = nextNode.nextSibling;
+      return nextNode;
+    };
+    let cursor = nextManaged(old.firstChild);
     for (const desired of [...next.childNodes]) {
       const index = available.findIndex(node => compatible(node, desired));
       const node = index < 0 ? desired.cloneNode(true) : available.splice(index, 1)[0];
       if (node !== cursor) old.insertBefore(node, cursor);
       if (index >= 0) patch(node, desired);
-      cursor = node.nextSibling;
+      cursor = nextManaged(node.nextSibling);
     }
     for (const unused of available) unused.remove();
   };

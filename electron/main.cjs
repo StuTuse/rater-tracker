@@ -49,7 +49,11 @@ else {
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event, url) => { if (!url.startsWith('app://rater/')) event.preventDefault(); });
     window.webContents.session.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
-    if (smoke) window.showInactive();
+    if (smoke) {
+      // The inactive test window may be occluded; keep its renderer painting for capture.
+      window.webContents.setBackgroundThrottling(false);
+      window.showInactive();
+    }
     await window.loadURL('app://rater/index.html');
     if (smoke) {
       try {
@@ -80,14 +84,34 @@ else {
           await new Promise(resolve => { let frames = 0; const tick = () => ++frames === 12 ? resolve() : requestAnimationFrame(tick); requestAnimationFrame(tick); });
           const liquidLightMoving = document.documentElement.dataset.motion === 'full' ? lightBefore !== getComputedStyle(light).transform : true;
           const xpTextReadable = parseFloat(getComputedStyle(document.querySelector('#xp-progress')).fontSize) >= 12;
-          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+          document.querySelector('[data-action="new-task"]').click();await pause(320);
+          const modal=document.querySelector('#modal'), dimension=modal.querySelector('[name="dimension"]');
+          modal.querySelector('[data-control-for="task-form:dimension"]').click();await pause(250);
+          const menu=document.querySelector('.select-popover'), customMenuInModal=menu.closest('dialog')===modal&&menu.matches(':popover-open');
+          menu.querySelector('[data-control-option="1"]').click();await pause(250);
+          const customSelectCommitted=dimension.value==='study'&&new FormData(document.querySelector('#task-form')).get('dimension')==='study';
+          modal.querySelector('[data-action="close-modal"]').click();await pause(35);
+          const modalExitAnimated=!modal.open&&getComputedStyle(modal).display==='block';await pause(320);
+          document.querySelector('[data-page="tasks"]').click();await pause(320);
+          const indicator=document.querySelector('.segment-indicator');document.querySelector('[data-filter="completed"]').click();await pause(40);
+          const segmentedAnimated=indicator===document.querySelector('.segment-indicator')&&indicator.getAnimations().some(a=>a.transitionProperty==='transform');await pause(320);
+          document.querySelector('[data-page="today"]').click();
+          document.querySelector('[data-control-for="id:rating-date"]').click();await pause(250);
+          const customCalendarVisible=document.querySelector('.date-popover')?.matches(':popover-open')&&document.querySelector('.calendar-day.is-selected')?.dataset.calendarDate===date;
+          const scrollbarHidden=getComputedStyle(document.documentElement).scrollbarWidth==='none';
+          const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});
+          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
         const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
         await fs.mkdir(directory, { recursive: true });
         await fs.writeFile(path.join(directory, 'report.json'), JSON.stringify({ ...report, version: app.getVersion(), packaged: app.isPackaged, userData: app.getPath('userData') }, null, 2));
         await new Promise(resolve => setTimeout(resolve, 1200));
         await fs.writeFile(path.join(directory, 'desktop.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable ? 0 : 1);
+        await window.webContents.executeJavaScript(`document.querySelector('[data-control-for="id:rating-date"]').click()`);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await fs.writeFile(path.join(directory, 'controls-calendar.png'), (await window.webContents.capturePage()).toPNG());
+        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });
