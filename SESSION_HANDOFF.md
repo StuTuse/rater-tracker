@@ -4,7 +4,7 @@
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG W009、正式方案，结算特别阅读 4～6 节。
+1. 读本文件、AGENTS、WORKLOG W009～W010、正式方案，结算特别阅读 4～6 节。
 2. 阅读 `docs/数据契约.md`、`docs/0.1验收记录.md`；视觉依据仍为专项规范与徽章清单。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
@@ -91,4 +91,6 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 
 `VERSION`／package／锁文件为 `0.1.0-alpha.1`；规划标签 `v0.1.0-plan.1` 保持，当前里程碑使用附注标签 `v0.1.0-alpha.1`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
-本次工作对应 WORKLOG **W009**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
+应用源码提交为 `49fda5c`，附注标签覆盖本次工程及续接归档文档；具体标签提交以 Git 查询为准。上一轮自动审批因用量限制中断提交，本次恢复后完成，没有绕过审批。验收浏览器已关闭，无验收 Electron 进程或 4173 预览监听。
+
+本次工作对应 WORKLOG **W009～W010**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
