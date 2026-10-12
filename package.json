@@ -1,6 +1,6 @@
 {
   "name": "rater-tracker",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "离线每日评分与任务成长记录器",
   "author": "Rater & Tracker (local)",
   "private": true,

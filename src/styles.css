@@ -123,3 +123,52 @@ html[data-motion=off] .xp-fluid,html[data-motion=off] .xp-glint{display:none}
 @media(max-width:1080px){.today-layout{grid-template-columns:minmax(0,1fr)}.card-top>div>span{font-size:12px}.rating-card{padding:22px}.growth{padding:22px;gap:18px}}
 @media(max-width:850px){.nav-link{font-size:0}.growth .eyebrow{font-size:12px}.total-xp{min-width:95px;padding-left:14px}.total-xp strong{font-size:27px}}
 @media(max-width:620px){.nav-link{font-size:11px;padding:5px 10px}.workspace{padding-left:16px;padding-right:16px}.growth{padding:18px 16px;gap:13px}.level-medallion{width:58px;height:66px}.growth-head{gap:2px}.xp-message{font-size:12px}.growth-foot{font-size:12px}.xp-bar{height:18px;margin:10px 0 8px}.subtitle{font-size:13px}.card-top h2{font-size:18px}.rating-card{padding:20px}.section-title>span{font-size:12px}.detail-numbers span{font-size:12px}.segmented{flex-wrap:wrap}.segmented button{font-size:12px;padding:8px 10px}.top-kicker{font-size:10px}.summary-grid span{font-size:12px}}
+
+/* Local interaction feedback; persistent nodes prevent replay on each save. */
+.star-button.lit .icon{animation:none}
+.rating-card,.task-card,.panel{transition:border-color .24s var(--ease-soft),box-shadow .24s var(--ease-soft),background .24s var(--ease-soft)}
+.rating-card{border:1px solid #e6dfcb}
+.card-top{align-items:center;margin-bottom:20px;min-height:40px}
+.rating-control{margin:18px 0 14px;gap:12px;min-height:48px}
+.star-button{height:48px;border-radius:12px;position:relative;transform:none!important}
+.star-button .icon{transition:fill .18s ease,stroke .18s ease,filter .18s ease;transform-origin:50% 60%;fill:transparent}
+.star-button.lit .icon{fill:#f3c849;stroke:#b78b20;filter:drop-shadow(0 2px 2px #bd90121a)}
+.rating-control[data-preview] .star-button.preview-lit .icon{fill:#f8df8b;stroke:#b78b20}
+.rating-control[data-preview] .star-button.lit.preview-lit .icon{fill:#f3c849}
+.rating-control[data-preview] .star-button.preview-dim .icon{fill:transparent;stroke:#c9c4b4;filter:none}
+.star-button:active:not(:disabled){background:#f2cc5840;box-shadow:inset 0 1px 4px #a7781818}
+.star-button:active .icon{scale:.9}
+.star-button .icon{transition:fill .18s ease,stroke .18s ease,filter .18s ease,scale .12s var(--ease-soft)}
+.zero{min-width:48px;min-height:40px;border-radius:10px}
+.rating-meta{min-height:24px;margin-bottom:12px}
+.rating-card details{border-top:1px solid #ede8d8;padding-top:10px}
+summary{border-radius:6px;transition:color .18s,background .18s}
+summary:hover{color:#805f1f}
+input,textarea,select{transition:border-color .2s,box-shadow .2s,background .2s}
+input:focus,textarea:focus,select:focus{border-color:#c19b32;box-shadow:0 0 0 3px #e8c25126;outline:0}
+button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid #aa801d;outline-offset:3px}
+.nav-link:active:not(:disabled),.segmented button:active:not(:disabled),.chip:active:not(:disabled),.icon-button:active:not(:disabled){transform:scale(.97)}
+.nav-link.selected{box-shadow:inset 3px 0 #c8a02f}
+.empty p:empty{display:none}
+.xp-message:empty{display:none}
+.brand span{line-height:1.4}
+.sidebar-bottom{padding-top:18px}
+.page-header .eyebrow{display:none}
+.gentle-note{margin-top:16px}
+@media(hover:hover){
+  .rating-card:hover,.rating-card:focus-within{border-color:#d6bd74;box-shadow:0 5px 18px #8063160d}
+  .task-card:hover{border-color:#d6bd74;box-shadow:0 6px 20px #80631612}
+  .star-button:hover:not(:disabled){background:#f8df8b40;box-shadow:0 2px 8px #a5791012}
+  .zero:hover:not(:disabled){background:#eee9d8}
+  .nav-link:hover:not(:disabled){background:#eee9d8;transform:translateX(2px)}
+  .secondary:hover:not(:disabled),.icon-button:hover:not(:disabled){border-color:#cfb969;box-shadow:0 3px 10px #80631614}
+  .segmented button:hover:not(:disabled),.chip:hover:not(:disabled){background:#f2e8c8}
+  .calendar-day:hover:not(:disabled){box-shadow:0 3px 9px #80631618;border-color:#c6a743}
+  .text-button:hover:not(:disabled),.title-button:hover:not(:disabled){color:#89651b}
+}
+html[data-motion=off] .badge-card:hover,html[data-motion=gentle] .badge-card:hover,
+html[data-motion=off] .badge-card:hover img,html[data-motion=gentle] .badge-card:hover img,
+html[data-motion=off] .nav-link:hover,html[data-motion=gentle] .nav-link:hover{transform:none}
+html[data-motion=off] .star-button:active .icon{scale:1}
+@media(prefers-reduced-motion:reduce){.badge-card:hover,.badge-card:hover img,.nav-link:hover{transform:none}}
+.static-update .star-button .icon{transition:none!important;animation:none!important}

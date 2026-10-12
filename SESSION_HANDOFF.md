@@ -1,11 +1,11 @@
 # SESSION_HANDOFF · 跨会话开发交接
 
-最后更新：2026-10-12，香港时间。产品规范《最终方案》v1.5（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.3**。
+最后更新：2026-10-12，香港时间。产品规范《最终方案》v1.6（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.4**。
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG W009～W012、正式方案，结算特别阅读 4～6 节。
-2. 阅读 `docs/数据契约.md`、`docs/alpha.3验收记录.md`；素材见 `docs/生图素材清单.md`，历史检查见 alpha.2 与 0.1 验收记录。
+1. 读本文件、AGENTS、WORKLOG W009～W013、正式方案，结算特别阅读 4～6 节。
+2. 阅读 `docs/数据契约.md`、`docs/alpha.4验收记录.md`；素材见 `docs/生图素材清单.md`，历史检查见 alpha.2 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
 
@@ -18,24 +18,24 @@
 | 工程 | 原生 HTML/CSS/JS，Electron 44.7.0，electron-builder 26.15.3；Windows x64 |
 | 结算 | 评分分批、冻结计划／C、四档窗口、折扣、补录、删除／撤销／恢复、等级与统计；25 项业务测试 |
 | 保存 | IndexedDB 完整快照、原子 revision CAS、串行保存、备份结构校验；真实保存失败与冲突注入 |
-| 界面 | 今日、任务、历史、奖励中心、设置；任务详情与阶段；7/30 天断点趋势、日历、周期来源回顾 |
+| 界面 | 五页与任务详情；精简装饰文案、原位更新、星级预览和逐颗点亮、悬停／按压／焦点反馈；12 项交互条件 |
 | 资产 | 48 个逐枚生图的透明 PNG 徽章、底纹与两张插画；旧 SVG 参考＋应用图标；资源与总览检查 |
 | 动效 | 金色液态光层、增长／回退／跨级／MAX；连续显示位置接续；偏好与隐藏暂停；11 项专项与 5 项 MAX 条件 |
 | 桌面 | 本地 app 来源、隔离 preload、单实例、JSON 文件接口；实际打包窗口和截图 |
-| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.2 → alpha.3 升级数据保持；隔离测试副本已卸载 |
+| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.3 → alpha.4 升级数据保持；隔离测试副本已卸载 |
 | 尚未覆盖 | 以后格式迁移、Windows 原生文件对话框全程点击、60 fps 实测、长期大数据性能、完整人工体验验收 |
 
-安装包：`release/Rater-Tracker-0.1.0-alpha.3-Setup.exe`，202,686,314 字节，约 193.3 MiB；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.3验收记录.md`。
+安装包：`release/Rater-Tracker-0.1.0-alpha.4-Setup.exe`，202,687,807 字节，约 193.3 MiB；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.3验收记录.md`。
 
 ## 文件责任与协作
 
-本轮负责 src/app.js、src/styles.css、浏览器／桌面验收与版本文档；没有改结算核心、存储契约或生图原图。没有派遣／创建其他会话，没有其他会话登记的修改。
+本轮负责 src/app.js、src/dom.js、src/styles.css、浏览器交互验收与版本文档；没有改结算核心、存储契约或生图原图。没有派遣／创建其他会话，没有其他会话登记的修改。
 
 | 路径 | 用途 |
 | --- | --- |
 | `src/core.js` | 唯一数值／日期／结算定义，纯事务 |
 | `src/storage.js` | 原子保存、备份校验与恢复契约 |
-| `src/app.js`、`src/styles.css` | 五页与详情、真实反馈、动效 |
+| `src/app.js`、`src/dom.js`、`src/styles.css` | 五页与详情、真实反馈、动效 |
 | `src/art.js`、`src/badges.js`、`assets/generated/` | 51 张生图与入口、徽章元数据、提示词及总览；旧 assets/badges SVG 保留参考 |
 | `src/icons.js`、`assets/app.*` | 矢量图标与安装图标 |
 | `electron/main.cjs`、`electron/preload.cjs` | 桌面来源、窗口、安全与文件接口 |
@@ -71,7 +71,7 @@ npm run dist
 npm run desktop:smoke
 node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.2-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.3-Setup.exe'
 ```
 
 安装验收脚本检测已有用户安装则停止；不为此自动卸载已有版本。源码路径含 `&`，工具入口直接经 Node 启动，避免常规 Windows .cmd 垫片解析错误。沙箱可能阻止 Node 子进程、缓存写入或下载；需要时按实际错误使用受审查的执行权限，不改写工程去关闭安全隔离。
@@ -82,7 +82,7 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 
 ## 检查与后续
 
-本轮 25 项纯业务测试、12 项浏览器条件、11 项流光／可读性条件与 5 项 MAX 条件通过；实际安装版 51 张解码、48 枚徽章、光层移动与 alpha.2 → alpha.3 升级通过。alpha.2 的 7 项素材条件为历史检查，本轮未重跑图片 alpha 测量。桌面／安装报告位于 `output/desktop`、`output/install`，截图及 MP4 位于 `output/playwright`；均忽略。主屏幕在实际 Electron 渲染检查过，不以构建成功代替视觉检查。
+本轮 25 项纯业务测试、12 项浏览器条件、12 项交互条件、11 项流光／可读性条件与 5 项 MAX 条件通过；实际安装版 51 张解码、48 枚徽章、光层移动与 alpha.2 → alpha.3 升级通过。alpha.2 的 7 项素材条件为历史检查，本轮未重跑图片 alpha 测量。桌面／安装报告位于 `output/desktop`、`output/install`，截图及 MP4 位于 `output/playwright`；均忽略。主屏幕在实际 Electron 渲染检查过，不以构建成功代替视觉检查。
 
 仍需人工连续使用、完整动效帧率／GPU 和长列表性能测量、Windows 原生文件对话框点击及完整辅助功能检查。已验证同格式 alpha.1 → alpha.2、alpha.2 → alpha.3 升级，不能推广为以后格式迁移已通过。文字对比是六类抽样；125% 为 CSS zoom，隐藏检查为事件模拟，详细边界见当前验收记录。
 
@@ -90,11 +90,11 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 
 ## 版本状态
 
-`VERSION`／package／锁文件为 `0.1.0-alpha.3`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.3`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
+`VERSION`／package／锁文件为 `0.1.0-alpha.4`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.4`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
-alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 优化可读性、流光和连续反馈，具体当前提交以 Git 查询为准。
+alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，优化可读性与流光；alpha.4 优化文案与交互，具体当前提交以 Git 查询为准。
 
-本次工作对应 WORKLOG **W009～W012**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
+本次工作对应 WORKLOG **W009～W013**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
 
 ## alpha.2 素材补充
 
@@ -105,3 +105,9 @@ alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交�
 ## alpha.3 动效实现速查
 
 `src/app.js` 的 growthAnimations 只登记有限的 WAAPI 反馈；循环 CSS 光层由 data-flow 与动效偏好管理，不能用取消全部子动画的方式打断它。paintGrowth 写真实值，growthStatic 先取消旧反馈；新反馈捕捉当前显示宽度／数字再衔接。不要在动画回调中结算。浏览器验收的 settle 只等有限动画；新增脚本 `scripts/flow-acceptance.cjs` 使用隔离快照并 finally 恢复。实际录制为 output/playwright/alpha3-xp-flow.mp4，不入库。
+
+## alpha.4 原位更新速查
+
+`src/dom.js` 比较元素、文本与稳定键，只更新变化的属性和子节点。评分卡片以日期／维度为键，任务卡片以任务 ID 为键；按钮按 action 与参数识别。`renderContent` 和 `refreshTaskDialog` 使用它，不能恢复为每次保存整体 innerHTML 替换。输入值与 details.open 按 preserveInputs 管理，导入清除草稿并允许重置。
+
+`animateStar` 只响应已提交的 lit 变化，SVG 动画按元素登记、重复更正取消旧动画；悬停／键盘预览使用独立 class，不修改状态。普通评分通过局部数值和经验条反馈，不重复 toast；备注等无经验变化的保存不打断正在播放的经验反馈。规则、格式与素材未变。新增 scripts/ui-acceptance.cjs 检查 DOM 身份、草稿、失败、连续点击和偏好，finally 恢复隔离浏览器快照。静态渲染使用 static-update 抑制星图标颜色过渡，提交保存才调用 animateStar。UI 事务等待使用 evaluate 内轮询 revision，不用 async waitForFunction 判断保存完成。flow 的接续检查把真实 WAAPI 暂停到 25% 后提交第二次评分，避免遮挡窗口的 rAF 节奏错过中断；它是受控渲染检查，不能作为实时性能测量。
