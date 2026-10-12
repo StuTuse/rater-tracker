@@ -1,7 +1,8 @@
 // Load with Playwright CLI run-code --filename. Requires a fresh snapshot of today's page.
 async (page) => {
   const results = {};
-  const settle = () => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
+  // Ambient liquid light deliberately loops; settle only finite feedback animations.
+  const settle = () => page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect.getComputedTiming().iterations !== Infinity).map(a => a.finished.catch(() => {}))));
   const read = () => page.evaluate(async () => { const {openStore}=await import('./src/storage.js'); const {totalUnits,stats}=await import('./src/core.js'); const store=await openStore(); const s=await store.read(); store.close(); return {total:totalUnits(s),revision:s.revision,stats:stats(s)}; });
   await page.reload(); await page.evaluate(() => window.raterReady);
   await page.getByRole('button',{name:'学习 3 星',exact:true}).click();

@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.2，生图素材更新版。** 已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章与手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.3，可读性与动效更新版。** 更清晰的文字层级、金色液态经验条与连续更正反馈；已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.2-Setup.exe](release/Rater-Tracker-0.1.0-alpha.2-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.3-Setup.exe](release/Rater-Tracker-0.1.0-alpha.3-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -22,7 +22,7 @@
 
 更新前先从设置页导出 JSON，再运行新安装程序。不要删除数据目录。备份包括历史分配、取消痕迹、冻结额度和 C、评分星数批次、设置及规则／格式版本；恢复不会重新发奖。浏览器预览与桌面数据互相独立。
 
-本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装及 alpha.1 → alpha.2 升级保持数据；以后格式迁移仍需独立验证。
+本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装、alpha.1 → alpha.2 与 alpha.2 → alpha.3 升级保持数据；以后格式迁移仍需独立验证。
 
 ## 开发命令
 
@@ -46,7 +46,7 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 ```powershell
 node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.1-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.2-Setup.exe'
 ```
 
 安装验收脚本先确认没有既有用户安装，再在工作区 `runtime-data/install-check` 测试安装、快捷方式、单实例、同版本重装；指定 `PreviousInstaller` 则先安装旧版，再安装当前版并检查数据保持。结束卸载测试副本。测试数据使用 `runtime-data/desktop-smoke`，不写入正常数据目录。如果检测到已有安装，脚本停止，避免覆盖它。
@@ -59,12 +59,14 @@ node node_modules/@playwright/cli/playwright-cli.js snapshot
 node node_modules/@playwright/cli/playwright-cli.js run-code --filename=scripts/browser-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js snapshot
 node node_modules/@playwright/cli/playwright-cli.js run-code --filename=scripts/growth-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js snapshot
+node node_modules/@playwright/cli/playwright-cli.js run-code --filename=scripts/flow-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js goto http://127.0.0.1:4173/assets/generated/gallery.html
 node node_modules/@playwright/cli/playwright-cli.js run-code --filename=scripts/art-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js close
 ```
 
-这些是验收流程而非用户数据操作；第一个会更正测试浏览器的学习评分，第二个使用 MAX 测试快照并在 `finally` 恢复原快照。截图与报告在 `output/`，测试数据、导出和构建产物均不入库。
+这些是验收流程而非用户数据操作；第一个会更正测试浏览器的学习评分，MAX 与 flow 流程使用测试快照并在 `finally` 恢复原快照。截图与报告在 `output/`，测试数据、导出和构建产物均不入库。流光是完整模式的循环装饰，验收只等待有限的反馈动画结束。
 
 ## 源码与验证范围
 
@@ -80,14 +82,16 @@ node node_modules/@playwright/cli/playwright-cli.js close
 | [数据契约.md](docs/数据契约.md) | 金额精度、历史分配、持久化和备份格式 |
 | [0.1验收记录.md](docs/0.1验收记录.md) | 实际检查、产物和未覆盖范围 |
 
-已有验证包含 25 项业务测试、浏览器交互与故障注入、三档动效与系统偏好、窄窗口、51 张生图资源、实际打包应用、安装及 alpha.1 → alpha.2 升级。仍需后续人工体验打磨、长历史量性能检查、60 fps 实测、原生文件对话框完整点击验收及以后数据格式迁移验证。没有以构建成功代替这些未覆盖项目。
+已有验证包含 25 项业务测试、12 项浏览器条件、11 项动效／可读性条件、5 项 MAX 条件、51 张生图资源、实际打包应用和 alpha.2 → alpha.3 安装升级。仍需后续人工体验打磨、长历史量性能检查、60 fps 实测、原生文件对话框完整点击验收及以后数据格式迁移验证。具体范围见 [alpha.3 验收](docs/alpha.3验收记录.md)。
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.4](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.5](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
-本地仓库 `main`，规划标签 `v0.1.0-plan.1` 保持；本版使用附注标签 `v0.1.0-alpha.2`。未配置 GitHub 远程或推送。
+本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.3`。未配置 GitHub 远程或推送。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 
-生图素材与完整提示词：[清单](docs/生图素材清单.md) · [可离线打开的徽章总览](assets/generated/gallery.html) · [alpha.2 验收](docs/alpha.2验收记录.md)。本轮使用内置 image_gen，全部最终图片已保存入项目。
+生图素材与完整提示词：[清单](docs/生图素材清单.md) · [可离线打开的徽章总览](assets/generated/gallery.html) · [alpha.2 验收](docs/alpha.2验收记录.md)。素材使用内置 image_gen 制作，全部最终图片已保存入项目。
+
+经验条动效预览：[实际录制](output/playwright/alpha3-xp-flow.mp4)；完整动效可在设置中切换为柔和或关闭，系统减少动态优先。录制是本地忽略产物，重新检出源码时不包含该视频。

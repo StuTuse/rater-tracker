@@ -12,6 +12,7 @@ const uid = () => crypto.randomUUID();
 const button = (action, label, name = '', extra = '', cls = '') => `<button type="button" class="${cls}" data-action="${action}" ${extra}>${name ? icon(name) : ''}${label}</button>`;
 let store, state, desktopInfo, page = 'today', chosenDate = today(), month = today().slice(0, 7), taskFilter = 'active', taskQuery = '', badgeFilter = 'all', trendRange = 7, rewardTab = 'badges';
 let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer, lastFocused;
+const growthAnimations = new Set();
 const drafts = new Map();
 const seriesNames = { stars: '星光', study: '求知', work: '创作', health: '活力', life: '日常', tasks: '达成' };
 const seriesCount = s => ({ ...s, stars: s.stars });
@@ -26,8 +27,25 @@ function toast(message, error = false) {
   clearTimeout(toast.timer); toast.timer = setTimeout(() => $('#feedback').replaceChildren(), error ? 8500 : 4200);
 }
 function motionMode() { return state.settings.motion === 'off' ? 'off' : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'gentle' : state.settings.motion; }
-function applyMotion() { document.documentElement.dataset.motion = motionMode(); }
-function growthStatic() {
+function flowState() {
+  const growth = $('#growth');
+  if (growth) growth.dataset.flow = motionMode() === 'full' && !document.hidden && totalUnits(state) > 0 ? 'running' : 'paused';
+}
+function applyMotion() { document.documentElement.dataset.motion = motionMode(); flowState(); }
+function stopGrowthFeedback() {
+  ++animationToken;
+  cancelAnimationFrame(numberFrame); clearTimeout(celebrationTimer);
+  growthAnimations.forEach(animation => animation.cancel()); growthAnimations.clear();
+  $('#particles')?.replaceChildren();
+  $('#growth')?.classList.remove('level-up', 'level-down', 'xp-changing');
+}
+function animateGrowth(element, frames, options) {
+  const animation = element.animate(frames, options);
+  growthAnimations.add(animation);
+  animation.finished.then(() => growthAnimations.delete(animation), () => growthAnimations.delete(animation));
+  return animation;
+}
+function paintGrowth() {
   const l = levelAt(totalUnits(state));
   $('#level-label').textContent = l.level === 'MAX' ? 'MAX' : `Lv.${l.level}`;
   $('#xp-total').textContent = fmt(l.total);
@@ -35,19 +53,28 @@ function growthStatic() {
   $('#xp-next').textContent = l.level === 'MAX' ? '所有努力都被认真记录' : `距下一级 ${fmt(l.need - l.current)} XP`;
   $('#xp-fill').style.width = `${l.ratio * 100}%`;
   $('#xp-bar').setAttribute('aria-valuenow', String(Math.round(l.ratio * 100)));
+  $('#xp-bar').setAttribute('aria-valuetext', l.level === 'MAX' ? `MAX，累计 ${fmt(l.total)} XP` : `Lv.${l.level}，本级 ${fmt(l.current)} / ${l.need} XP`);
   $('#growth').classList.toggle('max', l.level === 'MAX');
+  flowState();
+}
+function growthStatic() {
+  stopGrowthFeedback(); paintGrowth();
+  $('#growth-message').textContent = '每一点努力，都有回响';
+  $('#growth-message').className = 'xp-message';
 }
 function feedback(before, after, reason) {
-  const token = ++animationToken;
-  cancelAnimationFrame(numberFrame); clearTimeout(celebrationTimer);
-  $('#growth').getAnimations({ subtree: true }).forEach(a => a.cancel());
-  $('#particles').replaceChildren(); $('#growth').classList.remove('level-up', 'level-down');
+  // Capture the rendered position before cancelling an interrupted transition.
+  const fill = $('#xp-fill'), track = $('#xp-bar');
+  const displayedRatio = Math.max(0, Math.min(1, parseFloat(getComputedStyle(fill).width) / track.clientWidth));
+  const displayedTotal = Number($('#xp-total').textContent.replaceAll(',', ''));
+  stopGrowthFeedback();
+  const token = animationToken;
   const old = levelAt(totalUnits(before)), next = levelAt(totalUnits(after));
   const delta = next.total - old.total;
   const gained = earned(after).filter(b => !earned(before).some(e => e.id === b.id));
   const lost = earned(before).filter(b => !earned(after).some(e => e.id === b.id));
-  growthStatic();
-  if (delta === 0 && !gained.length && !lost.length) { toast(`${reason} · 已保存`); return; }
+  paintGrowth();
+  if (delta === 0 && !gained.length && !lost.length) { growthStatic(); toast(`${reason} · 已保存`); return; }
   const changed = old.level !== next.level;
   const phrase = changed ? (next.level === 'MAX' ? '抵达 MAX' : `${delta > 0 ? '升级至' : '更正为'} Lv.${next.level}${typeof old.level === 'number' && typeof next.level === 'number' && Math.abs(next.level - old.level) > 1 ? ` · 跨越 ${Math.abs(next.level - old.level)} 级` : ''}`) : reason;
   $('#growth-message').textContent = `${delta >= 0 ? '+' : '−'}${fmt(Math.abs(delta))} XP · ${phrase}`;
@@ -55,21 +82,23 @@ function feedback(before, after, reason) {
   const badgeNote = gained.length ? ` · 获得${gained.map(b => `「${b.name}」`).slice(0, 2).join('')}${gained.length > 2 ? `等 ${gained.length} 枚徽章` : ''}` : lost.length ? ` · ${lost.length} 枚徽章因有效记录变化撤回` : '';
   toast(`${reason} · ${delta >= 0 ? '+' : '−'}${fmt(Math.abs(delta))} XP${badgeNote}`);
   if (motionMode() !== 'off') {
-    const mode = motionMode(), duration = mode === 'gentle' ? 260 : changed ? 1200 : 650;
-    const fill = $('#xp-fill'), final = `${next.ratio * 100}%`;
-    const initial = `${old.ratio * 100}%`;
+    const mode = motionMode(), duration = mode === 'gentle' ? 300 : changed ? 1280 : 820;
+    const final = `${next.ratio * 100}%`, initial = `${displayedRatio * 100}%`;
     const keyframes = changed && mode === 'full' ? [{ width: initial, offset: 0 }, { width: delta > 0 ? '100%' : '0%', offset: .34 }, { width: delta > 0 ? '0%' : '100%', offset: .36 }, { width: final, offset: 1 }] : [{ width: initial }, { width: final }];
-    fill.animate(keyframes, { duration, easing: 'cubic-bezier(.2,.7,.2,1)' });
-    $('#xp-ghost').animate([{ width: initial, opacity: delta < 0 ? .45 : 0 }, { width: initial, opacity: 0 }], { duration: duration + 100 });
+    animateGrowth(fill, keyframes, { duration, easing: 'cubic-bezier(.22,.8,.25,1)' });
+    animateGrowth($('#xp-ghost'), [{ width: initial, opacity: delta < 0 ? .38 : 0 }, { width: initial, opacity: 0 }], { duration: duration + 180 });
+    $('#growth').classList.add('xp-changing');
+    $('#growth').dataset.direction = delta < 0 ? 'decrease' : 'increase';
+    if (mode === 'full') animateGrowth($('.xp-tip'), [{ opacity: .4, transform:'scale(.8)' }, { opacity: 1, transform:'scale(1.12)', offset:.45 }, { opacity:.65, transform:'scale(1)' }], { duration:duration+160, easing:'ease-out' });
     const start = performance.now();
-    const tick = time => { if (token !== animationToken) return; const p = Math.min(1, (time - start) / duration); $('#xp-total').textContent = fmt(old.total + delta * (1 - (1 - p) ** 3)); if (p < 1) numberFrame = requestAnimationFrame(tick); else growthStatic(); };
+    const tick = time => { if (token !== animationToken) return; const p = Math.min(1, (time - start) / duration); $('#xp-total').textContent = fmt(displayedTotal + (next.total - displayedTotal) * (1 - (1 - p) ** 3)); if (p < 1) numberFrame = requestAnimationFrame(tick); else { paintGrowth(); $('#growth').classList.remove('xp-changing'); } };
     numberFrame = requestAnimationFrame(tick);
     if (changed) {
       $('#growth').classList.add(delta > 0 ? 'level-up' : 'level-down');
       if (delta > 0 && mode === 'full') for (let i = 0; i < (next.level === 'MAX' ? 24 : 16); i++) { const particle = document.createElement('i'); particle.style.setProperty('--angle', `${i * 137.5}deg`); particle.style.setProperty('--distance', `${60 + (i % 4) * 19}px`); particle.style.setProperty('--delay', `${(i % 3) * 35}ms`); $('#particles').append(particle); }
     }
     celebrationTimer = setTimeout(() => { if (token === animationToken) { $('#particles').replaceChildren(); $('#growth').classList.remove('level-up', 'level-down'); $('#growth-message').textContent = '每一点努力，都有回响'; } }, 2000);
-  }
+  } else $('#growth').classList.remove('xp-changing');
 }
 
 function save(action, reason) {
@@ -98,7 +127,7 @@ function shell() {
     <nav>${[['today', '今日', 'sun'], ['tasks', '任务', 'tasks'], ['history', '历史', 'history'], ['rewards', '奖励中心', 'rewards'], ['settings', '设置', 'settings']].map(([id, title, i]) => button('navigate', title, i, `data-page="${id}"`, `nav-link ${page === id ? 'selected' : ''}`)).join('')}</nav>
     <div class="sidebar-bottom"><div class="tiny-garden">${icon('health')}${icon('star')}${icon('work')}</div><p>不必每天闪闪发光。<br>记录，就是向前一步。</p><span class="offline-dot"></span> 离线 · 私人的空间<small>v${escape(desktopInfo.version)}</small></div>
   </aside><div class="workspace"><header class="topbar"><div class="top-kicker">GROW A LITTLE, EVERY DAY</div><span id="save-status">已保存到本机</span></header>
-    <section id="growth" class="growth"><div class="level-medallion">${icon('rewards')}<strong id="level-label"></strong><div id="particles"></div></div><div class="growth-body"><div class="growth-head"><span class="eyebrow">你的成长</span><span class="xp-message" id="growth-message">每一点努力，都有回响</span></div><div class="xp-bar" id="xp-bar" role="progressbar" aria-label="当前等级经验进度" aria-valuemin="0" aria-valuemax="100"><div id="xp-ghost"></div><div id="xp-fill"></div></div><div class="growth-foot"><span id="xp-progress"></span><span id="xp-next"></span></div></div><div class="total-xp"><span>有效累计经验</span><strong id="xp-total"></strong><small>XP</small></div></section>
+    <section id="growth" class="growth"><div class="level-medallion">${icon('rewards')}<strong id="level-label"></strong><div id="particles"></div></div><div class="growth-body"><div class="growth-head"><span class="eyebrow">你的成长</span><span class="xp-message" id="growth-message">每一点努力，都有回响</span></div><div class="xp-bar" id="xp-bar" role="progressbar" aria-label="当前等级经验进度" aria-valuemin="0" aria-valuemax="100"><div id="xp-ghost"></div><div id="xp-fill"><div class="xp-fluid" aria-hidden="true"><i></i><i></i><i></i></div><div class="xp-glint" aria-hidden="true"></div><div class="xp-tip" aria-hidden="true"></div></div></div><div class="growth-foot"><span id="xp-progress"></span><span id="xp-next"></span></div></div><div class="total-xp"><span>有效累计经验</span><strong id="xp-total"></strong><small>XP</small></div></section>
     <main id="content"></main><footer>Rater & Tracker <span>·</span> 留下努力，允许更正，慢慢生长。</footer></div>`;
   growthStatic();
 }
@@ -359,12 +388,13 @@ document.addEventListener('submit', async event => {
 });
 $('#modal').addEventListener('cancel', event => { event.preventDefault(); closeModal(); });
 $('#modal').addEventListener('click', event => { if (event.target === $('#modal')) { const rect = $('#modal').getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal(); } });
-matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) applyMotion(); });
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) { applyMotion(); growthStatic(); } });
+document.addEventListener('visibilitychange', () => { if (state) { if (document.hidden) growthStatic(); else flowState(); } });
 window.raterReload = async () => { state = validateState(await store.read()); growthStatic(); renderContent(); };
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.2', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.3', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     setInterval(() => { if (page === 'today' && chosenDate !== today() && !document.hidden && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
   } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }

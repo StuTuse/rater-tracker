@@ -76,14 +76,18 @@ else {
           const { ART_ASSETS, badgeArt } = await import('./src/art.js');
           const generatedAssets = await Promise.all(ART_ASSETS.map(async file => { const image = new Image(); image.src = file; try { await image.decode(); return image.naturalWidth > 0; } catch { return false; } }));
           const badgeAssets = await Promise.all(BADGES.map(async b => { const response = await fetch(badgeArt(b.id)); return response.ok; }));
-          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          const light = document.querySelector('.xp-fluid i'), lightBefore = getComputedStyle(light).transform;
+          await new Promise(resolve => { let frames = 0; const tick = () => ++frames === 12 ? resolve() : requestAnimationFrame(tick); requestAnimationFrame(tick); });
+          const liquidLightMoving = document.documentElement.dataset.motion === 'full' ? lightBefore !== getComputedStyle(light).transform : true;
+          const xpTextReadable = parseFloat(getComputedStyle(document.querySelector('#xp-progress')).fontSize) >= 12;
+          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
         const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
         await fs.mkdir(directory, { recursive: true });
         await fs.writeFile(path.join(directory, 'report.json'), JSON.stringify({ ...report, version: app.getVersion(), packaged: app.isPackaged, userData: app.getPath('userData') }, null, 2));
         await new Promise(resolve => setTimeout(resolve, 1200));
         await fs.writeFile(path.join(directory, 'desktop.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded ? 0 : 1);
+        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });
