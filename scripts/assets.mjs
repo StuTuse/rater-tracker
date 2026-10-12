@@ -1,0 +1,83 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { deflateSync } from 'node:zlib';
+await mkdir('assets/badges', { recursive: true });
+// Every subject is explicitly drawn, rather than recolouring one template.
+const subjects = [
+  'M48 15 56 38 79 47 57 55 49 79 39 57 15 49 38 39Z M23 19l-4-5m53 7 5-5m1 57 6 3',
+  'M34 24 40 40 56 45 40 51 34 68 28 51 12 45 28 40Z M65 40 70 55 84 60 70 65 65 80 60 65 46 60 60 55Z M26 76Q55 89 81 30',
+  'M64 24 70 37 85 40 73 49 73 65 61 56 45 62 49 47 39 37 55 35Z M47 50 16 77m28-40L15 59m44 6L33 85',
+  'M48 23 65 48 48 72 32 48Z M17 64Q0 47 45 30T80 47Q76 64 30 68T17 64 M18 43Q8 67 52 62T83 39',
+  'M16 68 31 31 52 55 69 19 83 65 M12 64h8v8h-8Zm15-37h8v8h-8Zm21 24h8v8h-8Zm17-36h8v8h-8Zm14 46h8v8h-8Z',
+  'M49 46q-13-10-18 2T50 68q35-1 26-33T35 18Q-2 34 19 69q22 32 58 7 M49 43l4 7-8 3 1-8Z',
+  'M10 64Q43 12 86 59 M13 72Q45 25 82 66 M20 62l1 5m9-19 3 5m10-14 2 6m13-3-1 5m12 8-3 2 M19 28l4 4m56 0 5-5',
+  'M23 64 17 35 34 49 48 20 62 48 80 34 73 66Z M23 73h51 M48 6v7M17 19l6 6m58-5-6 6 M48 28l3 10 10 3-10 3-3 10-3-10-10-3 10-3Z',
+  'M31 17h33l-1 64-16-13-15 13Z M39 25h17M41 35h13',
+  'M48 27Q28 16 14 24l3 47q17-5 32 7 12-11 31-7l3-48q-20-6-35 4Zm0 0 1 51M25 34l15 3m-14 9 14 3m19-12 15-4m-15 16 14-3',
+  'M27 77Q30 34 72 17 83 43 53 57L27 77Z M72 17 28 77M43 43l11 2m-5-11 15 3m-22 22 1-10 M67 68q-8 12 0 16t0-16Z',
+  'M19 20h45v56H20Z M27 29h24m-24 10h15m-15 28h20 M51 32a18 18 0 1 1 0 36 18 18 0 0 1 0-36Z M65 64l17 17',
+  'M24 26h54q12 0 9 15h-9v28H25Q9 71 10 59l1-24q0-9 13-9ZM24 26q13 10 0 14H11m14 29q13-10 0-17H11 M37 38h32m-32 12h30m-28 9h23',
+  'M18 64h61v16H18Z M23 46h59v17H23Z M16 29h57v17H16Z M29 29V17q20-5 35 0v12M26 72h44m-36-19h39m-43-16h35',
+  'M48 64V27m0 16L28 29m21 22 22-21 M23 34Q12 12 35 14q15 2 13 17 M48 29Q57 8 79 19q-1 21-24 22 M48 65Q26 53 14 64l2 17q18-7 32 2 17-10 33-3V64q-17-11-33 1Zm0 0v18',
+  'M36 77 42 30h14l5 47Z M37 79h26M41 30V20h17v10M36 20l13-9 13 9Z M22 31 9 36l24-1M69 31l17 7-22-3M45 49h11m-13 15h15',
+  'M27 67 62 22 73 31 37 77 22 82Z M62 22l8-9 12 10-9 8 M27 67l10 10 M18 87Q53 74 79 82',
+  'M48 48 29 24m20 25L75 27 M26 15a11 11 0 1 1 0 22 11 11 0 0 1 0-22ZM76 18a10 10 0 1 1 0 20 10 10 0 0 1 0-20Z M48 48 27 80m21-31 25 33 M55 58q27-11 29 4L70 76',
+  'M23 17 80 75H23Z M35 45v19h20Z M23 30h5m-5 10h5m-5 10h5 M51 20l27 27m-20-30 25 25',
+  'M15 31h17l6-10h22l7 10h15v45H15Z M48 38a16 16 0 1 1 0 32 16 16 0 0 1 0-32Z M48 45a9 9 0 1 1 0 18 9 9 0 0 1 0-18Z M72 38h4',
+  'M18 39h64v38H18Z M18 39 13 23l63-13 4 16Z M25 21l9 11m8-15 9 12m9-16 9 12 M28 51h44m-44 12h24',
+  'M16 20v60m0-49h66m-66 21h66m-66 20h66 M23 24h20v12H23Zm27 0h28v12H50ZM31 44h29v12H31Zm33 0h17v12H64ZM22 64h22v12H22Zm28 0h22v12H50Z',
+  'M26 20h44v46H26Z M35 30q12-6 25 0m-29 29 12-16 8 8 8-10 9 18 M48 66 31 86m18-20 18 20M42 13h13 M61 63l4-2',
+  'M34 22h29l-3 29q-12 18-25 0ZM33 29H19q-3 20 16 21m28-21h14q5 19-17 21M48 64v12m-14 7h29 M46 45 52 29l4 2-6 16-5 6Z',
+  'M25 73Q8 34 72 18 85 69 25 73ZM25 73 64 30M42 53l-1-15m11 6 14 3',
+  'M26 22h44l-4 57H31Z M28 50q12-7 21 0t19 0 M47 29q-13 14 0 16t0-16Z',
+  'M17 53 32 22l13 5-1 16 33 17q9 4 8 17H15Z M15 70h70M36 42l12 4m-7 1 13 4m-7 1 14 4 M22 49l11 5',
+  'M48 78 17 48q-18-27 8-32 15-3 23 13 15-27 34-9 12 13-3 30Z M16 48h15l7-13 9 28 11-22 7 7h18',
+  'M31 44h34v10H31Z M16 32h14v35H16Zm-7 8h7v19H9ZM65 32h14v35H65Zm14 8h7v19h-7Z',
+  'M24 46a20 20 0 1 1 0 40 20 20 0 0 1 0-40Z M69 46a20 20 0 1 1 0 40 20 20 0 0 1 0-40Z M24 66l18-32 27 32H24l13-21h22 M37 34h14m12-9h10l-4 41M11 23l19 2M7 34h14',
+  'M48 16a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z M48 31v22l-19 19m19-19 20 19M23 45l25-12 25 12M17 71Q10 51 17 33m64 0q9 19 0 38M33 79h31',
+  'M48 12 77 23l-2 33q-6 20-27 28-26-13-28-33V23Z M44 31a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z M44 44v16m-10-11h21m-11 11-9 11m9-11 8 10 M59 58q-3-13 12-16 5 14-12 16Z',
+  'M24 35h42v35q-19 13-41 0Z M67 40q25-3 18 19-4 10-18 6M19 80h54M33 25q-7-8 1-17m14 17q-7-8 1-17',
+  'M42 38h15v34H42Z M31 77h37M49 32q-22-6 0-23 19 20 0 23Z M21 37l8 2m41-2 9-4',
+  'M28 55h42l-7 27H35Z M26 55h46v7H26Z M48 55V24m-1 14Q17 40 22 23q22-5 25 15Zm2 6q26 4 28-17-23-5-28 17ZM49 26q17-3 10-16-14 1-10 16Z',
+  'M25 43h46v28q-21 14-46 0Z M25 49H14v16h11m46-16h11v16H71 M25 41l42-16 5 9-46 15M46 25l-2-6 11-5 3 7M35 17l-4-5',
+  'M31 48V30q17-21 33 0v19 M22 45q-14-1-13 12v17h78V57q0-12-12-12l-9 16H31Z M31 56V39h34v17M19 74v10m59-10v10M37 43h22v17H37Z',
+  'M19 17h59v62H19Z M48 17v62M19 46h59M19 17q22 10 13 25L19 60m59-43q-22 12-13 27l13 16 M52 51 73 75m-19-5 9 11',
+  'M14 60h69m-65 2v23m60-23v23M30 63v20m17-20v20m16-20v20 M19 47h59v10H19Z M27 47q4-26 22-27 18 4 14 27 M50 43q17-1 24-18m-8 13 13 2M43 23q-5-11-15-6 2 12 15 6Z',
+  'M25 80V39q0-28 24-28t23 28v41M32 80V39q0-20 17-20t16 20v41 M9 54h14v25H9Zm66 0h13v25H75Z M45 54 35 84m19-30 10 30M16 62l-4 4m68-5 4 4',
+  'M22 21h53v55H22Z M31 49l12 13 24-28M17 82h64',
+  'M28 15h42M29 81h42M33 17q-1 17 15 30-17 13-15 32h33q2-22-17-32 18-14 17-30Z M40 26h20l-11 14Z M39 69l10-12 13 12Z',
+  'M29 84V16l41 5-4 28-37-5M18 85h53 M30 24l29 4',
+  'M32 30 36 20l10 5 3 9 10 3v12l-10 3-3 9-10 4-4-9-9-3V39Z M37 37a8 8 0 1 1 0 16 8 8 0 0 1 0-16Z M66 51l3-7 8 4 2 8 7 2v10l-8 2-3 8-9 1-4-7-8-3v-9Z M68 55a7 7 0 1 1 0 14 7 7 0 0 1 0-14Z',
+  'M10 69Q48 18 87 68M11 78Q48 33 85 78 M23 55v23m13-34v28m14-31v27m15-24v27m12-16v23M9 86q11-8 23 0t25 0t29 0',
+  'M46 25a28 28 0 1 1 0 56 28 28 0 0 1 0-56Z M46 35a18 18 0 1 1 0 36 18 18 0 0 1 0-36Z M46 44a9 9 0 1 1 0 18 9 9 0 0 1 0-18Z M46 53 78 20m-2 2-11-1 5-11m8 10 9 2-2 9',
+  'M37 64Q27 27 53 12q26 23 13 53Z M48 36a8 8 0 1 1 0 16 8 8 0 0 1 0-16Z M35 47 20 64v12l19-9m28-21 12 15v14l-15-8M44 71q-4 11 9 17 15-11 8-17',
+  'M12 82 43 29 56 49 66 35 88 82Z M43 29 39 17l20 3-15 11M43 29v-19M25 79l19-13 10 5 7-11M38 40l5 9 6-9'
+];
+const rows = (await readFile('徽章设计清单.md', 'utf8')).split('\n').filter(line => /\| (stars|study|work|health|life|tasks)-\d\d \|/.test(line));
+const badges = rows.map((row, i) => {
+  const cells = row.split('|').map(s => s.trim());
+  const badge = { id: cells[5], series: cells[5].split('-')[0], tier: Number(cells[1]), threshold: Number(cells[2].replaceAll(',', '')), name: cells[3], subject: cells[4] };
+  const green = ['health', 'life'].includes(badge.series);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><title>${badge.name}</title><path d="M17 13Q46 3 77 15 94 46 78 81 47 94 16 79 3 49 17 13Z" fill="#fff3c9"/><path d="${subjects[i]}" fill="${green ? '#dbe8ca' : '#ffe29a'}" stroke="#685938" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 22l3-3m73 55 3-2M18 88h5" fill="none" stroke="${green ? '#83a568' : '#d9ab39'}" stroke-width="2" stroke-linecap="round"/></svg>`;
+  return writeFile(`assets/badges/${badge.id}.svg`, svg).then(() => badge);
+});
+await writeFile('src/badges.js', `// Generated from the authoritative badge list by scripts/assets.mjs.\nexport const BADGES = ${JSON.stringify(await Promise.all(badges), null, 2)};\n`);
+await writeFile('assets/app.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect x="4" y="4" width="88" height="88" rx="27" fill="#f3c747"/><path d="M47 18 55 38 77 42 61 57 64 78 46 67 26 78 31 56 15 42 38 38Z" fill="#fff9e8" stroke="#6b5933" stroke-width="3" stroke-linejoin="round"/><path d="M65 77q-2-19 18-21 6 19-18 21Z" fill="#99b777" stroke="#6b5933" stroke-width="2"/></svg>');
+// A deterministic 256px PNG/ICO with a star and leaf; no external image service.
+const size = 256, scan = Buffer.alloc(size * (size * 4 + 1));
+const star = [[125,45],[145,97],[206,110],[164,149],[171,208],[123,178],[72,208],[84,148],[42,110],[103,97]];
+function inside(x,y,points) { let c=false; for(let i=0,j=points.length-1;i<points.length;j=i++) { const a=points[i],b=points[j]; if((a[1]>y)!==(b[1]>y) && x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]) c=!c; } return c; }
+for(let y=0;y<size;y++) for(let x=0;x<size;x++) {
+  const i=y*(size*4+1)+1+x*4, radius=67, dx=Math.max(0,Math.abs(x-128)-55),dy=Math.max(0,Math.abs(y-128)-55);
+  const bg=dx*dx+dy*dy<=radius*radius;
+  let color=inside(x,y,star)?[255,249,232,255]:[243,199,71,bg?255:0];
+  if(((x-191)/27)**2+((y-194)/15)**2<1) color=[153,183,119,255];
+  scan.set(color,i);
+}
+function crc(data) { let c=0xffffffff; for(const b of data) { c^=b; for(let i=0;i<8;i++) c=(c>>>1)^((c&1)?0xedb88320:0); } return (c^0xffffffff)>>>0; }
+function chunk(type,data) { const b=Buffer.alloc(data.length+12); b.writeUInt32BE(data.length); b.write(type,4); data.copy(b,8); b.writeUInt32BE(crc(b.subarray(4,-4)),b.length-4); return b; }
+const ihdr=Buffer.alloc(13); ihdr.writeUInt32BE(size); ihdr.writeUInt32BE(size,4); ihdr[8]=8; ihdr[9]=6;
+const png=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(scan)),chunk('IEND',Buffer.alloc(0))]);
+await writeFile('assets/app.png',png);
+const ico=Buffer.alloc(22); ico.writeUInt16LE(1,2); ico.writeUInt16LE(1,4); ico.writeUInt16LE(1,10); ico.writeUInt16LE(32,12); ico.writeUInt32LE(png.length,14); ico.writeUInt32LE(22,18);
+await writeFile('assets/app.ico',Buffer.concat([ico,png]));
+console.log('48 independent SVG badges and application icons generated.');

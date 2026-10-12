@@ -1,53 +1,87 @@
-# Rater & Tracker · 项目入口
+# Rater & Tracker
 
-个人每日评分与长期任务成长记录器。采用 HTML 前端与 Windows 桌面封装，安装后双击桌面快捷方式打开。
+个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前状态：方案已正式拍板；仓库目前只有规划文档和数值模拟，尚未创建应用工程、制作图标或生成安装包。**
+**当前版本：0.1.0-alpha.1，首个可安装的 0.1 开发预览。** 已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立 SVG 徽章和完整备份。不是 1.0 正式验收版。
 
-本地 Git 已建立，主分支 `main`；当前阶段版本 `0.1.0-plan.1`，规划基线标签 `v0.1.0-plan.1`。未配置远程仓库，GitHub 接入留待用户后续要求。
+## 安装与使用
 
-## 文档入口
+安装程序：[Rater-Tracker-0.1.0-alpha.1-Setup.exe](release/Rater-Tracker-0.1.0-alpha.1-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
-| 文件 | 用途 |
-| --- | --- |
-| [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 新会话接手入口：现状、已确认规则、下一步、协作与交接模板 |
-| [WORKLOG.md](WORKLOG.md) | 工作日志：实际完成内容、检查结果和未完成工作 |
-| [AGENTS.md](AGENTS.md) | 本项目的开发与文档维护约定 |
-| [版本管理规范.md](版本管理规范.md) | 本地 Git、提交、分支、标签与未来远程接入 |
-| [VERSION](VERSION) | 当前阶段版本的统一入口 |
-| [CHANGELOG.md](CHANGELOG.md) | 各阶段版本的变更摘要 |
-| [最终方案.md](最终方案.md) | 产品与数值权威依据，正式定稿 v1.3；黄色主色＋少量绿色点缀 |
-| [视觉与动效规范.md](视觉与动效规范.md) | 全组件动效、经验条分镜、手绘风格与体验验收 |
-| [徽章设计清单.md](徽章设计清单.md) | 六个系列各八级，共 48 枚；门槛、名称与不同主体图案 |
-| [项目规划.md](项目规划.md) | 历史讨论及用户拍板记录 |
-| [机制定稿候选.md](机制定稿候选.md) | 历史候选，旧状态和旧徽章数量不作为现行需求 |
+1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
+2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
+3. 为独立成果新建任务，在详情里记录推进、阶段和最终交付；归档、恢复、隐藏、延期、撤销和删除各自处理。
+4. 历史页查看日历和 7／30 天趋势；奖励中心查看徽章、系数、明细、周期回顾与规则。
+5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
-建议阅读顺序：交接文档 → 正式方案 → 本次工作对应的视觉／徽章规范 → 工作日志最近条目。
+日常运行没有联网资源或云服务。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
 
-## 项目现状
+## 数据与更新
 
-| 领域 | 状态 |
-| --- | --- |
-| 产品、经验与更正规则 | 已拍板 |
-| 页面结构、动效规范、徽章清单 | 已写入文档；视觉资产尚未制作 |
-| 应用源代码、持久化与业务测试 | 尚未开始 |
-| Electron 启动、安装包与桌面快捷方式 | 方案已确定；尚未实现 |
-| 数值成长模拟 | 已有脚本和结果；不能替代业务测试 |
+安装目录与用户数据分离。正常桌面数据使用 `%APPDATA%\RaterTracker` 下的 Chromium IndexedDB；设置页显示本机实际路径，并提供打开入口。固定页面来源 `app://rater`，存储名 `rater-tracker`。
 
-当前没有 `package.json`、应用启动命令或安装包路径。建立工程后，在本文件补充实际可运行命令与产物位置。
+更新前先从设置页导出 JSON，再运行新安装程序。不要删除数据目录。备份包括历史分配、取消痕迹、冻结额度和 C、评分星数批次、设置及规则／格式版本；恢复不会重新发奖。浏览器预览与桌面数据互相独立。
 
-## 规划模拟
+本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。同版本重装已验证保持数据，跨产品版本升级尚未验证。
 
-已有脚本：[analysis/simulate-growth.cjs](analysis/simulate-growth.cjs)。从项目根目录运行：
+## 开发命令
+
+本机实际环境：Windows 11 x64、Node 24.19.0、npm 11.17.0。锁定 Electron 44.7.0、electron-builder 26.15.3、Playwright CLI 0.1.22；`global-agent` 使用兼容的 4.1.3 override 修复开发依赖漏洞。所有应用资源本地打包，没有前端框架或运行时 npm 依赖。
 
 ```powershell
-node .\analysis\simulate-growth.cjs --enhanced-tasks --tiered-progress
+npm ci
+npm start                 # Electron 独立窗口，正常用户数据
+npm run dev               # 浏览器预览 http://127.0.0.1:4173
+npm test                  # 25 项业务测试
+npm run check             # 版本、语法、独立徽章主体、业务测试
+npm run build             # Windows x64 可运行目录 release/win-unpacked
+npm run dist              # Windows x64 NSIS 安装包，不发布
+npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结果
 ```
 
-脚本会写入 `analysis/growth-results-candidate.json`。其经验情景结果为轻量第 891 天、稳定第 449 天、高投入第 233 天到 MAX；其中徽章统计仍是历史口径，没有验证完整的补记、删除、撤销与恢复规则。
+首次工程安装／打包需要联网下载开发依赖、Electron 与 NSIS；安装好的应用离线运行。脚本直接由 Node 启动工具入口，适配本工作区路径中的空格和 `&`。
 
-## 每次工作结束
+检查打包应用与安装流程：
 
-在 `WORKLOG.md` 追加实际结果，更新 `SESSION_HANDOFF.md` 的当前状态与下一步；如修改需求，同时更新权威方案。具体交接格式见交接文档。
+```powershell
+node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
+& .\scripts\install-acceptance.ps1
+```
 
-检查本次差异与暂存区后提交相关文件；只有阶段里程碑才更新 VERSION／CHANGELOG 并打标签。多会话共用目录时先协调暂存范围，完整规则见版本管理规范。
+安装验收脚本先确认没有既有用户安装，再在工作区 `runtime-data/install-check` 测试安装、快捷方式、单实例、同版本重装；结束卸载测试副本。测试数据使用 `runtime-data/desktop-smoke`，不写入正常数据目录。如果检测到已有安装，脚本停止，避免覆盖它。
+
+浏览器验收使用 Playwright CLI（先 `npm run dev`），在专用测试浏览器执行：
+
+```powershell
+node node_modules/@playwright/cli/playwright-cli.js open http://127.0.0.1:4173 --headed
+node node_modules/@playwright/cli/playwright-cli.js snapshot
+node node_modules/@playwright/cli/playwright-cli.js run-code --filename=scripts/browser-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js snapshot
+node node_modules/@playwright/cli/playwright-cli.js run-code --filename=scripts/growth-acceptance.cjs
+```
+
+这些是验收流程而非用户数据操作；第一个会更正测试浏览器的学习评分，第二个使用 MAX 测试快照并在 `finally` 恢复原快照。截图与报告在 `output/`，测试数据、导出和构建产物均不入库。
+
+## 源码与验证范围
+
+| 路径 | 职责 |
+| --- | --- |
+| `src/core.js` | 香港日期、纯事务、整数金额、冻结参数、等级与统计 |
+| `src/storage.js` | IndexedDB 原子事务、revision 冲突校验、完整备份验证 |
+| `src/app.js` / `src/styles.css` | 五页界面、真实状态反馈、动效、任务详情 |
+| `assets/badges/` / `src/badges.js` | 48 枚独立手绘 SVG、名称与门槛 |
+| `electron/` | 固定本地来源、安全隔离、单实例、文件对话框 |
+| `test/core.test.mjs` | 正式方案的结算与更正场景 |
+| `scripts/` | 构建检查、资产生成、预览与实际渲染／安装验收 |
+| [数据契约.md](docs/数据契约.md) | 金额精度、历史分配、持久化和备份格式 |
+| [0.1验收记录.md](docs/0.1验收记录.md) | 实际检查、产物和未覆盖范围 |
+
+已有验证包含 25 项业务测试、浏览器交互与故障注入、三档动效与系统偏好、窄窗口、48 个资源、实际打包应用、安装与重装。仍需后续人工体验打磨、长历史量性能检查、60 fps 实测、原生文件对话框完整点击验收以及跨版本更新验证。没有以构建成功代替这些未覆盖项目。
+
+## 文档与版本入口
+
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.3](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+
+本地仓库 `main`，规划标签 `v0.1.0-plan.1` 保持；本版使用附注标签 `v0.1.0-alpha.1`。未配置 GitHub 远程或推送。
+
+规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。

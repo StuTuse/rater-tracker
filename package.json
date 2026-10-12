@@ -1,0 +1,42 @@
+{
+  "name": "rater-tracker",
+  "version": "0.1.0-alpha.1",
+  "description": "离线每日评分与任务成长记录器",
+  "author": "Rater & Tracker (local)",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "start": "node node_modules/electron/cli.js .",
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "build": "npm run check && node node_modules/electron-builder/cli.js --win --x64 --dir",
+    "dist": "npm run check && node node_modules/electron-builder/cli.js --win nsis --x64 --publish never",
+    "desktop:smoke": "node scripts/desktop-smoke.mjs"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "@playwright/cli": "0.1.22"
+  },
+  "overrides": { "global-agent": "4.1.3" },
+  "build": {
+    "appId": "local.ratertracker.desktop",
+    "productName": "Rater & Tracker",
+    "directories": { "output": "release", "buildResources": "assets" },
+    "files": ["src/**/*", "assets/**/*", "electron/**/*", "index.html", "VERSION", "package.json"],
+    "asar": true,
+    "win": { "target": "nsis", "icon": "assets/app.ico" },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false,
+      "artifactName": "Rater-Tracker-${version}-Setup.${ext}"
+    }
+  }
+}

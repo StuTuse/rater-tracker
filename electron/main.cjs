@@ -1,0 +1,89 @@
+const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu } = require('electron');
+const path = require('node:path');
+const fs = require('node:fs/promises');
+const { pathToFileURL } = require('node:url');
+const root = path.resolve(__dirname, '..');
+const smoke = process.argv.includes('--smoke');
+const isolatedAcceptance = process.argv.includes('--acceptance-hold');
+const smokeDirectory = path.join(root, 'runtime-data', 'desktop-smoke');
+if (smoke || isolatedAcceptance) app.setPath('userData', process.env.RATER_TEST_DATA ? path.resolve(process.env.RATER_TEST_DATA) : path.join(app.getPath('temp'), `rater-smoke-${Date.now()}`));
+else app.setPath('userData', path.join(app.getPath('appData'), 'RaterTracker'));
+app.setAppUserModelId('local.ratertracker.desktop');
+protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
+const singleton = app.requestSingleInstanceLock();
+let window;
+if (!singleton) app.quit();
+else {
+  app.on('second-instance', () => { if (window) { if (window.isMinimized()) window.restore(); window.show(); window.focus(); } });
+  app.whenReady().then(async () => {
+    protocol.handle('app', request => {
+      const url = new URL(request.url), file = path.resolve(root, '.' + decodeURIComponent(url.pathname));
+      const allowed = url.hostname === 'rater' && (file === path.join(root, 'index.html') || ['src', 'assets'].some(dir => file.startsWith(path.join(root, dir) + path.sep)));
+      return allowed ? net.fetch(pathToFileURL(file).href) : new Response('Forbidden', { status: 403 });
+    });
+    const secure = handler => async (event, ...args) => {
+      if (event.senderFrame !== event.sender.mainFrame || !event.senderFrame.url.startsWith('app://rater/')) throw new Error('Unsupported sender');
+      return handler(...args);
+    };
+    ipcMain.handle('desktop:info', secure(() => ({ version: app.getVersion(), dataDirectory: app.getPath('userData'), packaged: app.isPackaged })));
+    ipcMain.handle('desktop:open-data', secure(() => shell.openPath(app.getPath('userData'))));
+    ipcMain.handle('desktop:export', secure(async (contents, suggestedName) => {
+      if (typeof contents !== 'string' || Buffer.byteLength(contents) > 64 * 1024 * 1024) throw new Error('备份大小无效');
+      const result = await dialog.showSaveDialog(window, { title: '保存完整 JSON 备份', defaultPath: path.join(app.getPath('documents'), path.basename(String(suggestedName))), filters: [{ name: '完整 JSON 备份', extensions: ['json'] }] });
+      if (result.canceled || !result.filePath) return false;
+      // Atomic replacement in the user-selected directory.
+      const temp = `${result.filePath}.${Date.now()}.tmp`;
+      try { await fs.writeFile(temp, contents, 'utf8'); await fs.rename(temp, result.filePath); }
+      catch (error) { await fs.rm(temp, { force: true }); throw error; }
+      return true;
+    }));
+    ipcMain.handle('desktop:import', secure(async () => {
+      const result = await dialog.showOpenDialog(window, { title: '选择完整 JSON 备份', properties: ['openFile'], filters: [{ name: '完整 JSON 备份', extensions: ['json'] }] });
+      if (result.canceled) return null;
+      const file = result.filePaths[0], stat = await fs.stat(file);
+      if (stat.size > 64 * 1024 * 1024) throw new Error('备份超过 64 MB，本版本无法恢复');
+      return fs.readFile(file, 'utf8');
+    }));
+    Menu.setApplicationMenu(null);
+    window = new BrowserWindow({ width: 1440, height: 960, minWidth: 760, minHeight: 620, show: !smoke, backgroundColor: '#faf8ef', title: 'Rater & Tracker', icon: path.join(root, 'assets/app.png'), webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
+    window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    window.webContents.on('will-navigate', (event, url) => { if (!url.startsWith('app://rater/')) event.preventDefault(); });
+    window.webContents.session.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
+    if (smoke) window.showInactive();
+    await window.loadURL('app://rater/index.html');
+    if (smoke) {
+      try {
+        const report = await window.webContents.executeJavaScript(`(async () => {
+          await window.raterReady;
+          const core = await import('./src/core.js');
+          const storage = await import('./src/storage.js');
+          const store = await storage.openStore();
+          const first = await store.read();
+          let state = first;
+          const stamp = new Date().toISOString();
+          const date = core.hongKong(stamp).date;
+          state = core.transact(state, {id:'desktop-smoke-rate', type:'rate', date, dimension:'study', stars:3}, stamp);
+          await store.write(state, first.revision);
+          const reloaded = await store.read();
+          const restored = storage.parseBackup(storage.backupText(reloaded));
+          const valid = core.totalUnits(restored) === core.totalUnits(reloaded);
+          let conflict = false;
+          try { await store.write(state, first.revision - 1); } catch(e) { conflict = e instanceof storage.ConflictError; }
+          store.close();
+          await window.raterReload();
+          const assets = await Promise.all(Array.from(document.images).map(async i => { try { await i.decode(); return i.naturalWidth > 0; } catch { return false; } }));
+          const { BADGES } = await import('./src/badges.js');
+          const badgeAssets = await Promise.all(BADGES.map(async b => { const response = await fetch('assets/badges/'+b.id+'.svg'); return response.ok && (await response.text()).includes('<svg'); }));
+          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && badgeAssets.every(Boolean), badgeAssetCount:badgeAssets.filter(Boolean).length, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+        })()`);
+        const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
+        await fs.mkdir(directory, { recursive: true });
+        await fs.writeFile(path.join(directory, 'report.json'), JSON.stringify({ ...report, version: app.getVersion(), packaged: app.isPackaged, userData: app.getPath('userData') }, null, 2));
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        await fs.writeFile(path.join(directory, 'desktop.png'), (await window.webContents.capturePage()).toPNG());
+        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded ? 0 : 1);
+      } catch (error) { console.error(error); app.exit(1); }
+    }
+  }).catch(error => { console.error(error); app.exit(1); });
+}
+app.on('window-all-closed', () => app.quit());

@@ -5,6 +5,8 @@ out/
 build/
 release/
 artifacts/
+output/
+.playwright-cli/
 coverage/
 .cache/
 .vite/

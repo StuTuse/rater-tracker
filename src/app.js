@@ -1,0 +1,370 @@
+import { DIMENSIONS, LABELS, TIERS, SCALE, xp, hongKong, addDays, daysBetween, taskPlan, transact, totalUnits, levelAt, stats, nextCoefficient, progressDays, allocatedProgress, estimate } from './core.js';
+import { openStore, ConflictError, validateState, backupText, parseBackup } from './storage.js';
+import { icon } from './icons.js';
+import { BADGES } from './badges.js';
+
+const $ = selector => document.querySelector(selector);
+const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+const fmt = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const today = () => hongKong().date;
+const uid = () => crypto.randomUUID();
+const button = (action, label, name = '', extra = '', cls = '') => `<button type="button" class="${cls}" data-action="${action}" ${extra}>${name ? icon(name) : ''}${label}</button>`;
+let store, state, desktopInfo, page = 'today', chosenDate = today(), month = today().slice(0, 7), taskFilter = 'active', taskQuery = '', badgeFilter = 'all', trendRange = 7, rewardTab = 'badges';
+let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer, lastFocused;
+const drafts = new Map();
+const seriesNames = { stars: '星光', study: '求知', work: '创作', health: '活力', life: '日常', tasks: '达成' };
+const seriesCount = s => ({ ...s, stars: s.stars });
+const validTasks = () => Object.values(state.tasks).filter(t => !t.deleted);
+const earned = s => BADGES.filter(b => seriesCount(stats(s))[b.series] >= b.threshold);
+const dateLabel = date => new Date(`${date}T00:00:00+08:00`).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Hong_Kong' });
+const due = task => { const d = daysBetween(today(), task.deadline); return d < 0 ? `逾期 ${-d} 天` : d === 0 ? '今天到期' : d <= 3 ? `${d} 天内到期` : `${task.deadline.slice(5).replace('-', '/')} 截止`; };
+const taskStatus = task => task.completion?.active ? '已完成' : task.archived ? '已归档' : task.progress.some(p => p.active) ? '进行中' : '待开始';
+
+function toast(message, error = false) {
+  $('#feedback').innerHTML = `<div class="toast ${error ? 'error' : ''}">${icon(error ? 'info' : 'check')}<span>${escape(message)}</span></div>`;
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => $('#feedback').replaceChildren(), error ? 8500 : 4200);
+}
+function motionMode() { return state.settings.motion === 'off' ? 'off' : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'gentle' : state.settings.motion; }
+function applyMotion() { document.documentElement.dataset.motion = motionMode(); }
+function growthStatic() {
+  const l = levelAt(totalUnits(state));
+  $('#level-label').textContent = l.level === 'MAX' ? 'MAX' : `Lv.${l.level}`;
+  $('#xp-total').textContent = fmt(l.total);
+  $('#xp-progress').textContent = l.level === 'MAX' ? '满级以后，成长继续' : `${fmt(l.current)} / ${l.need} XP`;
+  $('#xp-next').textContent = l.level === 'MAX' ? '所有努力都被认真记录' : `距下一级 ${fmt(l.need - l.current)} XP`;
+  $('#xp-fill').style.width = `${l.ratio * 100}%`;
+  $('#xp-bar').setAttribute('aria-valuenow', String(Math.round(l.ratio * 100)));
+  $('#growth').classList.toggle('max', l.level === 'MAX');
+}
+function feedback(before, after, reason) {
+  const token = ++animationToken;
+  cancelAnimationFrame(numberFrame); clearTimeout(celebrationTimer);
+  $('#growth').getAnimations({ subtree: true }).forEach(a => a.cancel());
+  $('#particles').replaceChildren(); $('#growth').classList.remove('level-up', 'level-down');
+  const old = levelAt(totalUnits(before)), next = levelAt(totalUnits(after));
+  const delta = next.total - old.total;
+  const gained = earned(after).filter(b => !earned(before).some(e => e.id === b.id));
+  const lost = earned(before).filter(b => !earned(after).some(e => e.id === b.id));
+  growthStatic();
+  if (delta === 0 && !gained.length && !lost.length) { toast(`${reason} · 已保存`); return; }
+  const changed = old.level !== next.level;
+  const phrase = changed ? (next.level === 'MAX' ? '抵达 MAX' : `${delta > 0 ? '升级至' : '更正为'} Lv.${next.level}${typeof old.level === 'number' && typeof next.level === 'number' && Math.abs(next.level - old.level) > 1 ? ` · 跨越 ${Math.abs(next.level - old.level)} 级` : ''}`) : reason;
+  $('#growth-message').textContent = `${delta >= 0 ? '+' : '−'}${fmt(Math.abs(delta))} XP · ${phrase}`;
+  $('#growth-message').className = delta < 0 ? 'xp-message negative' : 'xp-message';
+  const badgeNote = gained.length ? ` · 获得${gained.map(b => `「${b.name}」`).slice(0, 2).join('')}${gained.length > 2 ? `等 ${gained.length} 枚徽章` : ''}` : lost.length ? ` · ${lost.length} 枚徽章因有效记录变化撤回` : '';
+  toast(`${reason} · ${delta >= 0 ? '+' : '−'}${fmt(Math.abs(delta))} XP${badgeNote}`);
+  if (motionMode() !== 'off') {
+    const mode = motionMode(), duration = mode === 'gentle' ? 260 : changed ? 1200 : 650;
+    const fill = $('#xp-fill'), final = `${next.ratio * 100}%`;
+    const initial = `${old.ratio * 100}%`;
+    const keyframes = changed && mode === 'full' ? [{ width: initial, offset: 0 }, { width: delta > 0 ? '100%' : '0%', offset: .34 }, { width: delta > 0 ? '0%' : '100%', offset: .36 }, { width: final, offset: 1 }] : [{ width: initial }, { width: final }];
+    fill.animate(keyframes, { duration, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    $('#xp-ghost').animate([{ width: initial, opacity: delta < 0 ? .45 : 0 }, { width: initial, opacity: 0 }], { duration: duration + 100 });
+    const start = performance.now();
+    const tick = time => { if (token !== animationToken) return; const p = Math.min(1, (time - start) / duration); $('#xp-total').textContent = fmt(old.total + delta * (1 - (1 - p) ** 3)); if (p < 1) numberFrame = requestAnimationFrame(tick); else growthStatic(); };
+    numberFrame = requestAnimationFrame(tick);
+    if (changed) {
+      $('#growth').classList.add(delta > 0 ? 'level-up' : 'level-down');
+      if (delta > 0 && mode === 'full') for (let i = 0; i < (next.level === 'MAX' ? 24 : 16); i++) { const particle = document.createElement('i'); particle.style.setProperty('--angle', `${i * 137.5}deg`); particle.style.setProperty('--distance', `${60 + (i % 4) * 19}px`); particle.style.setProperty('--delay', `${(i % 3) * 35}ms`); $('#particles').append(particle); }
+    }
+    celebrationTimer = setTimeout(() => { if (token === animationToken) { $('#particles').replaceChildren(); $('#growth').classList.remove('level-up', 'level-down'); $('#growth-message').textContent = '每一点努力，都有回响'; } }, 2000);
+  }
+}
+
+function save(action, reason) {
+  const prepared = { ...action, id: action.id ?? uid() };
+  queue = queue.then(async () => {
+    const before = state;
+    try {
+      const next = transact(state, prepared);
+      if (next === state) return;
+      await store.write(next, before.revision);
+      state = next; applyMotion(); renderContent(); refreshTaskDialog(); feedback(before, state, reason);
+      $('#save-status').textContent = '已保存到本机';
+    } catch (error) {
+      if (error instanceof ConflictError) { state = validateState(await store.read()); renderContent(); growthStatic(); }
+      $('#save-status').textContent = '本次未保存'; toast(error.message, true);
+      throw error;
+    }
+  }).catch(() => {});
+  return queue;
+}
+
+function shell() {
+  $('#app').innerHTML = `<aside class="sidebar">
+    <a class="brand" href="#today" data-action="navigate" data-page="today" aria-label="返回今日"><img src="assets/app.svg" alt=""><span>Rater <i>&</i> Tracker<small>把日子，写成成长</small></span></a>
+    <div class="nav-caption">我的成长手记</div>
+    <nav>${[['today', '今日', 'sun'], ['tasks', '任务', 'tasks'], ['history', '历史', 'history'], ['rewards', '奖励中心', 'rewards'], ['settings', '设置', 'settings']].map(([id, title, i]) => button('navigate', title, i, `data-page="${id}"`, `nav-link ${page === id ? 'selected' : ''}`)).join('')}</nav>
+    <div class="sidebar-bottom"><div class="tiny-garden">${icon('health')}${icon('star')}${icon('work')}</div><p>不必每天闪闪发光。<br>记录，就是向前一步。</p><span class="offline-dot"></span> 离线 · 私人的空间<small>v${escape(desktopInfo.version)}</small></div>
+  </aside><div class="workspace"><header class="topbar"><div class="top-kicker">GROW A LITTLE, EVERY DAY</div><span id="save-status">已保存到本机</span></header>
+    <section id="growth" class="growth"><div class="level-medallion">${icon('rewards')}<strong id="level-label"></strong><div id="particles"></div></div><div class="growth-body"><div class="growth-head"><span class="eyebrow">你的成长</span><span class="xp-message" id="growth-message">每一点努力，都有回响</span></div><div class="xp-bar" id="xp-bar" role="progressbar" aria-label="当前等级经验进度" aria-valuemin="0" aria-valuemax="100"><div id="xp-ghost"></div><div id="xp-fill"></div></div><div class="growth-foot"><span id="xp-progress"></span><span id="xp-next"></span></div></div><div class="total-xp"><span>有效累计经验</span><strong id="xp-total"></strong><small>XP</small></div></section>
+    <main id="content"></main><footer>Rater & Tracker <span>·</span> 留下努力，允许更正，慢慢生长。</footer></div>`;
+  growthStatic();
+}
+function header(kicker, title, description, right = '') { return `<div class="page-header"><div><p class="eyebrow">${kicker}</p><h1>${title}</h1><p class="subtitle">${description}</p></div>${right}</div>`; }
+function datePicker() { return `<div class="date-switch">${button('previous-date', '‹', '', 'aria-label="前一天"')}<input aria-label="评分日期" type="date" id="rating-date" value="${chosenDate}" max="${today()}">${button('next-date', '›', '', `aria-label="后一天" ${chosenDate === today() ? 'disabled' : ''}`)}</div>`; }
+function ratingCards(date) {
+  const day = state.ratings[date] ?? {};
+  return `<div class="ratings-grid">${DIMENSIONS.map((d, i) => {
+    const r = day[d], amount = r ? state.ledger.filter(e => e.owner === `${date}/${d}` && e.active).reduce((sum, e) => sum + e.actual, 0) : 0;
+    const note = drafts.get(`${date}/${d}`) ?? r?.note ?? '';
+    return `<article class="rating-card ${r ? 'rated' : ''}" style="--order:${i}"><div class="card-top"><div class="category-icon ${d}">${icon(d)}</div><div><h2>${LABELS[d]}</h2><span>${{ study: '为好奇心留一点时间', work: '让想法成为看得见的成果', health: '照顾身体，也照顾自己', life: '认真过好平凡的一天' }[d]}</span></div><span class="rating-state">${r ? `${r.stars} 星` : '未评分'}</span></div>
+      <div class="rating-control" role="group" aria-label="${LABELS[d]}评分"><button class="zero ${r?.stars === 0 ? 'active' : ''}" type="button" data-action="rate" data-dimension="${d}" data-stars="0" aria-pressed="${r?.stars === 0}">0 星</button><div class="stars">${[1, 2, 3, 4, 5].map(star => `<button type="button" data-action="rate" data-dimension="${d}" data-stars="${star}" class="star-button ${r && r.stars >= star ? 'lit' : ''}" aria-label="${LABELS[d]} ${star} 星" aria-pressed="${r?.stars === star}">${icon('star')}</button>`).join('')}</div></div>
+      <div class="rating-meta"><span>${r ? `${icon('check')}已记录 · ${fmt(xp(amount))} XP` : '今天的投入，由你来定义'}</span>${r ? button('clear-rating', '清空', '', `data-dimension="${d}"`, 'text-button') : '<span class="normal-xp">5–15 XP</span>'}</div>
+      <details ${note ? 'open' : ''}><summary>${icon('work')}原因与依据 <span>选填</span></summary><textarea rows="2" class="rating-note" data-dimension="${d}" data-date="${date}" placeholder="写下一个具体的进展，或今天需要休息的原因…" ${r ? '' : 'disabled'} aria-label="${LABELS[d]}原因与依据">${escape(note)}</textarea><small class="field-hint">离开输入框时自动保存 · <button type="button" class="text-button reference" data-action="reference" data-dimension="${d}">查看评分参照</button></small></details></article>`;
+  }).join('')}</div>`;
+}
+function empty(title, description, action = '') { return `<div class="empty"><div class="empty-art">${icon('health')}${icon('star')}</div><h3>${title}</h3><p>${description}</p>${action}</div>`; }
+function taskCard(t, compact = false) {
+  const p = t.frozen ?? taskPlan(t), tier = TIERS.find(x => x.id === p.tier);
+  const done = t.stages.filter(s => s.done).length;
+  const consumed = allocatedProgress(state, t), amount = state.ledger.filter(e => e.owner === t.id && e.active).reduce((a, e) => a + e.actual, 0);
+  const caution = !t.completion?.active && !t.archived && daysBetween(today(), t.deadline) <= 3;
+  return `<article class="task-card ${compact ? 'compact' : ''}"><div class="task-heading"><div class="task-marker ${t.completion?.active ? 'done' : ''}">${icon(t.completion?.active ? 'check' : 'flag')}</div><div class="task-title"><button type="button" class="title-button" data-action="task-detail" data-task="${t.id}">${escape(t.title)}</button><div class="task-tags"><span>${tier.name}</span>${t.dimension ? `<span>${LABELS[t.dimension]}</span>` : ''}<span class="${caution ? 'due' : ''}">${t.completion?.active ? `${t.completion.date} 完成` : due(t)}</span></div></div><span class="status ${t.completion?.active ? 'green' : ''}">${taskStatus(t)}</span></div>
+    ${!compact && t.goal ? `<p class="task-goal">${escape(t.goal)}</p>` : ''}<div class="task-progress"><div class="thin-bar"><i style="width:${Math.min(100, consumed / (p.e * .5) * 100)}%"></i></div><small>推进额度 ${fmt(xp(consumed))} / ${fmt(xp(p.e * .5))} XP ${t.stages.length ? ` · 阶段 ${done}/${t.stages.length}` : ''}</small></div>
+    <div class="task-foot"><span>已得 <b>${fmt(xp(amount))}</b> XP</span><div>${!t.completion?.active && !t.archived ? `${button('quick-progress', '推进', 'path', `data-task="${t.id}"`, 'secondary small')}${button('quick-complete', '完成', 'check', `data-task="${t.id}"`, 'primary small')}` : button('task-detail', '查看记录', 'arrow', `data-task="${t.id}"`, 'text-button')}</div></div></article>`;
+}
+function todayPage() {
+  const day = state.ratings[chosenDate] ?? {}, count = DIMENSIONS.filter(d => day[d]).length;
+  const tasks = validTasks().filter(t => !t.archived && !t.hidden && !t.completion?.active).sort((a, b) => a.deadline.localeCompare(b.deadline));
+  const s = stats(state);
+  return header(chosenDate === today() ? 'TODAY / 今日手记' : 'DAILY JOURNAL / 每日手记', chosenDate === today() ? '今天，也向前一点。' : dateLabel(chosenDate), `${dateLabel(chosenDate)} · ${count === 4 ? '四项已全部记录' : `已记录 ${count} / 4 项`}`, datePicker()) + `<div class="today-layout"><section><div class="section-title"><h2>给今天一个诚实的评分</h2><span>${count === 4 ? `${icon('check')}今日记录完成` : '空白 ≠ 0 星'}</span></div>${ratingCards(chosenDate)}<div class="gentle-note">${icon('info')}0 星也是有效记录。休息、恢复和重新整理，都可以是今天的成果。${chosenDate !== today() ? '<br>历史增量按补记时间折扣；原有经验保持。' : ''}</div></section><aside class="today-tasks"><div class="section-title"><h2>让成果往前走</h2>${button('new-task', '新建', 'plus', '', 'text-button')}</div><div class="task-stack">${tasks.slice(0, 4).map(t => taskCard(t, true)).join('') || empty('第一件想完成的事', '为一个独立成果建立任务，<br>每次推进都留下痕迹。', button('new-task', '建立我的第一个任务', 'plus', '', 'secondary'))}</div>${tasks.length > 4 ? button('navigate', `查看全部 ${tasks.length} 项任务`, 'arrow', 'data-page="tasks"', 'text-button all-tasks') : ''}<div class="small-reflection"><span class="eyebrow">一点点积累，真的看得见</span><div><strong>${s.recorded}</strong><span>记录天数</span><strong>${s.tasks}</strong><span>完成成果</span></div><p>${s.completeDays} 天完整评分 · ${s.stars} 颗有效星星</p></div></aside></div>`;
+}
+function tasksPage() {
+  const list = validTasks().filter(t => taskFilter === 'all' || taskFilter === 'active' && !t.completion?.active && !t.archived || taskFilter === 'completed' && t.completion?.active && !t.hidden || taskFilter === 'archived' && t.archived || taskFilter === 'hidden' && t.hidden).filter(t => `${t.title} ${t.goal}`.toLowerCase().includes(taskQuery.toLowerCase())).sort((a, b) => a.deadline.localeCompare(b.deadline));
+  return header('PROJECTS / 成果与推进', '把想做的，慢慢做成。', '一个任务，一份独立成果。阶段帮助推进，最终交付时结算。', button('new-task', '新建任务', 'plus', '', 'primary')) + `<div class="toolbar"><div class="segmented">${[['active', '未完成'], ['completed', '已完成'], ['archived', '归档'], ['hidden', '已隐藏'], ['all', '全部']].map(([id, label]) => button('task-filter', label, '', `data-filter="${id}"`, taskFilter === id ? 'selected' : '')).join('')}</div><input id="task-search" type="search" placeholder="搜索名称或完成标准" aria-label="搜索任务" value="${escape(taskQuery)}"></div><div class="tasks-grid">${list.map(t => taskCard(t)).join('')}</div>${list.length ? '' : empty('这里还是一张空白页', '给下一份成果起个名字，故事就开始了。', button('new-task', '新建任务', 'plus', '', 'secondary'))}`;
+}
+function calendar() {
+  const first = `${month}-01`, offset = (new Date(`${first}T00:00:00Z`).getUTCDay() + 6) % 7;
+  const [year, mon] = month.split('-').map(Number), length = new Date(Date.UTC(year, mon, 0)).getUTCDate();
+  return `<section class="panel calendar-panel"><div class="calendar-head">${button('previous-month', '‹', '', 'aria-label="上个月"')}<h2>${year} 年 ${mon} 月</h2>${button('next-month', '›', '', 'aria-label="下个月"')}</div><div class="calendar-grid">${['一', '二', '三', '四', '五', '六', '日'].map(d => `<span class="weekday">${d}</span>`).join('')}${'<span></span>'.repeat(offset)}${Array.from({ length }, (_, i) => {
+    const date = `${month}-${String(i + 1).padStart(2, '0')}`, count = DIMENSIONS.filter(d => state.ratings[date]?.[d]).length;
+    return `<button type="button" data-action="calendar-date" data-date="${date}" class="calendar-day ${chosenDate === date ? 'selected' : ''} ${count === 4 ? 'full' : ''} ${date === today() ? 'today' : ''}" ${date > today() ? 'disabled' : ''} aria-label="${date}，${count} 项评分"><span>${i + 1}</span><i class="${count ? 'has-record' : ''}"></i></button>`;
+  }).join('')}</div><p class="field-hint">● 有记录 <span class="green-dot">●</span> 四项完整 · 空白日期未评分</p></section>`;
+}
+function trend() {
+  const start = addDays(chosenDate, -(trendRange - 1)), width = 640, height = 160, pad = 22;
+  const dates = Array.from({ length: trendRange }, (_, i) => addDays(start, i));
+  const colors = ['#c79825', '#cf9866', '#88a26b', '#658b80'];
+  let graph = [0, 1, 2, 3, 4, 5].map(n => `<line x1="${pad}" x2="${width - pad}" y1="${height - pad - n * 23}" y2="${height - pad - n * 23}" stroke="#e8e4d8"/><text x="4" y="${height - pad - n * 23 + 4}" fill="#888272" font-size="10">${n}</text>`).join('');
+  DIMENSIONS.forEach((d, index) => {
+    let path = '', pen = false, circles = '';
+    dates.forEach((date, i) => {
+      const r = state.ratings[date]?.[d];
+      if (!r) { pen = false; return; }
+      const x = pad + i * (width - 2 * pad) / (dates.length - 1), y = height - pad - r.stars * 23;
+      path += `${pen ? 'L' : 'M'}${x},${y} `; pen = true;
+      circles += `<circle cx="${x}" cy="${y}" r="3" fill="${colors[index]}"><title>${date} ${LABELS[d]} ${r.stars} 星</title></circle>`;
+    });
+    graph += `<path class="trend-line" d="${path}" fill="none" stroke="${colors[index]}" stroke-width="2.4" stroke-linecap="round"/>${circles}`;
+  });
+  const recorded = dates.filter(date => DIMENSIONS.some(d => state.ratings[date]?.[d])).length, full = dates.filter(date => DIMENSIONS.every(d => state.ratings[date]?.[d])).length;
+  return `<section class="panel trend-panel"><div class="section-title"><h2>让记录连成轨迹</h2><div class="segmented">${[7, 30].map(n => button('trend-range', `${n} 天`, '', `data-range="${n}"`, trendRange === n ? 'selected' : '')).join('')}</div></div><div class="legend">${DIMENSIONS.map((d, i) => `<span style="--legend:${colors[i]}">${LABELS[d]}</span>`).join('')}</div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${trendRange} 天评分趋势，未评分日期保留断点">${graph}</svg><div class="trend-labels"><span>${start}</span><span>${chosenDate}</span></div><p class="field-hint">${recorded} 天有记录 · ${full} 天四项完整 · 未评分不计为 0 星</p></section>`;
+}
+function historyPage() {
+  const events = state.ledger.filter(e => e.date === chosenDate && !e.owner.includes('/')).sort((a, b) => b.sequence - a.sequence);
+  return header('MEMORIES / 历史与回顾', '翻一翻，走过的日子。', '补记真实的投入，也允许认真更正。', datePicker()) + `<div class="history-overview">${calendar()}${trend()}</div><div class="section-title"><h2>${chosenDate} · 每日评分</h2><span>直接选择星数即可补记或更正</span></div>${ratingCards(chosenDate)}<section class="panel history-events"><div class="section-title"><h2>当天任务事件</h2><span>${events.length} 笔结算</span></div>${events.length ? ledgerTable(events) : '<p class="muted">这一天没有任务事件。</p>'}</section>`;
+}
+function ledgerTable(entries) {
+  return `<div class="table-scroll"><table><thead><tr><th>事件 / 来源</th><th>实际日期</th><th>正常额度</th><th>折扣</th><th>实际入账</th><th>状态</th></tr></thead><tbody>${entries.map(e => `<tr><td><strong>${escape(e.kind)}</strong><small>${escape(e.owner.includes('/') ? `${e.date} ${LABELS[e.owner.split('/')[1]]}` : state.tasks[e.owner]?.title ?? e.owner)}</small></td><td>${e.date}<small>录入 ${hongKong(e.recordedAt).date}</small></td><td>${fmt(xp(e.normal))}</td><td>${(e.factor.numerator / e.factor.denominator * 100).toFixed(1)}%<small>${e.factor.delay ? `延迟 ${e.factor.delay} 天` : '及时'}</small></td><td class="${e.active ? '' : 'cancelled'}">${fmt(xp(e.actual))} XP</td><td>${e.active ? '<span class="green-text">有效</span>' : '<span class="muted">已撤回</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function coefficientCards(date = today(), previous = false) {
+  return `<div class="coefficient-grid">${TIERS.map(t => {
+    const next = nextCoefficient(state, t.id, date), prevDate = addDays(next.start, -1), prev = nextCoefficient(state, t.id, prevDate);
+    const entries = state.ledger.filter(e => e.active && e.window === prev.key), prevTasks = validTasks().filter(task => task.completion?.active && task.completion.window === prev.key);
+    return `<article class="coefficient-card"><span class="eyebrow">${t.name} · ${t.id === 'short' ? '自然月' : t.id === 'medium' ? '固定双月' : t.id === 'long' ? '自然季度' : '固定半年'}</span><strong>×${(next.c / 100).toFixed(2)}</strong><p>本期 ${next.count} 次有效完成 · 上限 ${(t.cap / 100).toFixed(2)}</p><small>${next.start} — ${addDays(next.end, -1)}<br>${next.end} 重置 · 还有 ${daysBetween(today(), next.end)} 天</small>${previous ? `<div class="previous-period">上期 ${prevTasks.length} 份成果 · ${fmt(xp(entries.reduce((sum, e) => sum + e.actual, 0)))} XP 完成基础入账</div>` : ''}</article>`;
+  }).join('')}</div>`;
+}
+function badgeCards() {
+  const counts = stats(state);
+  return `<div class="badge-grid">${BADGES.filter(b => badgeFilter === 'all' || b.series === badgeFilter).map(b => {
+    const count = counts[b.series], unlocked = count >= b.threshold;
+    return `<button type="button" class="badge-card ${unlocked ? 'earned' : 'locked'}" data-action="badge-detail" data-badge="${b.id}"><img src="assets/badges/${b.id}.svg" alt="${escape(b.subject)}"><h3>${b.name}</h3><span>${seriesNames[b.series]} · 第 ${b.tier} 级</span><div class="thin-bar"><i style="width:${Math.min(100, count / b.threshold * 100)}%"></i></div><small>${unlocked ? `${icon('check')}已获得` : `${count.toLocaleString()} / ${b.threshold.toLocaleString()}${b.series === 'tasks' ? ' 次' : ' 星'}`}</small></button>`;
+  }).join('')}</div>`;
+}
+function periodReview() {
+  const current = nextCoefficient(state, 'short', today()), end = addDays(current.start, -1), start = nextCoefficient(state, 'short', end).start;
+  const days = Object.entries(state.ratings).filter(([date]) => date >= start && date <= end).map(([, day]) => day);
+  const recorded = days.filter(day => DIMENSIONS.some(d => day[d])).length, full = days.filter(day => DIMENSIONS.every(d => day[d])).length;
+  const stars = days.reduce((sum, day) => sum + DIMENSIONS.reduce((n, d) => n + (day[d]?.stars ?? 0), 0), 0);
+  const sources = [['评分', e => e.owner.includes('/')], ['创建', e => e.kind === '创建任务'], ['推进', e => e.kind === '推进任务'], ['完成', e => e.kind === '完成任务'], ['持续奖励', e => e.kind.startsWith('持续奖励')]];
+  const entries = state.ledger.filter(e => e.active && e.date >= start && e.date <= end);
+  return `<section class="panel"><h2>上一个自然月 · ${start} — ${end}</h2><p class="subtitle">${recorded} 天有记录 · ${full} 天四项完整 · ${stars} 颗有效星星</p><div class="review-sources">${sources.map(([label, match]) => `<div><span>${label}</span><strong>${fmt(xp(entries.filter(match).reduce((sum, e) => sum + e.actual, 0)))}</strong><small>XP</small></div>`).join('')}</div><h2>各量级的上一个窗口</h2><p class="subtitle">以现存有效完成为依据，历史取消不再贡献统计。</p>${coefficientCards(today(), true)}${trend()}</section>`;
+}
+function rules() {
+  return `<section class="panel rules"><h2>每一份奖励，都有依据。</h2><details open><summary>每日评分</summary><p>四项固定为学习、作品、健康、生活；空白与 0 星不同。每项正常经验 = 5 + 2 × 星数。四项满星共 60 XP，没有额外全项完成奖。香港时间次日 04:00 前，前一天评分仍按及时记录。</p></details><details><summary>任务额度、推进与完成</summary><p>D = 原目标日期 − 开始日期，同日按 1 天。Dr = min(D,365)；E = [30 + 5 × (Dr − 1)] × M × 1.3；常规 / 重要 / 核心 M 为 1 / 1.5 / 2。创建的 2 XP 包含在 E 内。首次推进或直接完成时冻结原计划与重要性，延期不增加 E。</p><p>短 / 中 / 长 / 超长的每次推进比例为 10% / 5% / 2.5% / 1%，总提前领取最多 50% E。P = min(完成日前有效推进日数 × 2%,20%)；同日多条仅计一个持续日，完成当日不计。T = E × (1+P) × C；完成扣除正常创建与已分配推进额度，不补回打折损失。</p><p>C = 1 + min(本窗口此前有效同量级完成数 × 步长, 上限 − 1)。四档步长为 .05 / .08 / .10 / .15，上限为 1.30 / 1.40 / 1.50 / 1.60；窗口为自然月 / 固定双月 / 季度 / 半年。以保存成功顺序计数，历史完成冻结 C。</p></details><details><summary>补记、更正、撤销与删除</summary><p>任务按自然日；延迟 d≥1：F = 0.5 / [1 + 0.1 × (d−1)]。实际经验 = 正常分配 × F。历史增星只对新增星数打折；減星优先撤回最近批次的实际所得。文字修改不改奖，经验不会自动随时间减少。</p><p>删除历史推进或已完成任务的推进，撤回其实际所得，保留取消的正常额度痕迹；P 减少时撤回最近持续份额。完成后补录历史成果只可补持续奖励，不再预付；每份补发使用原 C 和本次补记 F。撤销完成一并撤回持续奖励，其他任务 C 不变。同日恢复同一完成日期沿用原 C 和仍满足条件的原奖励；跨日重新完成按新日期结算。</p><p>归档与恢复不发奖；隐藏已完成仅整理列表；删除任务撤回全部有效所得。备份恢复不重新结算。</p></details><details><summary>等级与徽章</summary><p>从 Lv.L 升到下一阶段需 30 + 5 × (L−1) XP。Lv.99 需累计 26,705 XP，MAX 为 27,225 XP。有效经验下降同步重算等级。六组共 48 枚独立徽章，以有效星数与完成任务数为依据，不额外发 XP；高级保留低级，记录更正会撤回不再满足的徽章。</p></details><details><summary>一个 14 天重要任务</summary><p>E=185.25。完成前四天各推进一次，预付共 37.05，创建 2，P=8%，第一个中任务 C=1；正常总奖励 200.07，完成结算 161.02。第二个同窗口中任务 C=1.08，总奖励 216.0756；所有预估以实际结算为准。</p></details><p class="field-hint">规则 v1.3 · 金额以整数百万分之一 XP 保存；每筆分配四舍五入一次，界面通常显示一位小数。</p></section>`;
+}
+function rewardsPage() {
+  const s = stats(state), obtained = earned(state);
+  return header('GROWTH / 奖励中心', '每一步，都算数。', '经验记录付出，徽章收藏成长。下一次奖励系数按当前有效计数预估。') + `<div class="summary-grid"><div><span>收集的徽章</span><strong>${obtained.length}<small> / 48</small></strong></div><div><span>有效星数</span><strong>${s.stars.toLocaleString()}</strong></div><div><span>完成的成果</span><strong>${s.tasks}</strong></div><div><span>完整记录天数</span><strong>${s.completeDays}</strong></div></div><div class="section-title"><h2>下一份成果的完成系数</h2><span>各量级独立 · 以实际结算为准</span></div>${coefficientCards()}<div class="toolbar reward-tabs"><div class="segmented">${[['badges', '徽章收藏'], ['ledger', '经验明细'], ['review', '周期回顾'], ['rules', '奖励规则']].map(([id, label]) => button('reward-tab', label, '', `data-tab="${id}"`, rewardTab === id ? 'selected' : '')).join('')}</div><span class="muted">所有反馈来自已保存的记录</span></div>${rewardTab === 'badges' ? `<div class="badge-filters">${[['all', '全部'], ...Object.entries(seriesNames)].map(([id, label]) => button('badge-filter', label, '', `data-series="${id}"`, badgeFilter === id ? 'chip selected' : 'chip')).join('')}</div>${badgeCards()}` : rewardTab === 'ledger' ? `<section class="panel"><p class="field-hint">共 ${state.ledger.length} 笔 · 显示最近 200 笔；完整历史随 JSON 备份保留。</p>${state.ledger.length ? ledgerTable([...state.ledger].reverse().slice(0, 200)) : empty('每一点经验，都有来处', '保存评分或记录任务后，在这里查看明细。')}</section>` : rewardTab === 'rules' ? rules() : periodReview()}`;
+}
+function settingsPage() {
+  return header('YOUR SPACE / 设置', '让这里，更适合你。', '所有记录留在这台电脑。定期备份，为长期成长多留一份保障。') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">按自己的目标定义投入；健康也可以包括合理休息。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">尊重系统的减少动态偏好。动效不会阻止输入，也不会产生奖励。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议现在备份，之后每周留一份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">数据与安装目录分离。手动更新保持记录；恢复不重发奖励。应用关闭后没有后台提醒。</p></section></div></div>`;
+}
+function renderContent(preserveInputs = true) {
+  const referenceDraft = preserveInputs && $('#references-form') ? Object.fromEntries(new FormData($('#references-form'))) : null;
+  const focus = document.activeElement;
+  const focusId = focus?.id, start = focus?.selectionStart, end = focus?.selectionEnd;
+  document.querySelectorAll('.nav-link').forEach(el => { el.classList.toggle('selected', el.dataset.page === page); el.setAttribute('aria-current', el.dataset.page === page ? 'page' : 'false'); });
+  $('#content').innerHTML = ({ today: todayPage, tasks: tasksPage, history: historyPage, rewards: rewardsPage, settings: settingsPage })[page]();
+  if (referenceDraft && $('#references-form')) for (const [name, value] of Object.entries(referenceDraft)) $('#references-form').elements.namedItem(name).value = value;
+  if (focusId && document.getElementById(focusId)) { const next = document.getElementById(focusId); next.focus({ preventScroll: true }); try { next.setSelectionRange(start, end); } catch {} }
+  // Notes retain focus and selection even when another committed transaction refreshes cards.
+  if (focus?.classList.contains('rating-note')) {
+    const next = document.querySelector(`.rating-note[data-dimension="${focus.dataset.dimension}"][data-date="${focus.dataset.date}"]`);
+    if (next) { next.focus({ preventScroll: true }); next.setSelectionRange(start, end); }
+  }
+}
+function openModal(contents, kind = '') {
+  const dialog = $('#modal');
+  lastFocused = document.activeElement;
+  dialog.dataset.kind = kind;
+  dialog.innerHTML = contents;
+  if (!dialog.open) dialog.showModal();
+}
+function closeModal() { $('#modal').close(); $('#modal').dataset.kind = ''; lastFocused?.focus({ preventScroll: true }); }
+const modalHead = (kicker, title) => `<div class="modal-head"><div><p class="eyebrow">${kicker}</p><h2>${escape(title)}</h2></div>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>`;
+function confirmAction(title, body, callback, label = '确认', danger = false) {
+  openModal(`${modalHead('请核对这次操作', title)}<p class="confirm-body">${body}</p><div class="modal-actions">${button('close-modal', '取消', '', '', 'secondary')}<button type="button" id="confirm-action" class="${danger ? 'danger' : 'primary'}">${label}</button></div>`, 'confirm');
+  $('#confirm-action').onclick = () => { closeModal(); callback(); };
+}
+function newTask() {
+  openModal(`${modalHead('NEW PROJECT', '建立一个想完成的成果')}<form id="task-form"><label class="field">任务名称 <span>必填</span><input name="title" placeholder="例如：完成我的第一支视频" required maxlength="160" autofocus></label><label class="field">成果 / 完成标准<textarea name="goal" placeholder="交付什么，做到什么程度？" rows="2" maxlength="4000"></textarea></label><div class="form-row"><label class="field">计划开始日期<input type="date" name="start" value="${today()}" required></label><label class="field">原目标日期<input type="date" name="target" value="${addDays(today(), 7)}" required></label></div><div class="form-row"><label class="field">所属项目<select name="dimension"><option value="">不分类</option>${DIMENSIONS.map(d => `<option value="${d}">${LABELS[d]}</option>`).join('')}</select></label><label class="field">重要性<select name="importance"><option value="normal">常规 · ×1</option><option value="important">重要 · ×1.5</option><option value="core">核心 · ×2</option></select></label></div><label class="field">阶段清单 <span>选填，每行一个</span><textarea name="stages" rows="3" placeholder="准备素材\n完成初稿\n最终交付"></textarea></label><p id="plan-preview" class="plan-preview"></p><p class="field-hint">首次推进或直接完成时冻结原计划与重要性。阶段勾选不单独发奖。</p><div class="modal-actions">${button('close-modal', '取消', '', '', 'secondary')}<button class="primary" type="submit">${icon('plus')}创建任务 · +2 XP</button></div></form>`, 'new');
+  updatePlanPreview();
+}
+function updatePlanPreview() {
+  const form = $('#task-form'); if (!form) return;
+  try { const plan = taskPlan(Object.fromEntries(new FormData(form))); $('#plan-preview').textContent = `${plan.days} 天 · ${TIERS.find(t => t.id === plan.tier).name} · 原始额度 ${fmt(xp(plan.e))} XP`; } catch(error) { $('#plan-preview').textContent = error.message; }
+}
+function detailContents(t) {
+  const plan = t.frozen ?? taskPlan(t), completed = t.completion?.active;
+  const previewDate = completed ? t.completion.date : t.deadline < today() ? today() : t.deadline;
+  const est = estimate(state, t, previewDate);
+  const activeXP = state.ledger.filter(e => e.owner === t.id && e.active).reduce((a, e) => a + e.actual, 0), cancelledQuota = t.progress.filter(p => !p.active && p.retained).reduce((sum, p) => sum + state.ledger.find(e => e.id === p.entry).normal, 0);
+  return `${modalHead('PROJECT JOURNAL', t.title)}<div class="detail-status"><span class="status ${completed ? 'green' : ''}">${taskStatus(t)}</span><span>${plan.days} 天 · ${TIERS.find(x => x.id === plan.tier).name} · ${plan.importance === 'core' ? '核心' : plan.importance === 'important' ? '重要' : '常规'}</span></div><p class="detail-goal">${escape(t.goal || '为这份成果留下记录。')}</p><div class="detail-numbers"><div><span>原始额度 E</span><b>${fmt(xp(plan.e))}</b></div><div><span>实际已得 XP</span><b>${fmt(xp(activeXP))}</b></div><div><span>有效持续日</span><b>${Math.min(10, progressDays(t, previewDate))}<small> / 10</small></b></div></div><p class="field-hint">${t.frozen ? '原计划、额度与重要性已锁定' : '尚未推进，原计划仍可修改'} · ${t.start} → ${t.target}<br>推进正常额度已分配 ${fmt(xp(allocatedProgress(state, t)))} / ${fmt(xp(plan.e * .5))} XP${cancelledQuota ? `<br>其中 ${fmt(xp(cancelledQuota))} XP 额度因删除已撤回，保留痕迹，不返流完成奖。` : ''}</p>
+    ${completed ? `<div class="settlement">${icon('check')} ${t.completion.date} 完成 · 冻结 C=${(t.completion.c / 100).toFixed(2)}<p>${escape(t.completion.note || '这份成果已经交付。')}</p></div>` : `<div class="plan-preview">假设 ${previewDate} 完成，当前已知持续日 P=${est.p}%，目标窗口下一次 C=${(est.c / 100).toFixed(2)}；正常完成分配预估 ${fmt(xp(est.allocation))} XP。<small>未来推进与完成计数尚不确定，补记折扣另计，以实际结算为准。</small></div>`}
+    ${t.stages.length ? `<section class="detail-section"><h3>阶段清单 <span>独立于经验分配</span></h3>${t.stages.map(s => `<label class="stage-row"><input type="checkbox" data-stage="${s.id}" data-task="${t.id}" ${s.done ? 'checked' : ''}>${escape(s.name)}</label>`).join('')}</section>` : ''}
+    ${!t.archived && (!completed || t.completion.date > t.start) ? `<section class="detail-section"><h3>${completed ? '补录完成日前的真实成果' : '记录一次推进'}</h3><form id="progress-form" data-task="${t.id}"><div class="form-row"><label class="field">实际推进日期<input type="date" name="date" value="${completed ? addDays(t.completion.date, -1) : today()}" min="${t.start}" max="${completed ? addDays(t.completion.date, -1) : today()}" required></label><label class="field">成果说明<input name="note" required maxlength="4000" placeholder="这一次具体完成了什么？"></label></div><button type="submit" class="secondary">${icon('path')}${completed ? '补录历史推进' : '保存推进'}</button></form><p class="field-hint">${completed ? '补录不重新预付；新增有效持续日才补发相应折扣增量。' : '同日不同成果可多次记录；同一成果只记一次。'}</p></section>` : ''}
+    ${!completed && !t.archived ? `<section class="detail-section"><h3>最终交付</h3><form id="complete-form" data-task="${t.id}"><div class="form-row"><label class="field">实际完成日期<input type="date" name="date" value="${today()}" min="${t.start}" max="${today()}" required></label><label class="field">完成说明<input name="note" placeholder="记录这份最终成果" maxlength="4000"></label></div><button type="submit" class="primary">${icon('check')}完成并结算</button>${t.completion?.undoneOn === today() ? button('restore-completion', `恢复原 ${t.completion.date} 完成记录`, 'restore', `data-task="${t.id}"`, 'text-button') : ''}</form></section>` : ''}
+    <section class="detail-section"><h3>推进历史</h3>${t.progress.length ? t.progress.map(p => `<div class="progress-entry ${p.active ? '' : 'cancelled'}"><div><span>${p.date} ${p.active ? '' : '· 已删除'}</span><p>${escape(p.note)}</p><small>实际 ${fmt(xp(state.ledger.find(e => e.id === p.entry).actual))} XP${p.active ? '' : ' 已撤回'}</small></div>${p.active ? button('delete-progress', '删除', 'delete', `data-task="${t.id}" data-progress="${p.id}"`, 'text-button') : ''}</div>`).join('') : '<p class="muted">还没有推进记录。</p>'}</section>
+    <details class="detail-section"><summary>修改任务信息 / 延期</summary><form id="edit-task-form" data-task="${t.id}"><label class="field">任务名称<input name="title" value="${escape(t.title)}" required maxlength="160"></label><label class="field">成果标准<textarea name="goal" rows="2">${escape(t.goal)}</textarea></label><label class="field">当前截止日期<input type="date" name="deadline" value="${t.deadline}" min="${t.start}" required></label>${!t.frozen ? `<div class="form-row"><label class="field">原计划开始<input name="start" type="date" value="${t.start}" required></label><label class="field">原目标日期<input name="target" type="date" value="${t.target}" required></label></div><label class="field">重要性<select name="importance">${[['normal', '常规'], ['important', '重要'], ['core', '核心']].map(([id, title]) => `<option value="${id}" ${t.importance === id ? 'selected' : ''}>${title}</option>`).join('')}</select></label>` : ''}<button class="secondary" type="submit">保存修改</button></form></details>
+    <div class="detail-actions">${completed ? `${button('undo-complete', '撤销完成', 'history', `data-task="${t.id}"`, 'secondary')}${button(t.hidden ? 'restore-task' : 'hide-task', t.hidden ? '取消隐藏' : '隐藏已完成', 'archive', `data-task="${t.id}"`, 'secondary')}` : button(t.archived ? 'restore-task' : 'archive-task', t.archived ? '恢复任务' : '放弃并归档', 'archive', `data-task="${t.id}"`, 'secondary')}${button('delete-task', '删除整个任务', 'delete', `data-task="${t.id}"`, 'danger-text')}</div>`;
+}
+function taskDetail(id) { const task = state.tasks[id]; if (!task || task.deleted) return; openModal(detailContents(task), 'task'); $('#modal').dataset.task = id; }
+function refreshTaskDialog() {
+  const modal = $('#modal'); if (!modal.open || modal.dataset.kind !== 'task') return;
+  const t = state.tasks[modal.dataset.task]; if (!t || t.deleted) { closeModal(); return; }
+  const scroll = modal.scrollTop, values = [...modal.querySelectorAll('form')].map(f => [f.id, Object.fromEntries(new FormData(f))]);
+  const focus = document.activeElement, name = focus?.name, formId = focus?.form?.id;
+  modal.innerHTML = detailContents(t);
+  for (const [id, fields] of values) for (const [name, value] of Object.entries(fields)) { const field = document.getElementById(id)?.elements.namedItem(name); if (field && !(field.type === 'date' && (field.min && value < field.min || field.max && value > field.max))) field.value = value; }
+  modal.scrollTop = scroll;
+  if (name && formId) document.getElementById(formId)?.elements.namedItem(name)?.focus({ preventScroll: true });
+}
+async function exportBackup() {
+  await queue;
+  const contents = backupText(state), name = `Rater-Tracker-${today()}-backup.json`;
+  let exported;
+  if (window.desktop) exported = await window.desktop.exportBackup(contents, name);
+  else { const url = URL.createObjectURL(new Blob([contents], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); exported = true; }
+  if (exported) { await save({ type: 'settings', lastExport: true }, '备份已导出'); toast('完整备份已导出，冻结参数与取消历史一并保存。'); }
+  return exported;
+}
+async function importBackup() {
+  let contents;
+  if (window.desktop) contents = await window.desktop.importBackup();
+  else {
+    contents = await new Promise(resolve => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.onchange = async () => resolve(input.files[0] ? await input.files[0].text() : null); input.oncancel = () => resolve(null); input.click(); });
+  }
+  if (!contents) return;
+  const restored = parseBackup(contents), dates = Object.keys(restored.ratings).filter(date => Object.keys(restored.ratings[date]).length).sort(), taskCount = Object.values(restored.tasks).filter(t => !t.deleted).length;
+  confirmAction('从这份完整备份恢复？', `备份中有 <b>${dates.length}</b> 天评分、<b>${taskCount}</b> 个任务、<b>${restored.ledger.length}</b> 笔结算，有效经验 <b>${fmt(xp(totalUnits(restored)))} XP</b>。<br>评分日期范围：${dates.length ? `${dates[0]} — ${dates.at(-1)}` : '无评分'}。<br><br>先导出当前数据的备份，成功后才替换全部数据。`, async () => {
+    try {
+      if (!await exportBackup()) { toast('当前数据备份未导出，恢复尚未执行。'); return; }
+      await queue;
+      const replacement = structuredClone(restored); replacement.revision = state.revision + 1;
+      await store.write(replacement, state.revision); state = replacement; drafts.clear();
+      ++animationToken; cancelAnimationFrame(numberFrame); clearTimeout(celebrationTimer); $('#growth').getAnimations({ subtree: true }).forEach(a => a.cancel()); $('#particles').replaceChildren(); $('#growth').classList.remove('level-up', 'level-down');
+      applyMotion(); growthStatic(); renderContent(false); toast('完整恢复成功。历史奖励保持原值。');
+    } catch (error) { toast(error.message, true); }
+  }, '备份当前数据并恢复');
+}
+
+document.addEventListener('click', async event => {
+  const b = event.target.closest('[data-action]'); if (!b || b.disabled) return;
+  const action = b.dataset.action, taskId = b.dataset.task;
+  try {
+    switch (action) {
+      case 'navigate': page = b.dataset.page; renderContent(); $('#content').scrollIntoView({ block: 'start' }); break;
+      case 'rate': await save({ type: 'rate', dimension: b.dataset.dimension, stars: Number(b.dataset.stars), date: chosenDate, ...(drafts.has(`${chosenDate}/${b.dataset.dimension}`) ? { note: drafts.get(`${chosenDate}/${b.dataset.dimension}`) } : {}) }, '评分已保存'); break;
+      case 'clear-rating': confirmAction(`清空${LABELS[b.dataset.dimension]}评分？`, '这会撤回该项全部实际经验和星数，之后重新补记按新的录入时间结算。', () => { drafts.delete(`${chosenDate}/${b.dataset.dimension}`); save({ type: 'rate', dimension: b.dataset.dimension, stars: null, date: chosenDate }, '评分已清空'); }, '清空评分', true); break;
+      case 'reference': openModal(`${modalHead('RATING GUIDE', `${LABELS[b.dataset.dimension]} · 评分参照`)}<p class="reference-text">${escape(state.settings.references[b.dataset.dimension])}</p>${button('close-modal', '知道了', '', '', 'primary')}`, 'reference'); break;
+      case 'previous-date': chosenDate = addDays(chosenDate, -1); month = chosenDate.slice(0, 7); renderContent(); break;
+      case 'next-date': chosenDate = addDays(chosenDate, 1); month = chosenDate.slice(0, 7); renderContent(); break;
+      case 'calendar-date': chosenDate = b.dataset.date; renderContent(); break;
+      case 'previous-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); month = d.toISOString().slice(0, 7); renderContent(); break; }
+      case 'next-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); month = d.toISOString().slice(0, 7); renderContent(); break; }
+      case 'task-filter': taskFilter = b.dataset.filter; renderContent(); break;
+      case 'trend-range': trendRange = Number(b.dataset.range); renderContent(); break;
+      case 'reward-tab': rewardTab = b.dataset.tab; renderContent(); break;
+      case 'badge-filter': badgeFilter = b.dataset.series; renderContent(); break;
+      case 'new-task': newTask(); break;
+      case 'task-detail': taskDetail(taskId); break;
+      case 'quick-progress': taskDetail(taskId); $('#progress-form')?.scrollIntoView({ block: 'center' }); $('#progress-form [name="note"]')?.focus(); break;
+      case 'quick-complete': taskDetail(taskId); $('#complete-form')?.scrollIntoView({ block: 'center' }); $('#complete-form [name="date"]')?.focus(); break;
+      case 'close-modal': closeModal(); break;
+      case 'delete-progress': confirmAction('删除这条推进？', '撤回该推进实际所得，必要时同步撤回持续奖励。历史或已完成的分配额度保留取消痕迹，不回流到完成奖。', async () => { await save({ type: 'deleteProgress', taskId, progressId: b.dataset.progress }, '推进已删除'); taskDetail(taskId); }, '删除推进', true); break;
+      case 'undo-complete': confirmAction('撤销这次完成？', '撤回这次完成及附属持续奖励，保留创建与有效推进所得；其他任务冻结系数保持。', async () => { await save({ type: 'undoComplete', taskId }, '完成已撤销'); taskDetail(taskId); }, '撤销完成'); break;
+      case 'restore-completion': await save({ type: 'complete', taskId, date: state.tasks[taskId].completion.date, note: state.tasks[taskId].completion.note }, '原完成记录已恢复'); break;
+      case 'archive-task': await save({ type: 'archive', taskId }, '任务已归档'); break;
+      case 'restore-task': await save({ type: 'restore', taskId }, '任务已恢复'); break;
+      case 'hide-task': await save({ type: 'hide', taskId }, '已完成任务已隐藏'); break;
+      case 'delete-task': confirmAction('删除整个任务？', '这会撤回全部有效创建、推进、完成及持续奖励，并回退完成数。这项操作不可恢复；可先导出备份。', () => save({ type: 'deleteTask', taskId }, '任务已删除'), '删除整个任务', true); break;
+      case 'badge-detail': { const badge = BADGES.find(b => b.id === b.dataset.badge), count = stats(state)[badge.series]; openModal(`${modalHead(`${seriesNames[badge.series]} / 第 ${badge.tier} 级`, badge.name)}<div class="badge-detail ${count >= badge.threshold ? 'earned' : 'locked'}"><img src="assets/badges/${badge.id}.svg" alt="${escape(badge.subject)}"><p>${escape(badge.subject)}</p><h3>${count >= badge.threshold ? '已经收入你的成长收藏' : `还差 ${(badge.threshold - count).toLocaleString()}${badge.series === 'tasks' ? ' 次有效完成' : ' 颗有效星星'}`}</h3><p>当前 ${count.toLocaleString()} / 门槛 ${badge.threshold.toLocaleString()}</p><small>徽章不另发经验；有效记录变化时同步获得或撤回。</small></div>${button('close-modal', '继续成长', '', '', 'primary')}`, 'badge'); break; }
+      case 'export': await exportBackup(); break;
+      case 'import': await importBackup(); break;
+      case 'open-data': await window.desktop.openData(); break;
+    }
+  } catch(error) { toast(error.message, true); }
+});
+document.addEventListener('input', event => {
+  const el = event.target;
+  if (el.classList.contains('rating-note')) drafts.set(`${el.dataset.date}/${el.dataset.dimension}`, el.value);
+  if (el.id === 'task-search') { taskQuery = el.value; renderContent(); }
+  if (el.closest('#task-form')) updatePlanPreview();
+});
+document.addEventListener('focusout', event => {
+  const el = event.target;
+  if (el.classList.contains('rating-note') && state.ratings[el.dataset.date]?.[el.dataset.dimension] && el.value !== state.ratings[el.dataset.date][el.dataset.dimension].note) save({ type: 'note', date: el.dataset.date, dimension: el.dataset.dimension, note: el.value }, '原因已保存');
+});
+document.addEventListener('change', event => {
+  const el = event.target;
+  if (el.id === 'rating-date') { if (el.value && el.value <= today()) { chosenDate = el.value; month = chosenDate.slice(0, 7); renderContent(); } }
+  if (el.id === 'motion-setting') save({ type: 'settings', motion: el.value }, '动效偏好已保存');
+  if (el.dataset.stage) save({ type: 'stage', taskId: el.dataset.task, stageId: el.dataset.stage, done: el.checked }, '阶段已更新');
+});
+document.addEventListener('submit', async event => {
+  event.preventDefault(); const form = event.target, values = Object.fromEntries(new FormData(form));
+  if (form.id === 'task-form') {
+    const id = uid();
+    await save({ ...values, type: 'createTask', id }, '任务已创建');
+    if (state.tasks[id]) { closeModal(); taskDetail(id); }
+  } else if (form.id === 'progress-form') {
+    const previous = state.revision; await save({ ...values, type: 'progress', taskId: form.dataset.task }, '推进已保存');
+    if (state.revision > previous) $('#progress-form [name="note"]').value = '';
+  } else if (form.id === 'complete-form') await save({ ...values, type: 'complete', taskId: form.dataset.task }, '成果已完成');
+  else if (form.id === 'edit-task-form') await save({ ...values, type: 'editTask', taskId: form.dataset.task }, '任务信息已保存');
+  else if (form.id === 'references-form') await save({ type: 'settings', references: values }, '评分参照已保存');
+});
+$('#modal').addEventListener('cancel', event => { event.preventDefault(); closeModal(); });
+$('#modal').addEventListener('click', event => { if (event.target === $('#modal')) { const rect = $('#modal').getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal(); } });
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) applyMotion(); });
+window.raterReload = async () => { state = validateState(await store.read()); growthStatic(); renderContent(); };
+window.raterReady = (async () => {
+  try {
+    store = await openStore(); state = validateState(await store.read());
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.1', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    applyMotion(); shell(); renderContent();
+    setInterval(() => { if (page === 'today' && chosenDate !== today() && !document.hidden && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
+  } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }
+})();
