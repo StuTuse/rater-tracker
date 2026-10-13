@@ -50,7 +50,7 @@ module.exports = function createAccountService(directory, safeStorage) {
       catch (error) { if (/credentials not found|no session/i.test(error.message)) return null; throw error; }
     },
     login: async (username, password) => {
-      if (typeof username !== 'string' || typeof password !== 'string' || username.length > 24 || password.length > 128) throw new Error('账号输入无效');
+      if (typeof username !== 'string' || typeof password !== 'string' || username.length > 25 || password.length > 128) throw new Error('账号输入无效');
       await restore(); checked(await auth.signInWithPassword({ username, password })); usernameLabel = username;
       const account = identity(await persist());
       if (!account) throw new Error('未获得账号身份');

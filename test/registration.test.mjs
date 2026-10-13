@@ -5,8 +5,14 @@ const values = { username: 'rater_test', email: 'test@example.com', password: 'S
 test('invalid registration never sends a verification request', async () => {
   let sent = 0;
   const registration = createRegistration({ signUp: async () => { sent++; } }, () => {});
-  for (const invalid of [{ ...values, email: 'bad' }, { ...values, username: '中文账号' }, { ...values, password: 'short' }]) await assert.rejects(registration.begin(invalid));
+  for (const invalid of [{ ...values, email: 'bad' }, ...['中文账号','Rater_test','rater','1rater','rater.test','rater+test','rater@test','a'.repeat(26)].map(username => ({...values,username})), { ...values, password: 'short' }]) await assert.rejects(registration.begin(invalid));
   assert.equal(sent, 0);
+});
+test('signup accepts exact backend username boundaries before sending any code', async () => {
+  const sent = [];
+  const registration = createRegistration({ signUp: async params => { sent.push(params.username); return { data: { verifyOtp: async () => ({ data: {} }) } }; } }, () => ({ id: '1' }));
+  for (const username of ['abc123', 'a'.repeat(25), 'rater_test-01']) await registration.begin({ ...values, username });
+  assert.deepEqual(sent, ['abc123', 'a'.repeat(25), 'rater_test-01']);
 });
 test('wrong code can retry; identity appears only after verified signup and cannot replay', async () => {
   let identityCount = 0;

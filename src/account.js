@@ -22,6 +22,7 @@ export async function loginAccount(username, password) {
 export async function logoutAccount() { if (window.desktop) return window.desktop.accountLogout(); checked(await auth.signOut()); }
 let registration;
 export async function registerAccount(values) {
+  if (!/^[a-z][0-9a-z_-]{5,24}$/.test(values?.username ?? '')) throw new Error('账号需为 6～25 位小写字母、数字、_ 或 -，以小写字母开头');
   if (window.desktop) return window.desktop.accountRegister(values);
   registration = null;
   const data = checked(await auth.signUp(values));

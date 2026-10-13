@@ -88,9 +88,12 @@ else {
           const cloud=await window.desktop.accountSync({type:'pull'});
           const storage=await import('./src/storage.js');const core=await import('./src/core.js');
           const store=await storage.openStore(before.id);const state=await store.read();store.close();
-          return { login:true, synchronized:true, xp:core.totalUnits(state)/core.SCALE, cloudVersion:cloud.version, accountIsolated:before.id.length>0, passwordFormRemoved:!document.querySelector('#account-login'), sidebarAccount:document.querySelector('.account-entry-text strong').textContent===before.name, passwordMasked:document.querySelector('.account-entry-text>span').textContent.includes('••••'), accountDialog:document.querySelector('#modal').open && document.querySelector('#modal').dataset.kind==='account' };
+          await new Promise(resolve=>setTimeout(resolve,320));
+          const rect=document.querySelector('#modal').getBoundingClientRect();
+          return { login:true, synchronized:true, xp:core.totalUnits(state)/core.SCALE, cloudVersion:cloud.version, accountIsolated:before.id.length>0, passwordFormRemoved:!document.querySelector('#account-login'), sidebarAccount:document.querySelector('.account-entry-text strong').textContent===before.name, passwordMasked:document.querySelector('.account-entry-text>span').textContent.includes('••••'), accountDialog:document.querySelector('#modal').open && document.querySelector('#modal').dataset.kind==='account', accountDialogCentered:Math.abs(rect.x+rect.width/2-innerWidth/2)<2 && Math.abs(rect.y+rect.height/2-innerHeight/2)<2 };
         })()`);
         report.encryptedSession = safeStorage.isEncryptionAvailable() && (await fs.stat(path.join(app.getPath('userData'), 'account-session.bin'))).size > 0;
+        if (!report.accountDialogCentered) throw new Error('账号弹窗未居中');
         if (process.env.RATER_ACCOUNT_CLEAR_SMOKE === '1') {
           Object.assign(report, await window.webContents.executeJavaScript(`(async () => {
             const account=await window.desktop.accountCurrent();

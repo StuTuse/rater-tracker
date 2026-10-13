@@ -1,12 +1,12 @@
 const { randomUUID } = require('node:crypto');
-function checked(result) { if (result?.error) throw new Error(result.error.message || '注册未完成'); return result?.data ?? result; }
+function checked(result) { if (result?.error) throw new Error(/SignUpRequest\.Username/.test(result.error.message ?? '') ? '账号不符合云端规则，请返回注册页修改为 6～25 位小写字母、数字、_ 或 -，以小写字母开头，然后重新发送验证码' : result.error.message || '注册未完成'); return result?.data ?? result; }
 module.exports = function createRegistration(auth, verified) {
   let pending;
   return {
     begin: async values => {
       const { email, username, password } = values ?? {};
       if (typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('请输入有效邮箱');
-      if (typeof username !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_.:+@-]{4,23}$/.test(username)) throw new Error('账号需为 5～24 位英文、数字或 -_.:+@，以字母或数字开头');
+      if (typeof username !== 'string' || !/^[a-z][0-9a-z_-]{5,24}$/.test(username)) throw new Error('账号需为 6～25 位小写字母、数字、_ 或 -，以小写字母开头');
       if (typeof password !== 'string' || password.length < 8 || password.length > 32) throw new Error('密码需为 8～32 位');
       pending = null;
       const data = checked(await auth.signUp({ email, username, password }));
