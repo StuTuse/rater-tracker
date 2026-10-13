@@ -2,7 +2,11 @@
 
 最后更新：2026-10-14，香港时间。产品规范《最终方案》v1.19、视觉 v1.15（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.17**。
 
-## 最新任务 · GitHub 私有仓库接入完成
+## 最新任务 · 双端工作区已隔离，安卓移植进行中
+
+2026-10-14 用户明确授权隔离后持续完成安卓移植及操作验收。已创建 codex/windows-dev 与 codex/android-port 两个独立 worktree，main 保留原目录。实际路径与责任见 docs/工作区隔离登记.md。Windows 本轮负责隔离运行入口；40项工程检查和实际 native info 的独立 userData 路径验证通过，使用 npm run start:dev，不将正常开发快捷方式当作隔离入口。Android 端已建立原生工程并在模拟器安装运行，仍在移植／验收，最终状态请读安卓工作区的交接；本节不表示验收完成。共享模块与入口由当前聊天统一集成，未派遣其他聊天。
+
+## 前次任务 · GitHub 私有仓库接入完成
 
 2026-10-14 用户同意单仓库双应用工程＋独立工作区方案，要求首先上传项目到 GitHub 并设为 private。已新建 `https://github.com/StuTuse/rater-tracker`，从创建时即 PRIVATE，origin 为 `https://github.com/StuTuse/rater-tracker.git`。main 的 22 个既有提交与 18 个既有附注标签已上传，逐一比较远程引用与本地对象一致；默认分支 main、isEmpty=false、isPrivate=true。随后本次文档提交也同步到同一远程；应用版本保持 alpha.17，不创建新阶段标签。
 
@@ -18,7 +22,7 @@
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG 最近 W031（私有 GitHub）／W030（安卓工程隔离）／W029（当前应用）、正式方案，结算特别阅读 4～6 节，同步见 8.5。
+1. 读本文件、AGENTS、WORKLOG 最近 W032（worktree 与开发数据隔离）／W031（私有 GitHub）／W030（安卓工程隔离）／W029（当前应用）、正式方案，结算特别阅读 4～6 节，同步见 8.5。
 2. 阅读 `docs/数据契约.md`、`docs/alpha.17验收记录.md`、`docs/alpha.16验收记录.md`、`docs/启动短句出处.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。

@@ -160,7 +160,7 @@ CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md
 
 当前版本为 `0.1.0-alpha.17`，主分支 `main`，既有规划与预览附注标签保持。2026-10-14 用户授权接入 [GitHub 私有仓库 StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)，`origin` 为 `https://github.com/StuTuse/rater-tracker.git`；访问需要获授权的 GitHub 账号。源码、文档、锁文件与素材入库，安装包、个人数据、备份、私有配置及签名材料不入库。
 
-用户已同意单仓库双应用工程、共享规则与独立 Git worktree 方案，见 [双端工程与工作区隔离方案](docs/双端工程与工作区隔离草案.md)。当前可运行工程仍为 Windows；安卓工程与工作区隔离尚未实施。
+用户已同意单仓库双应用工程、共享规则与独立 Git worktree 方案，见 [双端工程与工作区隔离方案](docs/双端工程与工作区隔离草案.md)。当前可运行工程仍为 Windows；两个 worktree 与 Windows 开发数据隔离已建立，见 [隔离登记](docs/工作区隔离登记.md)；安卓工程正在独立工作区移植与验收，尚未完成。Windows 工作区使用 npm run start:dev 进入独立开发数据目录。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 

@@ -420,3 +420,9 @@
 首次 gh auth status 在沙箱报告无效，获准执行后登录有效；Node 子进程历史扫描受 EPERM 限制，获准只读执行后完成。首次 Git 直连 github.com:443 失败；读取 Windows 现有代理127.0.0.1:7897，命令级 http.proxy 的 ls-remote 成功。首个代理上传过程结束后检查远程仍为空，重新推送成功；main 的22个既有提交上传，18标签全部上传，19个远程引用与本地逐一匹配，默认分支main、isEmpty=false、PRIVATE保持。使用 `git -c http.proxy=http://127.0.0.1:7897 push --set-upstream origin main`、随后 `git -c http.proxy=http://127.0.0.1:7897 push origin --tags`，未改全局网络配置、未强推、未改历史或旧标签。
 
 负责 AGENTS、README、版本管理规范、隔离草案、交接与本日志，记录新授权及已接受的组织方式，本轮文档检查提交后同步 main。VERSION 保持alpha.17、无新标签；未改应用源码／数据、无应用测试／构建、无云端业务请求、无其他聊天派遣。下一步先建立 worktree、独立开发入口与数据隔离，再实施工程拆分及安卓完整移植；这些工程步骤尚未开始。
+
+## W032 · 2026-10-14 · 双端 worktree 与 Windows 开发数据隔离
+
+用户授权建立隔离后立即开始安卓移植。本轮已用 Codex 托管工具建立 windows-dev 和 android-port 两个 worktree，并分别使用 codex/windows-dev 与 codex/android-port 分支；main 原目录保持集成基线，未派遣／创建其他聊天。登记见 docs/工作区隔离登记.md。Windows 工作区只修改 electron/main.cjs、package 的 start:dev、scripts/windows-dev.mjs 及文档；依赖独立安装，现有同版本 Electron 运行时复制为本工作区的忽略依赖，不共用活动 node_modules。
+
+40项原工程检查通过；实际启动 Windows 开发应用，经原生 info 验证 userData 精确等于本 worktree 的 runtime-data/windows-dev，与个人正式目录不同，随后关闭测试窗口。普通启动与正式安装数据语义保持。无版本升级／新标签、无正式数据修改。Android 工程在另一工作区移植与实际 APK 验收中，尚未完成；共享模块由本聊天统一集成，后续并行 Windows 修改需先同步已集成的共享基线。

@@ -8,6 +8,7 @@ const smoke = process.argv.includes('--smoke') || accountSmoke;
 const isolatedAcceptance = process.argv.includes('--acceptance-hold');
 const smokeDirectory = path.join(root, 'runtime-data', 'desktop-smoke');
 if (smoke || isolatedAcceptance) app.setPath('userData', process.env.RATER_TEST_DATA ? path.resolve(process.env.RATER_TEST_DATA) : path.join(app.getPath('temp'), `rater-smoke-${Date.now()}`));
+else if (process.env.RATER_DEV_DIRECTORY) app.setPath('userData', path.resolve(process.env.RATER_DEV_DIRECTORY));
 else app.setPath('userData', path.join(app.getPath('appData'), 'RaterTracker'));
 app.setAppUserModelId('local.ratertracker.desktop');
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
