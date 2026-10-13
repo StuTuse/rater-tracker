@@ -9,12 +9,24 @@ export const LAUNCH_QUOTES = [
   { text:'我不再追求让人生完美，而是试着让它有趣。', author:'德鲁·休斯顿', source:'houston-2013' },
   { text:'你只需要做对一次。', author:'德鲁·休斯顿', source:'houston-2013' },
   { text:'想法不是一开始就完整的，它们会在实践中逐渐清晰。', author:'马克·扎克伯格', source:'zuckerberg-2017' },
-  { text:'你只需要开始。', author:'马克·扎克伯格', source:'zuckerberg-2017' }
+  { text:'你只需要开始。', author:'马克·扎克伯格', source:'zuckerberg-2017' },
+  { text:'给人生排好优先顺序。', author:'黄仁勋', source:'huang-caltech-2024' },
+  { text:'每一次挫折，都让我们增长本领、磨炼品格。', author:'黄仁勋', source:'huang-caltech-2024' },
+  { text:'机会还在别处，也可以自己创造一个。', author:'黄仁勋', source:'huang-caltech-2024' },
+  { text:'难题会让你认识自己的能力。', author:'苏姿丰', source:'su-mit-2026' },
+  { text:'让自己身边有能让你变得更好的人。', author:'苏姿丰', source:'su-mit-2026' },
+  { text:'去把它弄明白。', author:'苏姿丰', source:'su-mit-2026' },
+  { text:'专注能放大工作的效果。', author:'萨姆·奥特曼', source:'altman-success' },
+  { text:'学会独立思考。', author:'萨姆·奥特曼', source:'altman-success' },
+  { text:'相信指数增长，保持耐心，等待惊喜。', author:'萨姆·奥特曼', source:'altman-success' },
+  { text:'永远相信梦想的力量。', author:'雷军', source:'lei-whu-2015', language:'zh' },
+  { text:'我一定要去试一下。', author:'雷军', source:'lei-whu-2015', language:'zh' },
+  { text:'开开心心就好。', author:'雷军', source:'lei-whu-2015', language:'zh' }
 ];
 const quote = index => `${LAUNCH_QUOTES[index].text} —— ${LAUNCH_QUOTES[index].author}`;
-// 80 quiet encouragements, questions and attributed excerpts mixed together.
+// 92 quiet encouragements, questions and attributed excerpts mixed together.
 export const LAUNCH_LINES = [
-  // 1–10
+  // Original groups keep their order; new attributed excerpts are interspersed.
   '先做一件小事，今天就有了起点。',
   '今天有没有给真正想做的事留一点时间？',
   quote(0),
@@ -25,6 +37,7 @@ export const LAUNCH_LINES = [
   '你现在忙的事，还是自己想要的吗？',
   '普通的一天，也能留下一点进展。',
   '允许自己从不熟练开始。',
+  quote(10),
   // 11–20
   '事情不必很大，做成一点就好。',
   '今天写稿了吗？',
@@ -36,6 +49,8 @@ export const LAUNCH_LINES = [
   '有些答案，要动手以后才会出现。',
   '那件一直想开始的事，第一步是什么？',
   quote(6),
+  quote(13),
+  quote(16),
   // 21–30
   '不顺利的时候，先看看具体卡在哪里。',
   '今天锻炼了吗？',
@@ -47,6 +62,7 @@ export const LAUNCH_LINES = [
   '把问题问清楚，常常就走近了答案。',
   '你需要再努力一点，还是先休息一下？',
   '进展有时只是比昨天少一点困惑。',
+  quote(19),
   // 31–40
   '不必让每一天都成为值得展示的一天。',
   '今天好好睡觉了吗？',
@@ -58,6 +74,8 @@ export const LAUNCH_LINES = [
   '改变计划，不代表之前的路白走了。',
   '今天有没有发现一个值得继续追问的问题？',
   '好奇心可以从一件很小的事开始。',
+  quote(11),
+  quote(14),
   // 41–50
   '不确定的时候，可以先试一个小版本。',
   '今天好好学习了吗？',
@@ -69,6 +87,8 @@ export const LAUNCH_LINES = [
   '你可以保留自己的节奏。',
   '今天有没有为自己的选择承担一点责任？',
   quote(5),
+  quote(17),
+  quote(20),
   // 51–60
   '有余力的时候，再向前多走一点。',
   '今天交新朋友了吗？',
@@ -80,6 +100,7 @@ export const LAUNCH_LINES = [
   '留一点时间给没有标准答案的事情。',
   '你最近一次为自己感到满意，是因为什么？',
   '不用等到做得很好，才承认自己有进步。',
+  quote(12),
   // 61–70
   '把想做的事拆小一点，会更容易靠近。',
   '今天能不能先完成最重要的一小部分？',
@@ -91,6 +112,8 @@ export const LAUNCH_LINES = [
   '今天不用把所有事情都安排妥当。',
   '有没有一件事，可以用更简单的方式完成？',
   '做得少一点、清楚一点，也可以。',
+  quote(15),
+  quote(18),
   // 71–80
   '给自己留一点安静，听听真实的想法。',
   '如果没人评价，你还愿意做这件事吗？',
@@ -101,7 +124,8 @@ export const LAUNCH_LINES = [
   '今天有没有做一件会让明天轻松一点的事？',
   '暂时没有结果，也不妨碍继续观察和尝试。',
   '今天结束时，你想记住哪一个小瞬间？',
-  '留下一点完成，也留下一点期待。'
+  '留下一点完成，也留下一点期待。',
+  quote(21)
 ];
 export function chooseLaunchLine(previous, random = Math.random()) {
   const choices = LAUNCH_LINES.filter(line => line !== previous);
