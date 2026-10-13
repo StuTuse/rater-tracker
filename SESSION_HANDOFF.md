@@ -1,15 +1,17 @@
 # SESSION_HANDOFF · 跨会话开发交接
 
-最后更新：2026-10-13，香港时间。产品规范《最终方案》v1.12、视觉 v1.8（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.10**。
+最后更新：2026-10-13，香港时间。产品规范《最终方案》v1.13、视觉 v1.9（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.11**。
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG 最近 W022、正式方案，结算特别阅读 4～6 节，同步见 8.5。
-2. 阅读 `docs/数据契约.md`、`docs/alpha.10验收记录.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.9 与 0.1 验收记录。
+1. 读本文件、AGENTS、WORKLOG 最近 W023、正式方案，结算特别阅读 4～6 节，同步见 8.5。
+2. 阅读 `docs/数据契约.md`、`docs/alpha.11验收记录.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.10 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
 
 ## 当前真实状态
+
+alpha.11最新：src/growth-stages.js统一十阶段映射／SVG主体／升级编排。Lv.1～9，随后每十级，90～MAX为阶段十，MAX增加星座环；十个独立主体与十种流动／升级，金色层次与框体渐进丰富。paintStage由当前有效等级绘制，实际保存后升级才播放；退级回退、重载静态，不改门槛和账本。38项工程、9项十阶段真实浏览器、11项flow、5项MAX通过；最终EXE十SVG布局／computed流动及既有账号动效通过，alpha.10→alpha.11升级保持11XP／revision1／路径、快捷方式和单实例，隔离副本卸载。SVG显式fill=none避免开放曲线黑填充；静态窄屏检查等待有限升级动画结束，循环不等待。未测60fps或完整原生逐阶段鼠标操作。
 
 ### CloudBase 账号登录与同步 · 2026-10-13
 
@@ -35,16 +37,21 @@ alpha.8最新：用户要求删除设置账号管理卡片，账号操作统一�
 | 界面 | 五页与任务详情；原位更新、局部星级反馈；应用内下拉／月历、横向选中滑块、双向弹窗／折叠动画，隐藏系统滚动条；26 项控件与 12 项交互条件 |
 | 资产 | 48 个逐枚生图的透明 PNG 徽章、底纹与两张插画；旧 SVG 参考＋应用图标；资源与总览检查 |
 | 动效 | 金色液态光层、增长／回退／跨级／MAX；连续显示位置接续；偏好与隐藏暂停；11 项专项与 5 项 MAX 条件 |
+| 十阶段成长 | 十个独立SVG等级主体、十种流动和升级编排；阶段回退与MAX最终形态；2项边界单元＋9项浏览器＋最终桌面渲染 |
 | 桌面 | 本地 app 来源、隔离 preload、单实例、JSON 文件接口；实际打包窗口和截图 |
 | 账号与同步 | 官方用户名密码登录；未登录与账号隔离、自动快照同步、冲突保留、加密会话；5 项同步测试＋真实云端／桌面检查 |
 | 账号组件 | 稳定登录／注册／验证码面板与草稿、420ms外框变形、消散后清理；大写开头与不区分大小写认证；16项动效专项和5项注册测试 |
 | 本机账号清空 | 最新备份＋暂停同步＋revision保护；只清当前本机账号，云端快照实际保持，取消导出不清空 |
-| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.9 → alpha.10 升级数据保持；隔离测试副本已卸载 |
+| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.10 → alpha.11 升级数据保持；隔离测试副本已卸载 |
 | 尚未覆盖 | 以后格式迁移、Windows 原生文件对话框全程点击、60 fps 实测、长期大数据性能、完整人工体验验收 |
 
-安装包：`release/Rater-Tracker-0.1.0-alpha.10-Setup.exe`，203,155,181 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.10验收记录.md`。
+安装包：`release/Rater-Tracker-0.1.0-alpha.11-Setup.exe`，203,241,874 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.11验收记录.md`。
 
 ## 文件责任与协作
+
+alpha.11负责growth-stages／app／styles、阶段单元与浏览器脚本、check／Electron smoke和版本／规范文档。未改core／storage／账号认证／云端SDK／SQL／生图；未派遣其他会话。原账号动效保持，真实邮箱注册、长期数据／性能仍待后续。当前工作范围结束，按实际反馈继续。
+
+本轮专用account-motion／account-regression／growth-stages浏览器和自建4173预览服务已关闭。后续预览需重新npm run dev；用户应用不提供热更新，退出后重新打开开发验收快捷方式。
 
 alpha.10本轮负责app／新增modal／username／styles、account客户端与原生account／registration、Electron smoke、账号UI／动效脚本、注册单元、数据契约与版本／规范／交接。未改core／storage／云端SDK／SQL／生图或云端身份配置；没有派遣会话。真实邮箱注册、云端同步与永久删除旧测试账号本轮未操作。
 
@@ -110,6 +117,9 @@ node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component run-code --filename=scripts/account-ui-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=account-motion run-code --filename=scripts/account-motion-acceptance.cjs
 & .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.9-Setup.exe'
+node node_modules/@playwright/cli/playwright-cli.js -s=growth-stages run-code --filename=scripts/stages-acceptance.cjs
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.10-Setup.exe'
+node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist
 ```
 
 安装验收脚本检测已有用户安装则停止；不为此自动卸载已有版本。源码路径含 `&`，工具入口直接经 Node 启动，避免常规 Windows .cmd 垫片解析错误。沙箱可能阻止 Node 子进程、缓存写入或下载；需要时按实际错误使用受审查的执行权限，不改写工程去关闭安全隔离。
@@ -119,6 +129,8 @@ node node_modules/@playwright/cli/playwright-cli.js -s=account-motion run-code -
 `scripts/assets.mjs` 从权威清单生成徽章元数据和各个明确手绘路径；设计迭代应同步生成源，防止重跑覆盖资产。`analysis/` 保留原规划结果，本次未重跑。
 
 ## 检查与后续
+
+alpha.11当前：38/38，9项阶段、11项flow及5项MAX通过。stages脚本用核心真实任务事务生成经验，再通过真实评分保存触发十个目的阶段的升级；撤回退级、静态重载、MAX阶段十、390px稳定布局、柔和／关闭通过。最终桌面包三个新增阶段检查与既有账号动效通过，安装升级通过。默认dist下载连接超时，使用本机同版本Electron成功打包；具体证据与边界见alpha.11验收。十图总览是验收临时视图，不是新增产品页面。
 
 alpha.9当前：35/35；用户错误精确对照旧客户端与云端regex，新增大写／5位／不支持标点／26位不发请求、6／25位及_-合规通过入口的回归。Playwright account-centered 检查桌面／窄屏登录和长注册居中、无横向溢出、共同dialog时长及既有退出／清空条件通过（注册传输模拟）。最终alpha.9真实账号登录／云同步11XP／v1、密码掩码、加密会话及两轴中心偏差<2px通过。未重测安装升级、真实注册收码至成功仍待用户复验；历史alpha.8升级结果不能推广为本轮已测。
 
@@ -138,11 +150,11 @@ alpha.7当前：33项检查通过；账号UI真实鼠标／键盘与窄屏检查
 
 ## 版本状态
 
-`VERSION`／package／锁文件为 `0.1.0-alpha.10`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.10`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
+`VERSION`／package／锁文件为 `0.1.0-alpha.11`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.11`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
 alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，alpha.4 提交 3ba94e1；alpha.5 统一应用内控件与二级界面动效，具体当前提交以 Git 查询为准。
 
-最近工作对应 WORKLOG **W022**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
+最近工作对应 WORKLOG **W023**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
 
 ## alpha.2 素材补充
 
