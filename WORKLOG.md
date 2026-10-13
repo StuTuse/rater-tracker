@@ -467,3 +467,8 @@ Android新头像布局后控件26复验通过；原生后台检查发现WebView�
 源码检查点eb83ea2已上传私有codex/android-port，并快进集入main后推送；Windows工作区快进同步该共享基线，47检查通过。回读GitHub PRIVATE／isPrivate=true。最终账号12条件补查通过，localStorage／sessionStorage均无明文JWT。最终release APK签名verify通过，98,107,848字节，SHA256 4aba3af2d523e2cd8875357615f576c696a5f0269b88c0f74f2f2cacbbb709c3，复制主目录release/android及SHA256.txt（忽略）。
 
 最终包重新发送注册验证码，SDK已进入验证页；QQ只读仍是旧邮件列表，已再次请用户手动刷新或提供这次新码。当前只能标“可安装预览／邮箱验证待完成”，没有Android完成标签。工作区保留，未归档签名／工具链／模拟器。等待码期间不重建／重载安卓页面，以免丢失内存挑战。
+
+
+## W038 · 2026-10-14 · 最终同步核对与邮箱阻塞
+
+main、codex/android-port、codex/windows-dev 均为 b9e7684，三处工作区干净。再次只读检查已打开 QQ 邮箱，仍仅三封旧 CloudBase 验证邮件，没有可用新码；06:20 核对时上一轮 05:44 后发送的挑战已超过10分钟。未反复发码，未重载当前安卓验证页。QQ 两次激活均 failed to activate captured window，按电脑操作恢复规则停止输入，需用户刷新收件箱／提供新码后重新发送一次并完成注册验收。APK、签名和其他验收结果保持W037，尚无完整验收完成标签。
