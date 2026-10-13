@@ -56,3 +56,18 @@ test('download cannot overwrite newer input; explicit restore does not grant rew
   assert.equal(result.meta.dirty, false); assert.equal(result.meta.inFlight, null);
   a.close();
 });
+
+test('clearing one local account is revision guarded and preserves guest and other accounts', async () => {
+  const a = await openStore('clear-target'), other = await openStore('clear-other'), guest = await openStore();
+  await a.write(rating(await a.read()), 0); await other.write(rating(await other.read(), 5), 0);
+  const guestBefore = await guest.read(), otherBefore = await other.read();
+  await a.beginPush(); await a.markConflict(2);
+  await assert.rejects(a.clearAccount(0)); assert.equal(totalUnits(await a.read()), 11e6);
+  await a.clearAccount((await a.read()).revision);
+  assert.equal(totalUnits(await a.read()), 0);
+  const cleared = await a.readSync(); assert.equal(cleared.meta.dirty, false); assert.equal(cleared.meta.inFlight, null); assert.equal(cleared.meta.conflict, null);
+  assert.deepEqual(await guest.read(), guestBefore); assert.deepEqual(await other.read(), otherBefore);
+  await assert.rejects(guest.clearAccount(guestBefore.revision));
+  const incoming = rating(createState()); await a.acceptPull(incoming, 2, 0); assert.equal(totalUnits(await a.read()), 11e6);
+  a.close(); other.close(); guest.close();
+});

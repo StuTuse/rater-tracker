@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.7，账号浮层与邮箱注册预览版。** 左下角账号入口、登录／注册及账号中心沿用统一黄色风格与反馈。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.8，统一账号管理与本机清空预览版。** 账号操作统一放在左下角浮层，设置不再显示账号卡片。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.7-Setup.exe](release/Rater-Tracker-0.1.0-alpha.7-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.8-Setup.exe](release/Rater-Tracker-0.1.0-alpha.8-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -34,7 +34,7 @@
 npm ci
 npm start                 # Electron 独立窗口，正常用户数据
 npm run dev               # 浏览器预览 http://127.0.0.1:4173
-npm test                  # 25 项业务＋5 项同步＋3 项注册流程测试
+npm test                  # 25 项业务＋6 项同步／本机清空＋3 项注册流程测试
 npm run check             # 版本、语法、51 张独立素材、业务测试
 npm run build             # Windows x64 可运行目录 release/win-unpacked
 npm run dist              # Windows x64 NSIS 安装包，不发布
@@ -92,13 +92,15 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 
 alpha.5 历史验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源，见 [alpha.5 验收](docs/alpha.5验收记录.md)。alpha.6 检查为 30 项业务／同步测试、真实账号与云端、最终桌面和安装升级，见 [alpha.6 验收](docs/alpha.6验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
 
-## 账号登录、注册与同步（alpha.7）
+## 账号登录、注册与同步（alpha.8）
 
 点击左下角头像入口，弹出登录／注册浮层；已有账号输入账号密码登录。选择“注册账号”，填写账号、邮箱、密码及确认密码，发送并填写邮箱验证码后登录。邮箱认证已开启；已有邮箱可能直接登录已有账号。可以继续在 CloudBase 控制台创建账号，密码重置仍在控制台完成。不要输入腾讯云管理账号密码。左下角密码为固定掩码，关闭浮层会清空密码输入。
 
 未登录记录保留在原位置；各账号独立保存。若要同步此前记录，登录后使用“将未登录记录复制到此账号”，先导出当前账号备份。应用打开期间自动同步，也可立即同步。两台离线设备修改会提示冲突；先备份再选择云端，不自动合并奖励账本。
 
-桌面会话系统加密保存，退出返回未登录数据；导出不包含凭证。服务停服或断网仍可本机使用。首版快照容量限 4 MiB，浏览器／手机登录未交付。账号浮层与新增注册检查见 [alpha.7 验收](docs/alpha.7验收记录.md)；真实邮箱收码至注册完成仍待用户实测。
+所有账号操作在左下角浮层内，设置页不再提供重复入口。“退出账号”保留本机账号记录；“清空本机账号数据”先导出完整备份，再删除当前账号的本机快照／同步缓存并退出，云端、未登录记录与其他账号不受影响。取消导出就取消清空；未同步改动需从导出的备份找回。重新登录可从云端恢复。登录／注册表单还提供“清空输入”。
+
+桌面会话系统加密保存，退出返回未登录数据；导出不包含凭证。服务停服或断网仍可本机使用。首版快照容量限 4 MiB，浏览器／手机登录未交付。统一入口与清空检查见 [alpha.8 验收](docs/alpha.8验收记录.md)；真实邮箱收码至注册完成仍待用户实测。
 
 开发／验收新增命令：
 
@@ -108,6 +110,10 @@ node cloud/build.mjs
 node cloud/migrate.cjs
 node cloud/account-acceptance.cjs
 node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
+# 仅使用隔离临时账号检查清空与云端保持；测试备份自动保存在隔离数据目录
+$env:RATER_ACCOUNT_CLEAR_SMOKE='1'
+node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
+Remove-Item Env:RATER_ACCOUNT_CLEAR_SMOKE
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component open http://127.0.0.1:4173
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component run-code --filename=scripts/account-ui-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component close
@@ -119,9 +125,9 @@ CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.9](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.10](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
-本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.7`。未配置 GitHub 远程或推送。
+本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.8`。未配置 GitHub 远程或推送。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 

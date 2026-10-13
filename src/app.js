@@ -22,9 +22,6 @@ function refreshAccountIdentity() {
   if ($('#account-entry-slot')) updateDOM($('#account-entry-slot'), accountIdentity());
   if ($('#modal').dataset.kind === 'account' && $('#sync-status')) $('#sync-status').textContent = syncStatus;
 }
-function accountPanel() {
-  return `<section class="panel account-panel"><h2>账号与同步</h2><p class="field-hint">${account ? escape(syncStatus) : '未登录时也可以离线记录。登录后启用云端同步。'}</p>${button('account-open', account ? '打开账号中心' : '登录 / 注册', 'account', '', 'secondary')}</section>`;
-}
 function openAccountDialog(mode) {
   accountMode = account ? 'profile' : mode ?? 'login';
   let contents;
@@ -36,6 +33,7 @@ function openAccountDialog(mode) {
     const fields = `<label class="field">账号<input name="username" autocomplete="username" placeholder="输入账号" required minlength="5" maxlength="24" ${registering ? 'pattern="[A-Za-z0-9][A-Za-z0-9_.:+@\\-]{4,23}"' : ''}></label>${registering ? '<label class="field">邮箱<input name="email" type="email" autocomplete="email" placeholder="用于接收注册验证码" required maxlength="254"></label>' : ''}<label class="field">密码<input name="password" type="password" autocomplete="${registering ? 'new-password' : 'current-password'}" placeholder="${registering ? '8～32 位密码' : '输入密码'}" required ${registering ? 'minlength="8" maxlength="32"' : 'maxlength="128"'}></label>${registering ? '<label class="field">确认密码<input name="confirmation" type="password" autocomplete="new-password" placeholder="再次输入密码" required minlength="8" maxlength="32"></label>' : ''}`;
     contents = `${modalHead('', verifying ? '验证邮箱' : registering ? '创建账号' : '欢迎回来')}${tabs}<div class="account-dialog-intro"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><p>${verifying ? '完成邮箱验证，即可开始同步。' : registering ? '创建账号，让成长记录随你同行。' : '登录账号，继续你的成长手记。'}</p></div>${verifying ? `<p class="field-hint">验证码已发送至 ${escape(registrationChallenge?.email)}。</p><form id="account-verify"><label class="field">邮箱验证码<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4,8}" required maxlength="8" placeholder="输入邮箱中的验证码"></label><p class="account-form-error" role="alert"></p><button class="primary account-submit" type="submit">验证并登录</button></form>${button('account-register-tab', '重新填写 / 发送验证码', '', '', 'text-button account-back')}` : `<form id="account-${registering ? 'register' : 'login'}">${fields}<p class="account-form-error" role="alert"></p><button class="primary account-submit" type="submit">${registering ? '发送验证码' : '登录'}</button></form>`}<p class="account-privacy field-hint">${registering || verifying ? '验证成功后创建账号并登录；已有邮箱可能直接登录已有账号。' : '使用应用账号登录。忘记密码可在 CloudBase 控制台重置。'} 密码不会保存到成长记录或显示为明文。</p>`;
   }
+  contents += account ? `<div class="account-session-clear">${button('account-clear-data', '清空本机账号数据', '', '', 'text-button')}<p class="field-hint">先备份再退出并清空当前账号的本机副本；云端记录保留。</p></div>` : accountMode !== 'verify' ? button('account-clear-input', '清空输入', '', '', 'text-button account-back') : '';
   openModal(contents, 'account');
   if (!account) $('#modal input')?.focus({ preventScroll: true });
 }
@@ -289,7 +287,7 @@ function rewardsPage() {
   return header('GROWTH / 奖励中心', '奖励中心', '') + `<div class="summary-grid"><div><span>收集的徽章</span><strong>${obtained.length}<small> / 48</small></strong></div><div><span>有效星数</span><strong>${s.stars.toLocaleString()}</strong></div><div><span>完成的成果</span><strong>${s.tasks}</strong></div><div><span>完整记录天数</span><strong>${s.completeDays}</strong></div></div><div class="section-title"><h2>下一份成果的完成系数</h2><span>各量级独立 · 以实际结算为准</span></div>${coefficientCards()}<div class="toolbar reward-tabs"><div class="segmented">${[['badges', '徽章收藏'], ['ledger', '经验明细'], ['review', '周期回顾'], ['rules', '奖励规则']].map(([id, label]) => button('reward-tab', label, '', `data-tab="${id}"`, rewardTab === id ? 'selected' : '')).join('')}</div></div>${rewardTab === 'badges' ? `<div class="badge-filters">${[['all', '全部'], ...Object.entries(seriesNames)].map(([id, label]) => button('badge-filter', label, '', `data-series="${id}"`, badgeFilter === id ? 'chip selected' : 'chip')).join('')}</div>${badgeCards()}` : rewardTab === 'ledger' ? `<section class="panel"><p class="field-hint">共 ${state.ledger.length} 笔 · 显示最近 200 笔；完整历史随 JSON 备份保留。</p>${state.ledger.length ? ledgerTable([...state.ledger].reverse().slice(0, 200)) : empty('暂无经验明细', '保存评分或记录任务后，在这里查看明细。', '', 'ledger')}</section>` : rewardTab === 'rules' ? rules() : periodReview()}`;
 }
 function settingsPage() {
-  return header('YOUR SPACE / 设置', '设置', '') + accountPanel() + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新保留数据。应用关闭后不发送提醒。</p></section></div></div>`;
+  return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新保留数据。应用关闭后不发送提醒。</p></section></div></div>`;
 }
 function renderContent(preserveInputs = true, animateChanges = false) {
   const referenceDraft = preserveInputs && $('#references-form') ? Object.fromEntries(new FormData($('#references-form'))) : null;
@@ -410,13 +408,13 @@ function refreshTaskDialog() {
   modal.scrollTop = scroll;
   if (name && formId) document.getElementById(formId)?.elements.namedItem(name)?.focus({ preventScroll: true });
 }
-async function exportBackup() {
+async function exportBackup(recordExport = true) {
   await queue;
   const contents = backupText(state), name = `Rater-Tracker-${today()}-backup.json`;
   let exported;
   if (window.desktop) exported = await window.desktop.exportBackup(contents, name);
   else { const url = URL.createObjectURL(new Blob([contents], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); exported = true; }
-  if (exported) { await save({ type: 'settings', lastExport: true }, '备份已导出'); toast('完整备份已导出，冻结参数与取消历史一并保存。'); }
+  if (exported) { if (recordExport) await save({ type: 'settings', lastExport: true }, '备份已导出'); toast('完整备份已导出，冻结参数与取消历史一并保存。'); }
   return exported;
 }
 async function importBackup() {
@@ -446,9 +444,29 @@ document.addEventListener('click', async event => {
     if (action === 'account-open') { openAccountDialog(); return; }
     if (action === 'account-login-tab') { registrationChallenge = null; openAccountDialog('login'); return; }
     if (action === 'account-register-tab') { registrationChallenge = null; openAccountDialog('register'); return; }
+    if (action === 'account-clear-input') { $('#modal form')?.reset(); $('#modal [role="alert"]').textContent = ''; $('#modal input')?.focus({ preventScroll: true }); return; }
+    if (action === 'account-clear-data') {
+      confirmAction('清空本机账号数据？', '先导出当前完整备份，再退出并删除此账号的本机记录及同步缓存。未同步改动只保存在备份中；云端、未登录记录和其他账号不受影响。重新登录可下载云端记录。', async () => {
+        const activeAccount = account, activeStore = store, previousEngine = syncEngine;
+        let cleared = false, signedOut = false;
+        accountBusy = true;
+        try {
+          await previousEngine?.running; await queue; syncEngine = null;
+          state = validateState(await activeStore.read()); const expectedRevision = state.revision;
+          if (!await exportBackup(false)) { openAccountDialog(); return; }
+          await queue; await logoutAccount(); signedOut = true; await activeStore.clearAccount(expectedRevision); await openAccount(null);
+          localStorage.removeItem('rater-active-account'); registrationChallenge = null;
+          cleared = true; openAccountDialog('login'); toast('本机账号数据已清空，云端记录保留。');
+        } catch (error) { if (signedOut) { await openAccount(null); openAccountDialog('login'); } toast(error.message, true); }
+        finally { if (!cleared && account?.id === activeAccount?.id) syncEngine = previousEngine; accountBusy = false; }
+      }, '备份并清空'); return;
+    }
     if (action === 'sync-now') { syncStatus = '正在同步'; refreshAccountIdentity(); await queue; await syncEngine?.run(); return; }
     if (action === 'account-logout') {
-      await syncEngine?.running; await queue; await logoutAccount(); await openAccount(null); renderContent(false); openAccountDialog('login'); return;
+      accountBusy = true;
+      try { await syncEngine?.running; await queue; await logoutAccount(); await openAccount(null); renderContent(false); openAccountDialog('login'); }
+      finally { accountBusy = false; }
+      return;
     }
     if (action === 'sync-download') {
       confirmAction('使用云端版本？', '先导出本机完整备份，再使用云端数据。本机未同步改动保留在备份中。', async () => {
@@ -563,7 +581,7 @@ window.raterReload = async () => { state = validateState(await store.read()); gr
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.7', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.8', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');

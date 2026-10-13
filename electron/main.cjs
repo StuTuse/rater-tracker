@@ -37,6 +37,9 @@ else {
     ipcMain.handle('desktop:open-data', secure(() => shell.openPath(app.getPath('userData'))));
     ipcMain.handle('desktop:export', secure(async (contents, suggestedName) => {
       if (typeof contents !== 'string' || Buffer.byteLength(contents) > 64 * 1024 * 1024) throw new Error('备份大小无效');
+      if (accountSmoke && process.env.RATER_ACCOUNT_CLEAR_SMOKE === '1') {
+        await fs.writeFile(path.join(app.getPath('userData'), 'clear-account-backup.json'), contents, 'utf8'); return true;
+      }
       const result = await dialog.showSaveDialog(window, { title: '保存完整 JSON 备份', defaultPath: path.join(app.getPath('documents'), path.basename(String(suggestedName))), filters: [{ name: '完整 JSON 备份', extensions: ['json'] }] });
       if (result.canceled || !result.filePath) return false;
       // Atomic replacement in the user-selected directory.
@@ -88,6 +91,34 @@ else {
           return { login:true, synchronized:true, xp:core.totalUnits(state)/core.SCALE, cloudVersion:cloud.version, accountIsolated:before.id.length>0, passwordFormRemoved:!document.querySelector('#account-login'), sidebarAccount:document.querySelector('.account-entry-text strong').textContent===before.name, passwordMasked:document.querySelector('.account-entry-text>span').textContent.includes('••••'), accountDialog:document.querySelector('#modal').open && document.querySelector('#modal').dataset.kind==='account' };
         })()`);
         report.encryptedSession = safeStorage.isEncryptionAvailable() && (await fs.stat(path.join(app.getPath('userData'), 'account-session.bin'))).size > 0;
+        if (process.env.RATER_ACCOUNT_CLEAR_SMOKE === '1') {
+          Object.assign(report, await window.webContents.executeJavaScript(`(async () => {
+            const account=await window.desktop.accountCurrent();
+            const storage=await import('./src/storage.js');
+            const store=await storage.openStore(account.id), before=JSON.stringify(await store.read());store.close();
+            const cloudBefore=JSON.stringify(await window.desktop.accountSync({type:'pull'}));
+            document.querySelector('[data-action="account-clear-data"]').click();
+            document.querySelector('#confirm-action').click();
+            const start=Date.now();
+            while (!document.querySelector('#account-login')) {
+              if (Date.now()-start>15000) throw new Error('清空本机账号数据超时');
+              await new Promise(resolve=>setTimeout(resolve,100));
+            }
+            const retained=await storage.openStore(account.id), after=JSON.stringify(await retained.read());retained.close();
+            const cleared=JSON.parse(after);
+            const result={ clearLogin:await window.desktop.accountCurrent()===null, rememberedAccountRemoved:localStorage.getItem('rater-active-account')===null, localAccountCleared:cleared.ledger.length===0 && cleared.revision===0, settingsAccountRemoved:!document.querySelector('#content [data-action="account-open"]') };
+            const restored=await window.desktop.accountLogin(${JSON.stringify(credentials.username)},${JSON.stringify(credentials.password)});
+            result.cloudRecordsRetained=cloudBefore===JSON.stringify(await window.desktop.accountSync({type:'pull'}));
+            await window.desktop.accountLogout();
+            if (Object.values(result).some(value=>value!==true)) throw new Error('清空本机账号数据检查失败');
+            return result;
+          })()`));
+          report.sessionFileRemoved = await fs.stat(path.join(app.getPath('userData'), 'account-session.bin')).then(() => false, error => { if (error.code === 'ENOENT') return true; throw error; });
+          if (!report.sessionFileRemoved) throw new Error('登录会话文件仍存在');
+          const backup = JSON.parse(await fs.readFile(path.join(app.getPath('userData'), 'clear-account-backup.json'), 'utf8'));
+          report.backupSaved = backup.application === 'rater-tracker' && backup.state.ledger.length > 0;
+          if (!report.backupSaved) throw new Error('清空前备份检查失败');
+        }
         await new Promise(resolve => setTimeout(resolve, 1200));
         const directory = process.env.RATER_SMOKE_OUTPUT || path.join(root, 'output/desktop'); await fs.mkdir(directory, { recursive:true });
         await fs.writeFile(path.join(directory, 'account-smoke.json'), JSON.stringify(report,null,2));

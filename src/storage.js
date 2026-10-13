@@ -53,6 +53,17 @@ export async function openStore(accountId = null) {
   });
   return {
     read, write, close: () => db.close(),
+    clearAccount: expectedRevision => new Promise((resolve, reject) => {
+      if (!accountId) { reject(new Error('不能通过账号清空操作删除未登录记录')); return; }
+      const tx = db.transaction('snapshots', 'readwrite'), records = tx.objectStore('snapshots');
+      let conflict = false;
+      const request = records.get(key);
+      request.onsuccess = () => {
+        if ((request.result?.revision ?? 0) !== expectedRevision) { conflict = true; tx.abort(); return; }
+        records.delete(key); records.delete(metaKey);
+      };
+      tx.oncomplete = () => resolve(); tx.onabort = () => reject(conflict ? new ConflictError() : tx.error ?? new Error('本机账号数据尚未清空')); tx.onerror = () => {};
+    }),
     readSync: () => mutateSync(pair => structuredClone(pair)),
     beginPush: () => mutateSync(pair => {
       if (!pair.meta.inFlight) pair.meta.inFlight = { requestId: crypto.randomUUID(), baseVersion: pair.meta.baseVersion, state: structuredClone(pair.state) };
