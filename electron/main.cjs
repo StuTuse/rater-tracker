@@ -188,13 +188,24 @@ else {
           modal.querySelector('[data-action="close-modal"]').click();await pause(40);
           const accountExitStable=modal.dataset.kind==='account'&&modal.offsetWidth===exitWidth&&modal.offsetHeight===exitHeight&&login.password.value==='Transient_test123';
           await pause(340);const accountSecretsCleared=login.password.value===''&&getComputedStyle(modal).display==='none';
+          const entries=[];let pageEntryLiftAndFade=true,pageEntry48Badges=false,pageEntryFourSettings=false;
+          for(const id of ['tasks','history','rewards','settings','today']){
+            document.querySelector('[data-page="'+id+'"]').click();
+            const animations=document.querySelector('#content').getAnimations({subtree:true}).filter(a=>a.id==='page-enter');entries.push(animations.length>0);
+            animations.forEach(a=>{a.pause();a.currentTime=a.effect.getTiming().delay+120;});
+            pageEntryLiftAndFade&&=animations.every(a=>{const style=getComputedStyle(a.effect.target);return Number(style.opacity)>0&&Number(style.opacity)<1&&style.translate!=='none';});
+            if(id==='rewards')pageEntry48Badges=animations.filter(a=>a.effect.target.matches('.badge-card')).length===48;
+            if(id==='settings')pageEntryFourSettings=animations.filter(a=>a.effect.target.matches('.panel')).length===4;
+            animations.forEach(a=>a.play());
+          }
+          await pause(550);const pageEntryAllFive=entries.length===5&&entries.every(Boolean);
           const phases=await import('./src/growth-stages.js'),growth=document.querySelector('#growth');
           const currentStageMatches=Number(growth.dataset.stage)===phases.growthStage(core.levelAt(core.totalUnits(reloaded)).level).id;
           const probe=growth.cloneNode(true);probe.setAttribute('aria-hidden','true');probe.style.position='fixed';probe.style.top='-9000px';probe.style.visibility='hidden';document.body.append(probe);
           const layouts=[],patterns=[];
           for(const phase of phases.GROWTH_STAGES){phases.paintStage(probe,phase.from);const box=probe.querySelector('.level-emblem').getBBox();layouts.push(box.width>20&&box.height>20);patterns.push(getComputedStyle(probe.querySelector('.xp-fluid i')).animationName);}
           probe.remove();const tenStageEmblemsRender=layouts.length===10&&layouts.every(Boolean),tenStageFlowPatterns=new Set(patterns).size===10;
-          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, currentStageMatches, tenStageEmblemsRender, tenStageFlowPatterns, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, pageEntryAllFive, pageEntryLiftAndFade, pageEntry48Badges, pageEntryFourSettings, currentStageMatches, tenStageEmblemsRender, tenStageFlowPatterns, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
         const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
         await fs.mkdir(directory, { recursive: true });
@@ -233,7 +244,7 @@ else {
         await window.webContents.executeJavaScript(`(async () => { const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});document.querySelector('[data-action="account-open"]').click();document.querySelector('[data-action="account-register-tab"]').click(); })()`);
         await new Promise(resolve => setTimeout(resolve, 500));
         await fs.writeFile(path.join(directory, 'account-motion.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
+        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });

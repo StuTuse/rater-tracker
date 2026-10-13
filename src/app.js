@@ -10,6 +10,7 @@ import { closeControlLayer, enhanceControls } from './controls.js';
 import { createModalController } from './modal.js';
 import { growthStage, paintStage, stageUpgradeFrames } from './growth-stages.js';
 import { chooseLaunchLine, BadgeNoticeQueue } from './notices.js';
+import { createPageMotion } from './page-motion.js';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
@@ -86,6 +87,7 @@ const modalUI = createModalController($('#modal'), motionMode, kind => {
   scheduleBadgeNotice();
 });
 const growthAnimations = new Set();
+const pageMotion = createPageMotion(() => $('#content'), motionMode);
 const starAnimations = new Map();
 const drafts = new Map();
 const seriesNames = { stars: '星光', study: '求知', work: '创作', health: '活力', life: '日常', tasks: '达成' };
@@ -105,7 +107,7 @@ function flowState() {
   const growth = $('#growth');
   if (growth) growth.dataset.flow = motionMode() === 'full' && !document.hidden && totalUnits(state) > 0 ? 'running' : 'paused';
 }
-function applyMotion() { document.documentElement.dataset.motion = motionMode(); if (motionMode() !== 'full') { starAnimations.forEach(a => a.cancel()); starAnimations.clear(); } flowState(); }
+function applyMotion() { document.documentElement.dataset.motion = motionMode(); if (motionMode() !== 'full') { pageMotion.cancel(); starAnimations.forEach(a => a.cancel()); starAnimations.clear(); } flowState(); }
 function stopGrowthFeedback() {
   ++animationToken;
   cancelAnimationFrame(numberFrame); clearTimeout(celebrationTimer);
@@ -315,7 +317,8 @@ function rewardsPage() {
 function settingsPage() {
   return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新保留数据。应用关闭后不发送提醒。</p></section></div></div>`;
 }
-function renderContent(preserveInputs = true, animateChanges = false) {
+function renderContent(preserveInputs = true, animateChanges = false, entrance = '') {
+  if (entrance) pageMotion.cancel();
   const referenceDraft = preserveInputs && $('#references-form') ? Object.fromEntries(new FormData($('#references-form'))) : null;
   const focus = document.activeElement;
   const focusId = focus?.id, start = focus?.selectionStart, end = focus?.selectionEnd;
@@ -339,6 +342,7 @@ function renderContent(preserveInputs = true, animateChanges = false) {
     const next = document.querySelector(`.rating-note[data-dimension="${focus.dataset.dimension}"][data-date="${focus.dataset.date}"]`);
     if (next) { next.focus({ preventScroll: true }); next.setSelectionRange(start, end); }
   }
+  if (entrance) pageMotion.play(entrance);
 }
 function animateStar(button, lit) {
   const svg = button.querySelector('svg'), previous = starAnimations.get(svg);
@@ -543,7 +547,7 @@ document.addEventListener('click', async event => {
       }, '备份并复制'); return;
     }
     switch (action) {
-      case 'navigate': page = b.dataset.page; renderContent(); break;
+      case 'navigate': { const changed = page !== b.dataset.page; page = b.dataset.page; renderContent(true, false, changed ? 'page' : ''); break; }
       case 'rate': await save({ type: 'rate', dimension: b.dataset.dimension, stars: Number(b.dataset.stars), date: chosenDate, ...(drafts.has(`${chosenDate}/${b.dataset.dimension}`) ? { note: drafts.get(`${chosenDate}/${b.dataset.dimension}`) } : {}) }, '评分已保存'); break;
       case 'clear-rating': confirmAction(`清空${LABELS[b.dataset.dimension]}评分？`, '这会撤回该项全部实际经验和星数，之后重新补记按新的录入时间结算。', () => { drafts.delete(`${chosenDate}/${b.dataset.dimension}`); save({ type: 'rate', dimension: b.dataset.dimension, stars: null, date: chosenDate }, '评分已清空'); }, '清空评分', true); break;
       case 'reference': openModal(`${modalHead('RATING GUIDE', `${LABELS[b.dataset.dimension]} · 评分参照`)}<p class="reference-text">${escape(state.settings.references[b.dataset.dimension])}</p>${button('close-modal', '知道了', '', '', 'primary')}`, 'reference'); break;
@@ -552,10 +556,10 @@ document.addEventListener('click', async event => {
       case 'calendar-date': chosenDate = b.dataset.date; renderContent(); break;
       case 'previous-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); month = d.toISOString().slice(0, 7); renderContent(); break; }
       case 'next-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); month = d.toISOString().slice(0, 7); renderContent(); break; }
-      case 'task-filter': taskFilter = b.dataset.filter; renderContent(); break;
-      case 'trend-range': trendRange = Number(b.dataset.range); renderContent(); break;
-      case 'reward-tab': rewardTab = b.dataset.tab; renderContent(); break;
-      case 'badge-filter': badgeFilter = b.dataset.series; renderContent(); break;
+      case 'task-filter': { const changed = taskFilter !== b.dataset.filter; taskFilter = b.dataset.filter; renderContent(true, false, changed ? 'tasks' : ''); break; }
+      case 'trend-range': { const changed = trendRange !== Number(b.dataset.range); trendRange = Number(b.dataset.range); renderContent(true, false, changed ? 'trend' : ''); break; }
+      case 'reward-tab': { const changed = rewardTab !== b.dataset.tab; rewardTab = b.dataset.tab; renderContent(true, false, changed ? 'rewards' : ''); break; }
+      case 'badge-filter': { const changed = badgeFilter !== b.dataset.series; badgeFilter = b.dataset.series; renderContent(true, false, changed ? 'badges' : ''); break; }
       case 'new-task': newTask(); break;
       case 'task-detail': taskDetail(taskId); break;
       case 'quick-progress': taskDetail(taskId); $('#progress-form')?.scrollIntoView({ block: 'center' }); $('#progress-form [name="note"]')?.focus(); break;
@@ -630,13 +634,13 @@ document.addEventListener('submit', async event => {
 $('#modal').addEventListener('cancel', event => { event.preventDefault(); closeModal(); });
 $('#modal').addEventListener('click', event => { if (event.target === $('#modal')) { const rect = $('#modal').getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal(); } });
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) { applyMotion(); growthStatic(); } });
-document.addEventListener('visibilitychange', () => { if (state) { if (document.hidden) growthStatic(); else flowState(); } });
+document.addEventListener('visibilitychange', () => { if (state) { if (document.hidden) { pageMotion.cancel(); growthStatic(); } else flowState(); } });
 window.raterReload = async () => { resetBadgeNotices(); state = validateState(await store.read()); growthStatic(); renderContent(); };
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.14', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
-    applyMotion(); shell(); renderContent();
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.15', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    applyMotion(); shell(); renderContent(true, false, 'page');
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');
       const active = await currentAccount().catch(() => remembered);

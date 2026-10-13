@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.14，科技创业名句扩展版。** 顶部92条平淡鼓励／自问与名人短语录混合，九位人物各2～3句；新增黄仁勋、苏姿丰、奥特曼、雷军各3句。每次启动换句，长句可悬停读完整内容。获得勋章显示账号中心同款居中窗口、原图名称与金色礼花，多枚合并查看。十阶段成长、登录草稿及关闭布局稳定保持。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.15，全标签切换动效更新版。** 五页标题、文字、卡片与控件统一上移淡入；奖励子页与各类页内标签也有内容过渡。保存／输入不重播页面，完整／柔和／关闭遵循偏好。顶部92句、勋章窗口／礼花、十阶段成长与登录草稿保持。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.14-Setup.exe](release/Rater-Tracker-0.1.0-alpha.14-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.15-Setup.exe](release/Rater-Tracker-0.1.0-alpha.15-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -73,6 +73,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --f
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/notices-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/ui-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/pages-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check goto http://127.0.0.1:4173/assets/generated/gallery.html
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/art-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
@@ -87,6 +88,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 | `src/core.js` | 香港日期、纯事务、整数金额、冻结参数、等级与统计 |
 | `src/storage.js` | IndexedDB 原子事务、revision 冲突校验、完整备份验证 |
 | `src/app.js` / `src/dom.js` / `src/controls.js` / `src/styles.css` | 五页界面、原位更新、应用内控件、动效与任务详情 |
+| `src/page-motion.js` / `scripts/pages-acceptance.cjs` | 主标签全内容与页内标签入场；有上限错峰、取消、减少动态与真实渲染检查 |
 | `src/growth-stages.js` / `test/growth-stages.test.mjs` | 十阶段等级映射、独立SVG主体、升级编排与真实门槛回退检查 |
 | `src/notices.js` / `test/notices.test.mjs` | 92句启动短句、九位人物各2～3句、排除相邻重复与勋章提示队列去重／撤回；不参与结算 |
 | `assets/generated/` / `src/art.js` / `src/badges.js` | 51 张生图素材、资源入口、名称与门槛；旧 SVG 留作参考 |
@@ -105,6 +107,8 @@ alpha.12顶部短句运行中保持；上次句子仅作本机界面偏好，不
 alpha.13将句池扩展到80条（46鼓励／24自问／10名句译文），主题放宽；官方来源见[短句出处](docs/启动短句出处.md)，实际40测试／9项浏览器文本条件与最终桌面检查见[alpha.13验收](docs/alpha.13验收记录.md)。本轮未重测NSIS升级，最近实测仍为alpha.11→alpha.12。
 
 alpha.14新增四位各3句并核对官方／本人出处，总池92句，其中22句名句。英文短译与中文摘句在源码元数据及来源记录中区分；实际检查见[alpha.14验收](docs/alpha.14验收记录.md)，安装升级未重测。
+
+全标签动画检查见[alpha.15验收](docs/alpha.15验收记录.md)：41项页面条件、12项原位更新、26项控件与最终桌面检查。五个主页面全内容入场，页内标签只动变化部分；原位保存不重播。同一内容组内的文字和控件随组移动，避免父子透明度叠乘。NSIS升级本轮未重测。
 
 ## 账号登录、注册与同步（alpha.10）
 
@@ -146,7 +150,7 @@ CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.16](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.17](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
 本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.10`。未配置 GitHub 远程或推送。
 

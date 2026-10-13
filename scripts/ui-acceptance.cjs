@@ -61,7 +61,7 @@ async page => {
     report.rapidClicksConverge=rapidProbe.lit===2&&rapidProbe.ratings[rapidProbe.date].study.stars===2;
     await page.getByRole('button',{name:'交互验收任务',exact:true}).click();
     await page.locator('#progress-form [name="note"]').fill('未提交的推进草稿');
-    const stageRevision=await page.evaluate(async()=>{const{openStore}=await import('./src/storage.js'),db=await openStore(),s=await db.read();db.close();window.uiProbe.form=document.querySelector('#progress-form');window.uiProbe.taskNote=window.uiProbe.form.elements.note;document.querySelector('[data-stage]').click();return s.revision+1;});
+    const stageRevision=await page.evaluate(async()=>{const{openStore}=await import('./src/storage.js'),db=await openStore(),s=await db.read();db.close();window.uiProbe.form=document.querySelector('#progress-form');window.uiProbe.taskNote=window.uiProbe.form.elements.note;document.querySelector('.stage-row input[data-stage]').click();return s.revision+1;});
     await waitRevision(stageRevision);
     report.taskFormSurvivesStageSave=await page.evaluate(()=>window.uiProbe.form===document.querySelector('#progress-form')&&window.uiProbe.taskNote.value==='未提交的推进草稿'&&document.activeElement===window.uiProbe.taskNote);
     await page.getByRole('button',{name:'关闭',exact:true}).click();

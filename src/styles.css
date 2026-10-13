@@ -316,6 +316,9 @@ html[data-motion=off] .xp-stage-stream{display:none}
 .phase-gallery-art{width:116px;height:116px;margin:6px 0 15px}
 .phase-gallery strong{font-size:16px;color:#765920}.phase-gallery span{font-size:12px;color:#8e7945}
 
+/* Page entrance is explicitly owned by page-motion; saves do not replay CSS entry. */
+#content .rating-card,#content .task-card,#content .panel,#content .badge-card img{animation:none}
+
 /* A quiet thought beside the top title; awards share the profile window's paper. */
 .topbar{gap:24px}.top-intro{display:flex;align-items:center;gap:22px;min-width:0;flex:1}.top-intro .top-kicker{flex-shrink:0}#launch-line{font-size:13px;line-height:1.6;letter-spacing:.2px;color:#74745e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#save-status{flex-shrink:0}
 dialog[data-kind=award]{width:420px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:24px 28px 28px;border:1px solid #e0d3a3;border-radius:24px;background:linear-gradient(145deg,#fffdf1,#fffef8 44%,#fffef7);box-shadow:0 22px 76px #54451a29,0 2px 9px #b59a3412;overflow:hidden}
