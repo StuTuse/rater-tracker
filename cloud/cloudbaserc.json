@@ -1,0 +1,13 @@
+{
+  "envId": "rater-tracker-sync-d3cx88f64aea2",
+  "functionRoot": "./functions",
+  "functions": [
+    {
+      "name": "rater-health",
+      "timeout": 5,
+      "runtime": "Nodejs18.15",
+      "memorySize": 128,
+      "handler": "index.main"
+    }
+  ]
+}

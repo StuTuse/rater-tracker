@@ -1,0 +1,19 @@
+{
+  "name": "rater-tracker-cloud-tools",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "migrate": "node migrate.cjs",
+    "acceptance": "node account-acceptance.cjs",
+    "login": "node node_modules/@cloudbase/cli/bin/tcb login --flow device",
+    "deploy:health": "node node_modules/@cloudbase/cli/bin/tcb fn deploy rater-health -e rater-tracker-sync-d3cx88f64aea2 --region ap-shanghai",
+    "test": "node --test --test-isolation=none health.test.cjs"
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "3.8.6",
+    "@cloudbase/js-sdk": "3.10.2",
+    "esbuild": "0.25.12",
+    "fake-indexeddb": "6.2.4",
+    "ws": "8.22.0"
+  }
+}

@@ -1,9 +1,10 @@
-const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
 const root = path.resolve(__dirname, '..');
-const smoke = process.argv.includes('--smoke');
+const accountSmoke = process.argv.includes('--account-smoke');
+const smoke = process.argv.includes('--smoke') || accountSmoke;
 const isolatedAcceptance = process.argv.includes('--acceptance-hold');
 const smokeDirectory = path.join(root, 'runtime-data', 'desktop-smoke');
 if (smoke || isolatedAcceptance) app.setPath('userData', process.env.RATER_TEST_DATA ? path.resolve(process.env.RATER_TEST_DATA) : path.join(app.getPath('temp'), `rater-smoke-${Date.now()}`));
@@ -25,6 +26,11 @@ else {
       if (event.senderFrame !== event.sender.mainFrame || !event.senderFrame.url.startsWith('app://rater/')) throw new Error('Unsupported sender');
       return handler(...args);
     };
+    const accounts = require('./account.cjs')(app.getPath('userData'), safeStorage);
+    ipcMain.handle('account:current', secure(() => accounts.current()));
+    ipcMain.handle('account:login', secure((name, password) => accounts.login(name, password)));
+    ipcMain.handle('account:logout', secure(() => accounts.logout()));
+    ipcMain.handle('account:sync', secure(data => accounts.sync(data)));
     ipcMain.handle('desktop:info', secure(() => ({ version: app.getVersion(), dataDirectory: app.getPath('userData'), packaged: app.isPackaged })));
     ipcMain.handle('desktop:open-data', secure(() => shell.openPath(app.getPath('userData'))));
     ipcMain.handle('desktop:export', secure(async (contents, suggestedName) => {
@@ -55,6 +61,38 @@ else {
       window.showInactive();
     }
     await window.loadURL('app://rater/index.html');
+    if (accountSmoke) {
+      try {
+        const credentials = JSON.parse(await fs.readFile(process.env.RATER_ACCOUNT_TEST_FILE || path.join(root, 'runtime-data/cloud-test/account.json'), 'utf8'));
+        const report = await window.webContents.executeJavaScript(`(async () => {
+          await window.raterReady;
+          document.querySelector('[data-page="settings"]').click();
+          const form = document.querySelector('#account-login');
+          if (form) {
+            form.username.value = ${JSON.stringify(credentials.username)};
+            form.password.value = ${JSON.stringify(credentials.password)};
+            form.dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+          }
+          const start=Date.now();
+          while (!document.querySelector('[data-action="account-logout"]') || !document.querySelector('#sync-status')?.textContent.includes('已同步')) {
+            if (Date.now()-start>35000) throw new Error(document.querySelector('#sync-status')?.textContent || '登录超时');
+            await new Promise(resolve=>setTimeout(resolve,100));
+          }
+          const before=await window.desktop.accountCurrent();
+          const cloud=await window.desktop.accountSync({type:'pull'});
+          const storage=await import('./src/storage.js');const core=await import('./src/core.js');
+          const store=await storage.openStore(before.id);const state=await store.read();store.close();
+          return { login:true, synchronized:true, xp:core.totalUnits(state)/core.SCALE, cloudVersion:cloud.version, accountIsolated:before.id.length>0, passwordFormRemoved:!document.querySelector('#account-login') };
+        })()`);
+        report.encryptedSession = safeStorage.isEncryptionAvailable() && (await fs.stat(path.join(app.getPath('userData'), 'account-session.bin'))).size > 0;
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        const directory = process.env.RATER_SMOKE_OUTPUT || path.join(root, 'output/desktop'); await fs.mkdir(directory, { recursive:true });
+        await fs.writeFile(path.join(directory, 'account-smoke.json'), JSON.stringify(report,null,2));
+        await fs.writeFile(path.join(directory, 'account-smoke.png'), (await window.webContents.capturePage()).toPNG());
+        console.log(JSON.stringify(report)); app.exit(0);
+      } catch(error) { console.error(error.message); app.exit(1); }
+      return;
+    }
     if (smoke) {
       try {
         const report = await window.webContents.executeJavaScript(`(async () => {

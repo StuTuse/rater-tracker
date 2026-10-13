@@ -1,0 +1,45 @@
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+const { randomBytes, randomUUID } = require('node:crypto');
+const assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '..');
+const cli = path.join(__dirname, 'node_modules/@cloudbase/cli/bin/tcb');
+const env = 'rater-tracker-sync-d3cx88f64aea2';
+function command(args) {
+  return JSON.parse(execFileSync(process.execPath, [cli, ...args, '-e', env, '--region', 'ap-shanghai', '--json', '--yes'], { cwd: __dirname, encoding: 'utf8' }));
+}
+(async () => {
+  const account = { username: `rt${Date.now()}`, password: randomBytes(24).toString('base64url') };
+  const created = command(['user', 'create', account.username, '--password', account.password, '--type', 'externalUser']);
+  console.log('test account created; result keys:', Object.keys(created.data ?? created));
+  await fs.mkdir(path.join(root, 'runtime-data/cloud-test'), { recursive: true });
+  await fs.writeFile(path.join(root, 'runtime-data/cloud-test/account.json'), JSON.stringify(account));
+  const createService = require('../electron/account.cjs');
+  const service = createService(path.join(root, 'runtime-data/cloud-test'), { isEncryptionAvailable: () => false });
+  const user = await service.login(account.username, account.password);
+  assert.ok(user.id);
+  console.log('official username login passed', user.id);
+  const { createState, transact } = await import('../src/core.js');
+  const state = transact(createState(), { type: 'rate', id: randomUUID(), date: '2026-10-13', dimension: 'study', stars: 3 }, '2026-10-13T10:00:00+08:00');
+  assert.equal((await service.sync({ type: 'pull' })).version, 0);
+  const requestId = randomUUID();
+  assert.equal((await service.sync({ type: 'push', baseVersion: 0, requestId, state })).version, 1);
+  assert.equal((await service.sync({ type: 'push', baseVersion: 0, requestId, state })).version, 1);
+  assert.equal((await service.sync({ type: 'push', baseVersion: 0, requestId: randomUUID(), state })).conflict, true);
+  assert.deepEqual((await service.sync({ type: 'pull' })).state, state);
+  console.log('cloud push/pull, duplicate retry, stale version checks passed');
+  await fs.writeFile(path.join(root, 'runtime-data/cloud-test/user.json'), JSON.stringify(user));
+  await service.logout();
+  await assert.rejects(service.sync({ type: 'pull' }));
+  const second = { username: `rb${Date.now()}`, password: randomBytes(24).toString('base64url') };
+  command(['user', 'create', second.username, '--password', second.password, '--type', 'externalUser']);
+  const other = await service.login(second.username, second.password);
+  assert.notEqual(other.id, user.id);
+  assert.equal((await service.sync({ type:'pull' })).state, null);
+  await service.logout();
+  command(['user', 'delete', other.id]);
+  console.log('second account cannot read first account; unauthenticated sync rejected');
+  console.log('logout passed; temporary account retained for isolated desktop acceptance');
+  process.exit(0);
+})().catch(error => { console.error(error.message); process.exit(1); });

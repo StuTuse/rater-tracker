@@ -1,7 +1,10 @@
 import { createState, FORMAT_VERSION, RULE_VERSION, DIMENSIONS, validDate, taskPlan, SCALE, mul } from './core.js';
 
 export class ConflictError extends Error { constructor() { super('其他窗口已保存更新。已载入最新数据，请重新执行本次操作。'); } }
-export async function openStore() {
+export async function openStore(accountId = null) {
+  const key = accountId ? `account:${accountId}` : 'current';
+  const metaKey = `${key}:sync`;
+  const defaults = () => ({ baseVersion: 0, dirty: false, inFlight: null, conflict: null, lastSync: null });
   const db = await new Promise((resolve, reject) => {
     const request = indexedDB.open('rater-tracker', 1);
     request.onupgradeneeded = () => request.result.createObjectStore('snapshots');
@@ -11,23 +14,68 @@ export async function openStore() {
   });
   db.onversionchange = () => db.close();
   const read = () => new Promise((resolve, reject) => {
-    const request = db.transaction('snapshots').objectStore('snapshots').get('current');
+    const request = db.transaction('snapshots').objectStore('snapshots').get(key);
     request.onsuccess = () => resolve(request.result ?? createState());
     request.onerror = () => reject(request.error);
   });
   const write = (state, expectedRevision) => new Promise((resolve, reject) => {
     const tx = db.transaction('snapshots', 'readwrite'), store = tx.objectStore('snapshots');
     let conflict = false, writeError;
-    const request = store.get('current');
+    const request = store.get(key);
     request.onsuccess = () => {
       if ((request.result?.revision ?? 0) !== expectedRevision) { conflict = true; tx.abort(); }
-      else { try { store.put(state, 'current'); } catch (error) { writeError = error; tx.abort(); } }
+      else { try {
+        store.put(state, key);
+        if (accountId) { const meta = store.get(metaKey); meta.onsuccess = () => store.put({ ...(meta.result ?? defaults()), dirty: true }, metaKey); }
+      } catch (error) { writeError = error; tx.abort(); } }
     };
     tx.oncomplete = () => resolve(state);
     tx.onabort = () => reject(conflict ? new ConflictError() : writeError ?? tx.error ?? new Error('本次尚未保存，请重试。'));
     tx.onerror = () => {}; // abort owns the single rejection.
   });
-  return { read, write, close: () => db.close() };
+  const mutateSync = callback => new Promise((resolve, reject) => {
+    const tx = db.transaction('snapshots', 'readwrite'), records = tx.objectStore('snapshots');
+    let result, failure;
+    const stateRequest = records.get(key);
+    stateRequest.onsuccess = () => {
+      const metaRequest = records.get(metaKey);
+      metaRequest.onsuccess = () => {
+        try {
+          const pair = { state: stateRequest.result ?? createState(), meta: metaRequest.result ?? defaults() };
+          result = callback(pair);
+          records.put(pair.state, key); records.put(pair.meta, metaKey);
+        } catch (error) { failure = error; tx.abort(); }
+      };
+    };
+    tx.oncomplete = () => resolve(result);
+    tx.onabort = () => reject(failure ?? tx.error ?? new Error('同步保存失败'));
+    tx.onerror = () => {};
+  });
+  return {
+    read, write, close: () => db.close(),
+    readSync: () => mutateSync(pair => structuredClone(pair)),
+    beginPush: () => mutateSync(pair => {
+      if (!pair.meta.inFlight) pair.meta.inFlight = { requestId: crypto.randomUUID(), baseVersion: pair.meta.baseVersion, state: structuredClone(pair.state) };
+      return structuredClone(pair.meta.inFlight);
+    }),
+    ackPush: (requestId, version) => mutateSync(pair => {
+      if (pair.meta.inFlight?.requestId !== requestId) throw new Error('同步确认不匹配');
+      pair.meta.dirty = pair.state.revision !== pair.meta.inFlight.state.revision;
+      pair.meta.baseVersion = version; pair.meta.inFlight = null; pair.meta.lastSync = new Date().toISOString();
+    }),
+    markConflict: version => mutateSync(pair => { pair.meta.conflict = version; }),
+    acceptPull: (incoming, version, expectedRevision) => mutateSync(pair => {
+      if (pair.meta.dirty || pair.meta.inFlight || pair.state.revision !== expectedRevision) throw new ConflictError();
+      if (version < pair.meta.baseVersion) throw new Error('云端版本回退');
+      if (version > pair.meta.baseVersion) { pair.state = structuredClone(incoming); pair.state.revision = expectedRevision + 1; }
+      pair.meta.baseVersion = version; pair.meta.lastSync = new Date().toISOString();
+    }),
+    useCloud: (incoming, version, expectedRevision) => mutateSync(pair => {
+      if (pair.state.revision !== expectedRevision) throw new ConflictError();
+      pair.state = structuredClone(incoming); pair.state.revision = expectedRevision + 1;
+      pair.meta = { ...defaults(), baseVersion: version, lastSync: new Date().toISOString() };
+    })
+  };
 }
 const check = (condition, message) => { if (!condition) throw new Error(`备份校验失败：${message}`); };
 const plain = value => value && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;

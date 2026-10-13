@@ -1,5 +1,7 @@
 import { DIMENSIONS, LABELS, TIERS, SCALE, xp, hongKong, addDays, daysBetween, taskPlan, transact, totalUnits, levelAt, stats, nextCoefficient, progressDays, allocatedProgress, estimate } from './core.js';
 import { openStore, ConflictError, validateState, backupText, parseBackup } from './storage.js';
+import { currentAccount, loginAccount, logoutAccount, cloudSync } from './account.js';
+import { SyncEngine } from './sync.js';
 import { icon } from './icons.js';
 import { BADGES } from './badges.js';
 import { ART, badgeArt } from './art.js';
@@ -11,6 +13,34 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&a
 const fmt = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const today = () => hongKong().date;
 const uid = () => crypto.randomUUID();
+let account = null, syncEngine = null, syncStatus = '未登录', accountBusy = false;
+function accountPanel() {
+  return `<section class="panel account-panel"><h2>账号与同步</h2><p role="status" id="sync-status">${escape(syncStatus)}</p>${account ? `<p>账号：${escape(account.name)}</p><div class="backup-actions">${button('sync-now', '立即同步', '', '', 'primary')}${button('sync-download', '备份本机并使用云端', '', '', 'secondary')}${button('sync-adopt', '将未登录记录复制到此账号', '', '', 'secondary')}${button('account-logout', '退出账号', '', '', 'secondary')}</div><p class="field-hint">离线保存到本机，联网后同步。两端同时修改会提示冲突；云端更新不重演奖励。未登录记录与各账号分开保存。</p>` : `<form id="account-login"><label class="field">账号<input name="username" autocomplete="username" required minlength="5" maxlength="24"></label><label class="field">密码<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label><button class="primary" type="submit" ${accountBusy ? 'disabled' : ''}>${accountBusy ? '正在登录…' : '登录'}</button></form><p class="field-hint">使用 CloudBase 用户账号，账号可在云开发控制台的身份认证中创建；密码遗忘时在控制台重置。这里不使用腾讯云管理账号密码。</p>`}</section>`;
+}
+async function openAccount(next) {
+  await syncEngine?.running;
+  await queue;
+  syncEngine = null;
+  store.close(); account = next;
+  store = await openStore(next?.id); state = validateState(await store.read());
+  localStorage.setItem('rater-active-account', JSON.stringify(next));
+  drafts.clear(); stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog();
+  if (next) {
+    const activeStore = store;
+    syncEngine = new SyncEngine(store, cloudSync, async (status, message) => {
+      if (store !== activeStore) return;
+      syncStatus = ({ synced: '已同步', pending: '已保存到本机，待同步', conflict: '两端数据有冲突，请先备份并选择云端版本', offline: '已保存到本机，同步暂未完成' })[status];
+      if (message) syncStatus += `：${message}`;
+      await queue;
+      if (store !== activeStore) return;
+      const latest = validateState(await store.read());
+      if (latest.revision !== state.revision) { state = latest; applyMotion(); growthStatic(); renderContent(); refreshTaskDialog(); }
+      else if (page === 'settings') renderContent();
+      $('#save-status').textContent = syncStatus;
+    });
+    syncStatus = '正在同步'; syncEngine.run();
+  } else syncStatus = '未登录 · 仅保存在本机';
+}
 const button = (action, label, name = '', extra = '', cls = '') => `<button type="button" class="${cls}" data-action="${action}" ${extra}>${name ? icon(name) : ''}${label}</button>`;
 let store, state, desktopInfo, page = 'today', chosenDate = today(), month = today().slice(0, 7), taskFilter = 'active', taskQuery = '', badgeFilter = 'all', trendRange = 7, rewardTab = 'badges';
 let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer, lastFocused, modalSwapAnimation;
@@ -117,6 +147,7 @@ function save(action, reason) {
       await store.write(next, before.revision);
       state = next; applyMotion(); renderContent(true, true); refreshTaskDialog(); feedback(before, state, reason);
       $('#save-status').textContent = '已保存到本机';
+      if (syncEngine) { syncStatus = '已保存到本机，待同步'; syncEngine.run(); }
     } catch (error) {
       if (error instanceof ConflictError) { state = validateState(await store.read()); renderContent(); growthStatic(); }
       $('#save-status').textContent = '本次未保存'; toast(error.message, true);
@@ -235,7 +266,7 @@ function rewardsPage() {
   return header('GROWTH / 奖励中心', '奖励中心', '') + `<div class="summary-grid"><div><span>收集的徽章</span><strong>${obtained.length}<small> / 48</small></strong></div><div><span>有效星数</span><strong>${s.stars.toLocaleString()}</strong></div><div><span>完成的成果</span><strong>${s.tasks}</strong></div><div><span>完整记录天数</span><strong>${s.completeDays}</strong></div></div><div class="section-title"><h2>下一份成果的完成系数</h2><span>各量级独立 · 以实际结算为准</span></div>${coefficientCards()}<div class="toolbar reward-tabs"><div class="segmented">${[['badges', '徽章收藏'], ['ledger', '经验明细'], ['review', '周期回顾'], ['rules', '奖励规则']].map(([id, label]) => button('reward-tab', label, '', `data-tab="${id}"`, rewardTab === id ? 'selected' : '')).join('')}</div></div>${rewardTab === 'badges' ? `<div class="badge-filters">${[['all', '全部'], ...Object.entries(seriesNames)].map(([id, label]) => button('badge-filter', label, '', `data-series="${id}"`, badgeFilter === id ? 'chip selected' : 'chip')).join('')}</div>${badgeCards()}` : rewardTab === 'ledger' ? `<section class="panel"><p class="field-hint">共 ${state.ledger.length} 笔 · 显示最近 200 笔；完整历史随 JSON 备份保留。</p>${state.ledger.length ? ledgerTable([...state.ledger].reverse().slice(0, 200)) : empty('暂无经验明细', '保存评分或记录任务后，在这里查看明细。', '', 'ledger')}</section>` : rewardTab === 'rules' ? rules() : periodReview()}`;
 }
 function settingsPage() {
-  return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新保留数据。应用关闭后不发送提醒。</p></section></div></div>`;
+  return header('YOUR SPACE / 设置', '设置', '') + accountPanel() + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新保留数据。应用关闭后不发送提醒。</p></section></div></div>`;
 }
 function renderContent(preserveInputs = true, animateChanges = false) {
   const referenceDraft = preserveInputs && $('#references-form') ? Object.fromEntries(new FormData($('#references-form'))) : null;
@@ -386,9 +417,35 @@ async function importBackup() {
 }
 
 document.addEventListener('click', async event => {
-  const b = event.target.closest('[data-action]'); if (!b || b.disabled) return;
+  const b = event.target.closest('[data-action]'); if (!b || b.disabled || accountBusy) return;
   const action = b.dataset.action, taskId = b.dataset.task;
   try {
+    if (action === 'sync-now') { await queue; await syncEngine?.run(); return; }
+    if (action === 'account-logout') {
+      await syncEngine?.running; await queue; await logoutAccount(); await openAccount(null); renderContent(false); return;
+    }
+    if (action === 'sync-download') {
+      confirmAction('使用云端版本？', '先导出本机完整备份，再使用云端数据。本机未同步改动保留在备份中。', async () => {
+        await syncEngine?.running;
+        if (!await exportBackup()) return;
+        await queue;
+        const expected = state.revision, result = await cloudSync({ type: 'pull' });
+        if (!result.state) { toast('云端还没有记录。', true); return; }
+        await store.useCloud(validateState(result.state), result.version, expected);
+        state = validateState(await store.read()); drafts.clear(); growthStatic(); renderContent(false); syncEngine.run();
+      }, '备份并使用云端'); return;
+    }
+    if (action === 'sync-adopt') {
+      confirmAction('复制未登录时的本机记录？', '先备份当前账号数据，再完整复制未登录记录。联网后按版本检查上传，有冲突时不会覆盖云端。', async () => {
+        await syncEngine?.running;
+        if (!await exportBackup()) return;
+        await queue;
+        const guest = await openStore();
+        const source = validateState(await guest.read()); guest.close();
+        source.revision = state.revision + 1;
+        await store.write(source, state.revision); state = source; growthStatic(); renderContent(false); syncEngine.run();
+      }, '备份并复制'); return;
+    }
     switch (action) {
       case 'navigate': page = b.dataset.page; renderContent(); break;
       case 'rate': await save({ type: 'rate', dimension: b.dataset.dimension, stars: Number(b.dataset.stars), date: chosenDate, ...(drafts.has(`${chosenDate}/${b.dataset.dimension}`) ? { note: drafts.get(`${chosenDate}/${b.dataset.dimension}`) } : {}) }, '评分已保存'); break;
@@ -439,6 +496,16 @@ document.addEventListener('change', event => {
   if (el.dataset.stage) save({ type: 'stage', taskId: el.dataset.task, stageId: el.dataset.stage, done: el.checked }, '阶段已更新');
 });
 document.addEventListener('submit', async event => {
+  if (event.target.id === 'account-login') {
+    event.preventDefault();
+    if (accountBusy) return;
+    const form = event.target, values = Object.fromEntries(new FormData(form));
+    accountBusy = true; form.querySelector('button').disabled = true;
+    try { const next = await loginAccount(values.username.trim(), values.password); form.reset(); await openAccount(next); }
+    catch (error) { syncStatus = `登录未完成：${error.message}`; toast(syncStatus, true); }
+    finally { values.password = ''; accountBusy = false; renderContent(false); }
+    return;
+  }
   event.preventDefault(); const form = event.target, values = Object.fromEntries(new FormData(form));
   if (form.id === 'task-form') {
     const id = uid();
@@ -459,8 +526,15 @@ window.raterReload = async () => { state = validateState(await store.read()); gr
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.5', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.6', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
+    try {
+      const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');
+      const active = await currentAccount().catch(() => remembered);
+      if (active?.id) await openAccount(active);
+    } catch (error) { syncStatus = `账号恢复未完成：${error.message}`; }
+    setInterval(() => { if (!document.hidden && syncEngine) syncEngine.run(); }, 60000);
+    window.addEventListener('online', () => syncEngine?.run());
     setInterval(() => { if (page === 'today' && chosenDate !== today() && !document.hidden && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
   } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }
 })();

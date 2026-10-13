@@ -27,6 +27,6 @@ for (const dir of ['src','electron','scripts']) for(const name of await readdir(
   const result=spawnSync(process.execPath,['--check',`${dir}/${name}`],{encoding:'utf8'});
   assert.equal(result.status,0,result.stderr);
 }
-const tests=spawnSync(process.execPath,['--test','test/core.test.mjs'],{stdio:'inherit'});
+const tests=spawnSync(process.execPath,['--test','test/core.test.mjs','test/sync.test.mjs'],{stdio:'inherit'});
 if(tests.status!==0) process.exit(tests.status ?? 1);
 console.log(`Version ${version}; syntax; 48 SVG reference subjects; 51 distinct generated PNG assets; business tests passed.`);

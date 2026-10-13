@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.5，应用内控件更新版。** 下拉菜单、日期月历与横向选中滑块使用统一样式；弹窗和折叠详情补齐进出动画，隐藏系统滚动条并保留滚动。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.6，账号登录与同步预览版。** 下拉菜单、日期月历与横向选中滑块使用统一样式；弹窗和折叠详情补齐进出动画，隐藏系统滚动条并保留滚动。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.5-Setup.exe](release/Rater-Tracker-0.1.0-alpha.5-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.6-Setup.exe](release/Rater-Tracker-0.1.0-alpha.6-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -14,7 +14,7 @@
 4. 历史页查看日历和 7／30 天趋势；奖励中心查看徽章、系数、明细、周期回顾与规则。
 5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
-日常运行没有联网资源或云服务。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
+未登录可完全离线使用；账号同步需要联网。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
 
 ## 数据与更新
 
@@ -22,17 +22,17 @@
 
 更新前先从设置页导出 JSON，再运行新安装程序。不要删除数据目录。备份包括历史分配、取消痕迹、冻结额度和 C、评分星数批次、设置及规则／格式版本；恢复不会重新发奖。浏览器预览与桌面数据互相独立。
 
-本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.4 → alpha.5 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
+本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.5 → alpha.6 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
 
 ## 开发命令
 
-本机实际环境：Windows 11 x64、Node 24.19.0、npm 11.17.0。锁定 Electron 44.7.0、electron-builder 26.15.3、Playwright CLI 0.1.22；`global-agent` 使用兼容的 4.1.3 override 修复开发依赖漏洞。所有应用资源本地打包，没有前端框架或运行时 npm 依赖。
+本机实际环境：Windows 11 x64、Node 24.19.0、npm 11.17.0。锁定 Electron 44.7.0、electron-builder 26.15.3、Playwright CLI 0.1.22；`global-agent` 使用兼容的 4.1.3 override 修复开发依赖漏洞。应用资源和官方 CloudBase SDK 本地打包，原生 SDK 使用运行时依赖 ws 8.22.0。
 
 ```powershell
 npm ci
 npm start                 # Electron 独立窗口，正常用户数据
 npm run dev               # 浏览器预览 http://127.0.0.1:4173
-npm test                  # 25 项业务测试
+npm test                  # 25 项业务＋5 项同步测试
 npm run check             # 版本、语法、51 张独立素材、业务测试
 npm run build             # Windows x64 可运行目录 release/win-unpacked
 npm run dist              # Windows x64 NSIS 安装包，不发布
@@ -41,12 +41,14 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 
 首次工程安装／打包需要联网下载开发依赖、Electron 与 NSIS；安装好的应用离线运行。脚本直接由 Node 启动工具入口，适配本工作区路径中的空格和 `&`。
 
+若重复打包等待下载，先确认 node_modules/electron/dist/version 为 44.7.0，可使用本机正式运行时：`node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist`。本轮最终安装包采用此命令；仍需先通过 npm run check。
+
 检查打包应用与安装流程：
 
 ```powershell
 node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.4-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.5-Setup.exe'
 ```
 
 安装验收脚本先确认没有既有用户安装，再在工作区 `runtime-data/install-check` 测试安装、快捷方式、单实例、同版本重装；指定 `PreviousInstaller` 则先安装旧版，再安装当前版并检查数据保持。结束卸载测试副本。测试数据使用 `runtime-data/desktop-smoke`，不写入正常数据目录。如果检测到已有安装，脚本停止，避免覆盖它。
@@ -86,13 +88,35 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 | [数据契约.md](docs/数据契约.md) | 金额精度、历史分配、持久化和备份格式 |
 | [0.1验收记录.md](docs/0.1验收记录.md) | 实际检查、产物和未覆盖范围 |
 
-已有验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源。桌面／安装结果与检查边界见 [alpha.5 验收](docs/alpha.5验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
+alpha.5 历史验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源，见 [alpha.5 验收](docs/alpha.5验收记录.md)。alpha.6 检查为 30 项业务／同步测试、真实账号与云端、最终桌面和安装升级，见 [alpha.6 验收](docs/alpha.6验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
+
+## 账号登录与同步（alpha.6）
+
+在 CloudBase 控制台的身份认证／用户管理创建用户名密码账号；应用“设置 → 账号与同步”登录。不要输入腾讯云管理账号密码。个人首版密码重置在控制台完成。
+
+未登录记录保留在原位置；各账号独立保存。若要同步此前记录，登录后使用“将未登录记录复制到此账号”，先导出当前账号备份。应用打开期间自动同步，也可立即同步。两台离线设备修改会提示冲突；先备份再选择云端，不自动合并奖励账本。
+
+桌面会话系统加密保存，退出返回未登录数据；导出不包含凭证。服务停服或断网仍可本机使用。首版快照容量限 4 MiB，浏览器／手机登录未交付。实际检查见 [alpha.6 验收](docs/alpha.6验收记录.md)。
+
+开发／验收新增命令：
+
+```powershell
+npm ci --prefix cloud
+node cloud/build.mjs
+node cloud/migrate.cjs
+node cloud/account-acceptance.cjs
+node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
+```
+
+迁移和云端验收需要 CloudBase CLI 本机登录；验收会创建临时账号及虚构数据，详见 cloud/README。正常安装使用已经打包的官方 SDK，不需安装部署工具。
+
+CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md)。2026-10-13 用户认证、桌面调用和完整快照同步通过；手机和网页客户端待后续开发。
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.7](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.8](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
-本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.5`。未配置 GitHub 远程或推送。
+本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.6`。未配置 GitHub 远程或推送。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 

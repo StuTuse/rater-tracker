@@ -1,15 +1,23 @@
 # SESSION_HANDOFF · 跨会话开发交接
 
-最后更新：2026-10-12，香港时间。产品规范《最终方案》v1.7、视觉 v1.5（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.5**。
+最后更新：2026-10-13，香港时间。产品规范《最终方案》v1.8、视觉 v1.5（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.6**。
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG 最近 W014、正式方案，结算特别阅读 4～6 节。
-2. 阅读 `docs/数据契约.md`、`docs/alpha.5验收记录.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.4 与 0.1 验收记录。
+1. 读本文件、AGENTS、WORKLOG 最近 W017、正式方案，结算特别阅读 4～6 节，同步见 8.5。
+2. 阅读 `docs/数据契约.md`、`docs/alpha.6验收记录.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.5 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
 
 ## 当前真实状态
+
+### CloudBase 账号登录与同步 · 2026-10-13
+
+用户授权完善应用端账号登录与同步。指定体验环境 `rater-tracker-sync-d3cx88f64aea2`（上海 ap-shanghai，到期 2027-04-12）实际为 PostgreSQL；001_sync.sql 已部署。用户名密码认证启用，账号在控制台创建／重置；未提供自助注册。官方 Node SDK 经受限 IPC 登录与 RPC，同步会话系统加密保存，无管理员凭证入包。
+
+首次为完整快照版本同步：保存与 dirty 原子写入，稳定 inFlight 重试、云端行锁 CAS 和回执；按认证 UID 隔离，冲突暂停并保留本地。选择云端和复制旧记录先成功导出备份。未登录／各账号独立，不自动上传旧个人数据，不重算历史奖励。不是操作级合并或云端统一结算，容量 4 MiB。免费计划不允许添加网页安全域名，桌面原生 SDK 已实测，手机／网页客户端待后续。rater-health 保留；W015／W016 为历史接入记录。
+
+云端两账号隔离、重试、冲突、退出及打包桌面登录／会话恢复通过。两个验收账号永久清理被自动审批拒绝，已向用户请求授权，目前保留：2109848299591114753、2109850418322677762。仅允许清理这些指定测试账号及其虚构记录，不能处理其他账号；凭证文件在忽略的 runtime-data/cloud-test。
 
 已从规划基线建立首个可运行／可安装的开发预览。不是 1.0 完整验收版。
 
@@ -22,25 +30,27 @@
 | 资产 | 48 个逐枚生图的透明 PNG 徽章、底纹与两张插画；旧 SVG 参考＋应用图标；资源与总览检查 |
 | 动效 | 金色液态光层、增长／回退／跨级／MAX；连续显示位置接续；偏好与隐藏暂停；11 项专项与 5 项 MAX 条件 |
 | 桌面 | 本地 app 来源、隔离 preload、单实例、JSON 文件接口；实际打包窗口和截图 |
-| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.4 → alpha.5 升级数据保持；隔离测试副本已卸载 |
+| 账号与同步 | 官方用户名密码登录；未登录与账号隔离、自动快照同步、冲突保留、加密会话；5 项同步测试＋真实云端／桌面检查 |
+| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.5 → alpha.6 升级数据保持；隔离测试副本已卸载 |
 | 尚未覆盖 | 以后格式迁移、Windows 原生文件对话框全程点击、60 fps 实测、长期大数据性能、完整人工体验验收 |
 
-安装包：`release/Rater-Tracker-0.1.0-alpha.5-Setup.exe`，202,693,363 字节，约 193.3 MiB；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.5验收记录.md`。
+安装包：`release/Rater-Tracker-0.1.0-alpha.6-Setup.exe`，203,233,999 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.6验收记录.md`。
 
 ## 文件责任与协作
 
-本轮负责 src/controls.js、app.js、dom.js、styles.css、icons.js、index.html、Electron smoke、浏览器验收和版本文档；没有改结算核心、存储契约或生图原图。接续前次未完成的同一轮改动，没有派遣／创建其他会话。
+本轮负责 src/app.js、storage.js、account.js、sync.js、vendor、index.html、Electron account／main／preload／SDK、cloud SQL／工具／依赖、同步测试、桌面账号验收脚本与版本文档。没有改结算核心或生图原图，没有派遣／创建其他会话。规则和备份格式不变。
 
 | 路径 | 用途 |
 | --- | --- |
 | `src/core.js` | 唯一数值／日期／结算定义，纯事务 |
-| `src/storage.js` | 原子保存、备份校验与恢复契约 |
+| `src/storage.js` | 原子保存、账号命名空间、同步元数据、备份校验与恢复契约 |
+| `src/account.js`、`src/sync.js`、`electron/account.cjs`、`cloud/` | 认证、会话加密、同步队列、官方 SDK 构建、SQL RPC 与云端验收 |
 | `src/app.js`、`src/dom.js`、`src/controls.js`、`src/styles.css` | 五页与详情、原位更新、应用内菜单／月历／滑块、真实反馈与动效 |
 | `src/art.js`、`src/badges.js`、`assets/generated/` | 51 张生图与入口、徽章元数据、提示词及总览；旧 assets/badges SVG 保留参考 |
 | `src/icons.js`、`assets/app.*` | 矢量图标与安装图标 |
 | `electron/main.cjs`、`electron/preload.cjs` | 桌面来源、窗口、安全与文件接口 |
 | `scripts/` | 预览、资产生成、工程检查、浏览器／桌面／安装验收 |
-| `test/core.test.mjs` | 25 项有意义的正式方案测试 |
+| `test/core.test.mjs`、`test/sync.test.mjs` | 25 项正式方案＋5 项同步边界测试 |
 | `docs/` | 数据契约与实际验收记录 |
 
 登记不是文件锁。后续用户安排并行时先协调共享入口，不能在共用目录各自切分支。
@@ -71,7 +81,11 @@ npm run dist
 npm run desktop:smoke
 node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.4-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.5-Setup.exe'
+node cloud/build.mjs
+node cloud/migrate.cjs
+node cloud/account-acceptance.cjs
+node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 ```
 
 安装验收脚本检测已有用户安装则停止；不为此自动卸载已有版本。源码路径含 `&`，工具入口直接经 Node 启动，避免常规 Windows .cmd 垫片解析错误。沙箱可能阻止 Node 子进程、缓存写入或下载；需要时按实际错误使用受审查的执行权限，不改写工程去关闭安全隔离。
@@ -82,7 +96,9 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 
 ## 检查与后续
 
-本轮 25 项业务、26 项控件、12 项浏览器、12 项 UI、11 项 flow 和 5 项 MAX 条件通过；最终安装 Electron 中新菜单、日历、退出动画、滑块、隐藏滚动条及 51 张解码／48 枚徽章通过。alpha.4 → alpha.5 升级保持 11 XP、revision=1 与数据路径，隔离测试副本已卸载。alpha.2 的图片 alpha 测量为历史检查，本轮未重跑。桌面／安装报告在 output/desktop、output/install，浏览器截图在 output/playwright；均忽略。
+本轮 npm run check 为 30/30，云端真实两账号测试通过；源码和最终打包 EXE 账号 smoke 登录下载 11 XP、云端 v1、加密会话与重启恢复通过。浏览器390px卡片无溢出、密码掩码；不是浏览器认证验收。alpha.5 → alpha.6 升级保持 11 XP、revision=1 与数据路径，快捷方式／单实例通过，隔离安装副本已卸载。26 项控件、12 项浏览器、12 项 UI、11 项 flow 和 5 项 MAX 为 alpha.5 历史专项，本轮未全量重跑；安装 smoke 验证菜单、日历与动画基础行为。报告在 output/desktop/account、output/install、.playwright-cli，均忽略。
+
+下一步：用户创建个人应用账号并在设置登录，按需复制旧未登录记录。未来多端客户端需另行解决网页安全域名／套餐约束及手机交付；若需要自动合并，须新增业务操作协议，不能直接合并 ledger 或从任务现状重算旧奖励。云端服务期满后的续费／方案另行决定，本轮未购买套餐。
 
 控件浮层必须挂到所属 dialog 内才能接收模态环境真实点击；退出浮层立即 inert／aria-hidden，清理在动画后进行。data-persistent-ui 标记由控件模块管理，DOM 更新跳过这些生成节点，控件增强阶段清理孤立按钮。不要改回按全局字段序号识别控件。桌面 smoke 的后台窗口仅在测试模式禁用节流以避免截图旧帧；不把该检查当成性能测试。
 
@@ -92,7 +108,7 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 
 ## 版本状态
 
-`VERSION`／package／锁文件为 `0.1.0-alpha.5`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.5`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
+`VERSION`／package／锁文件为 `0.1.0-alpha.6`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.6`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
 alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，alpha.4 提交 3ba94e1；alpha.5 统一应用内控件与二级界面动效，具体当前提交以 Git 查询为准。
 
