@@ -8,7 +8,7 @@ async page => {
     const image=s.querySelector('img'),title=s.querySelector('h1'),brand=s.querySelector('strong');
     const a=image.getBoundingClientRect(),b=title.getBoundingClientRect(),c=brand.getBoundingClientRect();
     const center=r=>Math.abs(r.left+r.width/2-innerWidth/2)<2;
-    return {white:getComputedStyle(s).backgroundColor==='rgb(255, 255, 255)'&&s.offsetWidth===innerWidth&&s.offsetHeight===innerHeight,
+    return {backgroundMatches:getComputedStyle(s).backgroundColor==='rgb(250, 248, 239)'&&getComputedStyle(s).backgroundColor===getComputedStyle(document.documentElement).backgroundColor&&s.offsetWidth===innerWidth&&s.offsetHeight===innerHeight,
       identity:image.complete&&image.naturalWidth>0&&center(a)&&center(b)&&b.top>a.bottom&&title.textContent==='Rater & Tracker',
       wordmark:brand.textContent==='TuseCreation'&&Number(getComputedStyle(brand).fontWeight)>=800&&center(c)&&c.top>innerHeight*.8&&c.bottom<innerHeight-25,
       blocked:document.querySelector('#app').inert&&getComputedStyle(document.querySelector('#app')).visibility==='hidden',
@@ -29,7 +29,7 @@ async page => {
     report.readyUnlocked=await page.evaluate(()=>!document.querySelector('#startup')&&!document.querySelector('#app').inert&&!document.querySelector('#app').hasAttribute('aria-busy')&&!document.body.classList.contains('is-starting'));
     await page.getByRole('button',{name:'任务',exact:true}).click();await page.getByRole('button',{name:'历史',exact:true}).click();await page.evaluate(()=>window.raterReload());
     report.inAppNoReplay=await page.locator('#startup').count()===0;
-    await page.setViewportSize({width:390,height:844});await start();const small=await geometry();report.narrowLayout=small.white&&small.identity&&small.wordmark&&small.noOverflow;
+    await page.setViewportSize({width:390,height:844});await start();const small=await geometry();report.narrowLayout=small.backgroundMatches&&small.identity&&small.wordmark&&small.noOverflow;
     await page.screenshot({path:'output/playwright/startup-narrow.png'});await ready();await page.setViewportSize({width:1440,height:960});
     await setMode('gentle');await start();const gentle=await freezeExit();report.gentleRespected=gentle.duration===150&&gentle.noScale;await resume();await ready();
     await setMode('off');await start();await ready();report.offRespected=await page.evaluate(()=>document.documentElement.dataset.motion==='off'&&!document.getAnimations().some(a=>a.id==='startup-exit'||a.id==='page-enter'));

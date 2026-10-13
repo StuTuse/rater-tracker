@@ -319,9 +319,9 @@ html[data-motion=off] .xp-stage-stream{display:none}
 /* Page entrance is explicitly owned by page-motion; saves do not replay CSS entry. */
 #content .rating-card,#content .task-card,#content .panel,#content .badge-card img{animation:none}
 
-/* A white first frame with the existing app icon and a quiet creator wordmark. */
-body.is-starting{background:#fff;overflow:hidden}body.is-starting #app{visibility:hidden}body.is-starting.is-revealing #app{visibility:visible}
-#startup{position:fixed;inset:0;z-index:100;background:#fff;color:#2d302b;display:grid;place-items:center;min-height:100dvh;user-select:none}
+/* The first frame shares the app's pale yellow paper and creator wordmark. */
+body.is-starting{background:var(--paper);overflow:hidden}body.is-starting #app{visibility:hidden}body.is-starting.is-revealing #app{visibility:visible}
+#startup{position:fixed;inset:0;z-index:100;background:var(--paper);color:#2d302b;display:grid;place-items:center;min-height:100dvh;user-select:none}
 .startup-identity{display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;padding:24px;transform:translateY(-25px)}
 .startup-identity img{display:block;width:128px;height:128px;object-fit:contain;filter:drop-shadow(0 8px 18px #ad89351a)}
 .startup-identity h1{font-size:28px;line-height:1.3;font-weight:600;letter-spacing:-.7px}

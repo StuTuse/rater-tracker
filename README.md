@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.16，白底启动页更新版。** 启动时中央软件图标与名称，底部加粗TuseCreation字标，数据准备后自然消散进入主界面。五页及页内切换动效、顶部92句、勋章窗口／礼花、十阶段成长与登录草稿保持。已实现真实评分、任务结算、本地持久化、48枚独立生图徽章、手绘底纹和完整备份。不是1.0正式验收版。
+**当前版本：0.1.0-alpha.17，淡黄色启动页更新版。** 启动页使用与软件背景一致的纸色（#faf8ef），中央软件图标与名称，底部加粗TuseCreation字标，数据准备后自然消散进入主界面。五页及页内切换动效、顶部92句、勋章窗口／礼花、十阶段成长与登录草稿保持。已实现真实评分、任务结算、本地持久化、48枚独立生图徽章、手绘底纹和完整备份。不是1.0正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.16-Setup.exe](release/Rater-Tracker-0.1.0-alpha.16-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.17-Setup.exe](release/Rater-Tracker-0.1.0-alpha.17-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -90,7 +90,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 | `src/storage.js` | IndexedDB 原子事务、revision 冲突校验、完整备份验证 |
 | `src/app.js` / `src/dom.js` / `src/controls.js` / `src/styles.css` | 五页界面、原位更新、应用内控件、动效与任务详情 |
 | `src/page-motion.js` / `scripts/pages-acceptance.cjs` | 主标签全内容与页内标签入场；有上限错峰、取消、减少动态与真实渲染检查 |
-| `src/startup.js` / `scripts/startup-acceptance.cjs` | 静态白底首屏、软件标识与TuseCreation字标、就绪消散、错误恢复及实际启动帧检查 |
+| `src/startup.js` / `scripts/startup-acceptance.cjs` | 静态纸色首屏、软件标识与TuseCreation字标、就绪消散、错误恢复及实际启动帧检查 |
 | `src/growth-stages.js` / `test/growth-stages.test.mjs` | 十阶段等级映射、独立SVG主体、升级编排与真实门槛回退检查 |
 | `src/notices.js` / `test/notices.test.mjs` | 92句启动短句、九位人物各2～3句、排除相邻重复与勋章提示队列去重／撤回；不参与结算 |
 | `assets/generated/` / `src/art.js` / `src/badges.js` | 51 张生图素材、资源入口、名称与门槛；旧 SVG 留作参考 |
@@ -111,6 +111,8 @@ alpha.13将句池扩展到80条（46鼓励／24自问／10名句译文），主�
 alpha.14新增四位各3句并核对官方／本人出处，总池92句，其中22句名句。英文短译与中文摘句在源码元数据及来源记录中区分；实际检查见[alpha.14验收](docs/alpha.14验收记录.md)，安装升级未重测。
 
 alpha.16白底启动页直接显示本地软件图标、名称和底部粗体TuseCreation，约1.2秒最短展示与数据准备并行。完整320ms消散与主页面入场衔接，柔和150ms、关闭静态；读取失败仍可重试，页内操作不重播。40工程、18项启动浏览器检查、41项切页回归及最终EXE首屏与既有smoke通过，见[alpha.16验收](docs/alpha.16验收记录.md)。本轮未重测安装升级。
+
+alpha.17按新要求把首屏改为软件背景同款淡黄色#faf8ef，窗口首帧同色；40工程、18启动浏览器与最终EXE隔离smoke通过，见[alpha.17验收](docs/alpha.17验收记录.md)。
 
 全标签动画检查见[alpha.15验收](docs/alpha.15验收记录.md)：41项页面条件、12项原位更新、26项控件与最终桌面检查。五个主页面全内容入场，页内标签只动变化部分；原位保存不重播。同一内容组内的文字和控件随组移动，避免父子透明度叠乘。NSIS升级本轮未重测。
 

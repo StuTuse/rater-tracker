@@ -1,4 +1,4 @@
-// The static splash is painted before storage opens, in the same desktop window.
+// The paper-colored splash is painted before storage opens, in the same window.
 // Startup readiness includes this hand-off; reloads within the app never replay it.
 export async function finishStartup(mode = 'gentle', reveal = () => {}) {
   const splash = document.querySelector('#startup');

@@ -640,7 +640,7 @@ window.raterReload = async () => { resetBadgeNotices(); state = validateState(aw
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.16', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.17', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');

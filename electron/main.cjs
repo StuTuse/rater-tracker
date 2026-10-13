@@ -56,7 +56,7 @@ else {
       return fs.readFile(file, 'utf8');
     }));
     Menu.setApplicationMenu(null);
-    window = new BrowserWindow({ width: 1440, height: 960, minWidth: 760, minHeight: 620, show: !smoke, backgroundColor: '#ffffff', title: 'Rater & Tracker', icon: path.join(root, 'assets/app.png'), webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
+    window = new BrowserWindow({ width: 1440, height: 960, minWidth: 760, minHeight: 620, show: !smoke, backgroundColor: '#faf8ef', title: 'Rater & Tracker', icon: path.join(root, 'assets/app.png'), webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
     const firstPaint = smoke ? new Promise(resolve => window.once('ready-to-show', resolve)) : null;
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event, url) => { if (!url.startsWith('app://rater/')) event.preventDefault(); });
@@ -140,11 +140,11 @@ else {
         await fs.mkdir(directory, { recursive: true });
         const startup = await window.webContents.executeJavaScript(`(async () => {
           const splash=document.querySelector('#startup'),image=splash?.querySelector('img');
-          if(!splash||!image)return {startupWhite:false,startupIdentity:false,startupCreator:false,startupBlocksInput:false};
+          if(!splash||!image)return {startupBackgroundMatches:false,startupIdentity:false,startupCreator:false,startupBlocksInput:false};
           await image.decode();
           const rect=splash.getBoundingClientRect(),icon=image.getBoundingClientRect(),title=splash.querySelector('h1').getBoundingClientRect(),brand=splash.querySelector('strong'),word=brand.getBoundingClientRect();
           const centered=r=>Math.abs(r.x+r.width/2-innerWidth/2)<2;
-          return {startupWhite:getComputedStyle(splash).backgroundColor==='rgb(255, 255, 255)'&&rect.width===innerWidth&&rect.height===innerHeight,
+          return {startupBackgroundMatches:getComputedStyle(splash).backgroundColor==='rgb(250, 248, 239)'&&getComputedStyle(splash).backgroundColor===getComputedStyle(document.documentElement).backgroundColor&&rect.width===innerWidth&&rect.height===innerHeight,
             startupIdentity:image.naturalWidth>0&&centered(icon)&&centered(title)&&title.top>icon.bottom&&splash.querySelector('h1').textContent==='Rater & Tracker',
             startupCreator:brand.textContent==='TuseCreation'&&Number(getComputedStyle(brand).fontWeight)>=800&&centered(word)&&word.top>innerHeight*.8,
             startupBlocksInput:document.querySelector('#app').inert&&getComputedStyle(document.querySelector('#app')).visibility==='hidden'};
@@ -262,7 +262,7 @@ else {
         await window.webContents.executeJavaScript(`(async () => { const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});document.querySelector('[data-action="account-open"]').click();document.querySelector('[data-action="account-register-tab"]').click(); })()`);
         await new Promise(resolve => setTimeout(resolve, 500));
         await fs.writeFile(path.join(directory, 'account-motion.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.startupWhite && report.startupIdentity && report.startupCreator && report.startupBlocksInput && report.startupDismissed && report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
+        app.exit(report.startupBackgroundMatches && report.startupIdentity && report.startupCreator && report.startupBlocksInput && report.startupDismissed && report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });
