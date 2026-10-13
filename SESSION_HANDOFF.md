@@ -17,3 +17,6 @@ Native认证完整SDK缓存仅进程内存并由Keystore AES-GCM／AtomicFile保
 验证码阶段之后：更新实际验收与日志／交接、核对并集入main、Windows工作区合并共享基线、保持私有并推送，完成时才建Android附注标签。当前源码检查点提交可上传为WIP，不能把上传／实现等同全验收。最终APK在Android工作区release/android，签名已验证v2、RSA3072；最终校验／主目录稳定产物复制仍需补录。
 
 验收命令：node scripts/check.mjs；node scripts/android-ui-acceptance.mjs ui|controls|pages|flow|stages|max；android-mobility-acceptance.mjs／android-files-acceptance.mjs；RATER_ANDROID_TEST_CREDENTIALS指向忽略JSON（username,password,id），运行android-account-acceptance.mjs／android-cloud-acceptance.mjs／android-release-acceptance.mjs。仅本次虚构云账号作写测试，原业务快照恢复，云版本正常增长。报告与截图output/android、output/desktop忽略。下一会话先看最新WORKLOG和本文件，不能输出密码／验证码／JWT／QQ邮件会话URL。
+
+
+最新W037：main及Windows工作区已快进至eb83ea2，私有main／codex/android-port已推送，47检查通过。最新debug包已安装、账号12补查通过；正式包8通过并已回读签名，稳定APK在主目录release/android，98,107,848字节，SHA256见W037。本次新邮箱验证码已重发，验证页保持，用户未回复刷新／新码，不能reload或重装dev以免挑战失效。用户回复后直接只读Sky邮箱取最新码，或用其提供新码完成验证；超过10分钟重新发一次。还未创建Android完成标签。
