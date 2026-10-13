@@ -18,5 +18,6 @@ public class MainActivity extends BridgeActivity {
    @Override public void handleOnBackPressed(){ RaterPlatformPlugin p=(RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance();p.back(); }
   });
  }
+ @Override public void onPause(){super.onPause();if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).inactive();}
  @Override public void onResume(){super.onResume();if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).active();}
 }

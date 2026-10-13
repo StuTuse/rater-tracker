@@ -10,7 +10,7 @@ export async function finishStartup(mode = 'gentle', reveal = () => {}) {
   try {
     reveal();
     const duration = mode === 'off' ? 0 : mode === 'full' ? 320 : 150;
-    if (duration && !document.hidden) {
+    if (duration && !document.hidden && globalThis.raterNative?.active!==false) {
       await splash.animate([{ opacity: 1 }, { opacity: 0 }], {
         id: 'startup-exit', duration, easing: 'cubic-bezier(.22,.8,.25,1)', fill: 'forwards'
       }).finished.catch(() => {});

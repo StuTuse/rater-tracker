@@ -1,0 +1,9 @@
+import{readFileSync}from'node:fs';let source=readFileSync(new URL('./stages-acceptance.cjs',import.meta.url),'utf8');
+function replace(from,to){if(!source.includes(from))throw Error('Native stage adapter source changed');source=source.replace(from,to);}
+replace('await page.evaluate(()=>window.raterReady);','await page.evaluate(()=>window.raterReady);await page.evaluate(()=>{const original=Element.prototype.animate;Element.prototype.animate=function(frames,options){const a=original.call(this,frames,options);if(this.id==="level-art"&&window.__holdStage){window.__holdStage=false;a.pause();a.currentTime=Number(a.effect.getTiming().duration)/3;window.__heldStage=a;}return a;};});');
+replace("await page.getByRole('button',{name:'学习 5 星',exact:true}).click();","await page.evaluate(()=>window.__holdStage=true);await page.getByRole('button',{name:'学习 5 星',exact:true}).click();");
+replace("el=>el.getAnimations().map(a=>a.effect.getKeyframes())","el=>{const frames=el.getAnimations().map(a=>a.effect.getKeyframes());window.__heldStage?.play();delete window.__heldStage;return frames;}");
+replace("await page.locator('[data-action=clear-rating][data-dimension=study]').click();","if(await page.locator('#modal[data-kind=award][open]').count())await page.getByRole('button',{name:'收下',exact:true}).click();await page.locator('[data-action=clear-rating][data-dimension=study]').click();");
+replace("await page.screenshot({path:'output/playwright/ten-stage-emblems.png',fullPage:true});","await page.evaluate(()=>document.querySelector('.phase-gallery').style.gridTemplateColumns='repeat(2,minmax(0,1fr))');await page.screenshot({path:'output/playwright/ten-stage-emblems.png'});");
+replace("db.close();document.querySelector('#modal').close();},original);","db.close();document.querySelector('#modal').close();await window.raterReload();},original);");
+export default new Function('return ('+source+'\n)')();

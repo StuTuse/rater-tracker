@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{sessionIdentity}from'../packages/data/session-identity.js';
+test('native token restoration without a user profile keeps the verified subject',()=>{assert.deepEqual(sessionIdentity({session:{sub:'u1'}},{id:'u1',name:'Test'}),{id:'u1',name:'Test'});});
+test('saved identity cannot be applied to another subject or an absent session',()=>{assert.equal(sessionIdentity({session:{sub:'u2'}},{id:'u1',name:'Test'}),null);assert.equal(sessionIdentity({},{id:'u1',name:'Test'}),null);});
+test('new verified login replaces the saved identity and keeps its display label',()=>{assert.deepEqual(sessionIdentity({session:{sub:'u2',user:{id:'u2',username:'canonical'}}},{id:'u1',name:'Old'},'Display'),{id:'u2',name:'Display'});assert.throws(()=>sessionIdentity({session:{sub:'u1',user:{id:'u2'}}},null),/身份不一致/);});
+test('anonymous credentials cannot restore a signed-in identity',()=>{assert.equal(sessionIdentity({session:{sub:'u1',user:{id:'u1',is_anonymous:true}}},{id:'u1',name:'Old'}),null);});

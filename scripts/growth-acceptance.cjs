@@ -19,7 +19,7 @@ async (page) => {
     await page.waitForFunction(()=>document.querySelector('#level-label').textContent==='MAX');
     await page.getByRole('button',{name:'关闭',exact:true}).click();
     await page.waitForFunction(()=>document.querySelector('#xp-total').textContent.replaceAll(',','')==='31265.0');
-    results.maxFinal=true;
+    results.maxFinal=true;await page.locator('#modal[data-kind=award][open]').waitFor({state:'visible'});await page.getByRole('button',{name:'收下',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#modal').open);results.maxAwardDoesNotGrantXP=await page.locator('#xp-total').innerText()==='31,265.0';
     await page.getByRole('button',{name:'任务',exact:true}).click();
     await page.getByRole('button',{name:'已完成',exact:true}).click();
     await page.getByRole('button',{name:'MAX验收成果 5',exact:true}).click();

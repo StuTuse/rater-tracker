@@ -1,6 +1,6 @@
 import { DIMENSIONS, LABELS, TIERS, SCALE, xp, hongKong, addDays, daysBetween, taskPlan, transact, totalUnits, levelAt, stats, nextCoefficient, progressDays, allocatedProgress, estimate } from './core.js';
 import { openStore, ConflictError, validateState, backupText, parseBackup } from './storage.js';
-import { currentAccount, loginAccount, logoutAccount, registerAccount, verifyRegistration, cloudSync } from './account.js';
+import { currentAccount, loginAccount, logoutAccount, registerAccount, verifyRegistration, cancelRegistration, cloudSync } from './account.js';
 import { SyncEngine } from './sync.js';
 import { icon } from './icons.js';
 import { BADGES } from './badges.js';
@@ -14,6 +14,7 @@ import { createPageMotion } from './page-motion.js';
 import { finishStartup } from './startup.js';
 
 const platform = window.desktop ?? window.raterNative;
+const appVisible=()=>!document.hidden&&window.raterNative?.active!==false;
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
 const fmt = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -59,10 +60,10 @@ async function openAccount(next) {
   store.close(); account = next;
   store = await openStore(next?.id); state = validateState(await store.read());
   localStorage.setItem('rater-active-account', JSON.stringify(next));
-  drafts.clear(); stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog(); refreshAccountIdentity();
+  drafts.clear(); stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog(); refreshAccountIdentity();$('#save-status').textContent=next?'正在同步':'已保存到本机';
   if (next) {
     const activeStore = store;
-    syncEngine = new SyncEngine(store, cloudSync, async (status, message) => {
+    syncEngine = new SyncEngine(store, data=>cloudSync({...data,accountId:next.id}), async (status, message) => {
       if (store !== activeStore) return;
       syncStatus = ({ synced: '已同步', pending: '已保存到本机，待同步', conflict: '两端数据有冲突，请先备份并选择云端版本', offline: '已保存到本机，同步暂未完成' })[status];
       if (message) syncStatus += `：${message}`;
@@ -83,7 +84,7 @@ let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer
 const modalUI = createModalController($('#modal'), motionMode, kind => {
   if (kind === 'account') {
     $('#modal').querySelectorAll('input[type="password"], #account-verify input').forEach(input => { input.value = ''; });
-    registrationChallenge = null;
+    registrationChallenge = null; cancelRegistration();
   }
   if (kind === 'award') { badgeNotices.dismiss(); activeBadge = null; }
   scheduleBadgeNotice();
@@ -107,7 +108,7 @@ function toast(message, error = false) {
 function motionMode() { return state.settings.motion === 'off' ? 'off' : matchMedia('(prefers-reduced-motion: reduce)').matches ? 'gentle' : state.settings.motion; }
 function flowState() {
   const growth = $('#growth');
-  if (growth) growth.dataset.flow = motionMode() === 'full' && !document.hidden && totalUnits(state) > 0 ? 'running' : 'paused';
+  if (growth) growth.dataset.flow = motionMode() === 'full' && appVisible() && totalUnits(state) > 0 ? 'running' : 'paused';
 }
 function applyMotion() { document.documentElement.dataset.motion = motionMode(); if (motionMode() !== 'full') { pageMotion.cancel(); starAnimations.forEach(a => a.cancel()); starAnimations.clear(); } flowState(); }
 function stopGrowthFeedback() {
@@ -213,8 +214,8 @@ function shell() {
     <a class="brand" href="#today" data-action="navigate" data-page="today" aria-label="返回今日"><img src="assets/app.svg" alt=""><span>Rater <i>&</i> Tracker</span></a>
     <div class="nav-caption">记录</div>
     <nav>${[['today', '今日', 'sun'], ['tasks', '任务', 'tasks'], ['history', '历史', 'history'], ['rewards', '奖励中心', 'rewards'], ['settings', '设置', 'settings']].map(([id, title, i]) => button('navigate', title, i, `data-page="${id}"`, `nav-link ${page === id ? 'selected' : ''}`)).join('')}</nav>
-    <div class="sidebar-bottom"><div id="account-entry-slot">${accountIdentity()}</div><small>v${escape(desktopInfo.version)}</small></div>
-  </aside><div class="workspace"><header class="topbar"><div class="top-intro"><div class="top-kicker">Rater & Tracker</div><span id="launch-line" title="${escape(launchLine)}">${escape(launchLine)}</span></div><span id="save-status">已保存到本机</span></header>
+    ${window.raterNative ? "" : `<div class="sidebar-bottom"><div id="account-entry-slot">${accountIdentity()}</div><small>v${escape(desktopInfo.version)}</small></div>`}
+  </aside><div class="workspace"><header class="topbar"><div class="top-intro"><div class="top-kicker">Rater & Tracker</div><span id="launch-line" title="${escape(launchLine)}">${escape(launchLine)}</span></div><span id="save-status">已保存到本机</span>${window.raterNative ? `<div id="account-entry-slot">${accountIdentity()}</div>` : ""}</header>
     <section id="growth" class="growth"><div class="level-medallion"><div id="level-art"></div><strong id="level-label"></strong><div id="particles"></div></div><div class="growth-body"><div class="growth-head"><span class="eyebrow">等级经验</span><span class="xp-message" id="growth-message"></span></div><div class="xp-bar" id="xp-bar" role="progressbar" aria-label="当前等级经验进度" aria-valuemin="0" aria-valuemax="100"><div id="xp-ghost"></div><div id="xp-fill"><div class="xp-fluid" aria-hidden="true"><i></i><i></i><i></i></div><div class="xp-stage-stream" aria-hidden="true">${Array.from({length:6},(_,i)=>`<i style="--mote:${i}"></i>`).join('')}</div><div class="xp-glint" aria-hidden="true"></div><div class="xp-tip" aria-hidden="true"></div></div></div><div class="growth-foot"><span id="xp-progress"></span><span id="xp-next"></span></div></div><div class="total-xp"><span>有效累计经验</span><strong id="xp-total"></strong><small>XP</small></div></section>
     <main id="content"></main><footer>Rater & Tracker <span>·</span> 本机保存</footer></div>`;
   growthStatic();
@@ -317,7 +318,7 @@ function rewardsPage() {
   return header('GROWTH / 奖励中心', '奖励中心', '') + `<div class="summary-grid"><div><span>收集的徽章</span><strong>${obtained.length}<small> / 48</small></strong></div><div><span>有效星数</span><strong>${s.stars.toLocaleString()}</strong></div><div><span>完成的成果</span><strong>${s.tasks}</strong></div><div><span>完整记录天数</span><strong>${s.completeDays}</strong></div></div><div class="section-title"><h2>下一份成果的完成系数</h2><span>各量级独立 · 以实际结算为准</span></div>${coefficientCards()}<div class="toolbar reward-tabs"><div class="segmented">${[['badges', '徽章收藏'], ['ledger', '经验明细'], ['review', '周期回顾'], ['rules', '奖励规则']].map(([id, label]) => button('reward-tab', label, '', `data-tab="${id}"`, rewardTab === id ? 'selected' : '')).join('')}</div></div>${rewardTab === 'badges' ? `<div class="badge-filters">${[['all', '全部'], ...Object.entries(seriesNames)].map(([id, label]) => button('badge-filter', label, '', `data-series="${id}"`, badgeFilter === id ? 'chip selected' : 'chip')).join('')}</div>${badgeCards()}` : rewardTab === 'ledger' ? `<section class="panel"><p class="field-hint">共 ${state.ledger.length} 笔 · 显示最近 200 笔；完整历史随 JSON 备份保留。</p>${state.ledger.length ? ledgerTable([...state.ledger].reverse().slice(0, 200)) : empty('暂无经验明细', '保存评分或记录任务后，在这里查看明细。', '', 'ledger')}</section>` : rewardTab === 'rules' ? rules() : periodReview()}`;
 }
 function settingsPage() {
-  return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新保留数据。应用关闭后不发送提醒。</p></section></div></div>`;
+  return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${window.raterNative ? "记录保存在本机。可通过完整 JSON 备份迁移到另一台设备。" : escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">${window.raterNative ? "更新保留数据；卸载前请导出完整备份。" : "更新保留数据。"}应用关闭后不发送提醒。</p></section></div></div>`;
 }
 function renderContent(preserveInputs = true, animateChanges = false, entrance = '') {
   if (entrance) pageMotion.cancel();
@@ -350,7 +351,7 @@ function animateStar(button, lit) {
   const svg = button.querySelector('svg'), previous = starAnimations.get(svg);
   const transform = previous ? getComputedStyle(svg).transform : lit ? 'scale(.72) rotate(-9deg)' : 'scale(1.08)';
   previous?.cancel(); starAnimations.delete(svg);
-  if (motionMode() === 'off' || document.hidden) return;
+  if (motionMode() === 'off' || !appVisible()) return;
   const gentle = motionMode() === 'gentle';
   const animation = svg.animate(gentle ? [{ opacity: .55 }, { opacity: 1 }] : [
     { transform, opacity: .65 },
@@ -400,7 +401,7 @@ function scheduleBadgeNotice() {
   if (!badgeNotices.pending.length) return;
   badgeNoticeTimer = setTimeout(() => {
     const modal = $('#modal'), focus = document.activeElement;
-    if (modal.open || modal.hasAttribute('data-closing') || document.hidden || focus?.matches('input,textarea,select,[contenteditable=true]')) return;
+    if (modal.open || modal.hasAttribute('data-closing') || !appVisible() || focus?.matches('input,textarea,select,[contenteditable=true]')) return;
     badgeNotices.reconcile(earned(state).map(b => b.id));
     if (!badgeNotices.take().length) return;
     awardPage = 0; showBadgeNotice();
@@ -424,7 +425,7 @@ function showBadgeNotice() {
   openModal(`<div class="award-heading"><span>获得勋章</span>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>${confetti}<div class="award-body"><div class="award-halo" aria-hidden="true"></div><img class="award-image" src="${badgeArt(badge.id)}" alt="${escape(badge.subject)}"><h2 id="modal-title">${escape(badge.name)}</h2><p>${seriesNames[badge.series]} · 第 ${badge.tier} 级</p></div><div class="award-actions">${ids.length > 1 ? `${button('award-prev', '上一枚', 'chevron', '', 'secondary')}<span id="award-count">${awardPage + 1} / ${ids.length}</span>${button('award-next', '下一枚', 'chevron', '', 'secondary')}` : '<span id="award-count" hidden>1 / 1</span>'}${button('close-modal', '收下', '', '', 'primary')}</div>`, 'award');
 }
 document.addEventListener('focusout', scheduleBadgeNotice);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleBadgeNotice(); else $('.award-confetti')?.remove(); });
+document.addEventListener('visibilitychange', () => { if (appVisible()) scheduleBadgeNotice(); else $('.award-confetti')?.remove(); });
 const modalHead = (kicker, title) => `<div class="modal-head"><div><h2 id="modal-title">${escape(title)}</h2></div>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>`;
 function confirmAction(title, body, callback, label = '确认', danger = false) {
   openModal(`${modalHead('请核对这次操作', title)}<p class="confirm-body">${body}</p><div class="modal-actions">${button('close-modal', '取消', '', '', 'secondary')}<button type="button" id="confirm-action" class="${danger ? 'danger' : 'primary'}">${label}</button></div>`, 'confirm');
@@ -549,7 +550,7 @@ document.addEventListener('click', async event => {
       }, '备份并复制'); return;
     }
     switch (action) {
-      case 'navigate': { const changed = page !== b.dataset.page; page = b.dataset.page; renderContent(true, false, changed ? 'page' : ''); break; }
+      case 'navigate': { const changed = page !== b.dataset.page; page = b.dataset.page; renderContent(true, false, changed ? 'page' : ''); if(changed && window.raterNative)window.scrollTo(0,0); break; }
       case 'rate': await save({ type: 'rate', dimension: b.dataset.dimension, stars: Number(b.dataset.stars), date: chosenDate, ...(drafts.has(`${chosenDate}/${b.dataset.dimension}`) ? { note: drafts.get(`${chosenDate}/${b.dataset.dimension}`) } : {}) }, '评分已保存'); break;
       case 'clear-rating': confirmAction(`清空${LABELS[b.dataset.dimension]}评分？`, '这会撤回该项全部实际经验和星数，之后重新补记按新的录入时间结算。', () => { drafts.delete(`${chosenDate}/${b.dataset.dimension}`); save({ type: 'rate', dimension: b.dataset.dimension, stars: null, date: chosenDate }, '评分已清空'); }, '清空评分', true); break;
       case 'reference': openModal(`${modalHead('RATING GUIDE', `${LABELS[b.dataset.dimension]} · 评分参照`)}<p class="reference-text">${escape(state.settings.references[b.dataset.dimension])}</p>${button('close-modal', '知道了', '', '', 'primary')}`, 'reference'); break;
@@ -636,7 +637,7 @@ document.addEventListener('submit', async event => {
 $('#modal').addEventListener('cancel', event => { event.preventDefault(); closeModal(); });
 $('#modal').addEventListener('click', event => { if (event.target === $('#modal')) { const rect = $('#modal').getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal(); } });
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) { applyMotion(); growthStatic(); } });
-document.addEventListener('visibilitychange', () => { if (state) { if (document.hidden) { pageMotion.cancel(); growthStatic(); } else flowState(); } });
+document.addEventListener('visibilitychange', () => { if (state) { if (!appVisible()) { pageMotion.cancel(); growthStatic(); } else flowState(); } });
 window.raterReload = async () => { resetBadgeNotices(); state = validateState(await store.read()); growthStatic(); renderContent(); };
 window.raterReady = (async () => {
   try {
@@ -648,12 +649,13 @@ window.raterReady = (async () => {
       const active = await currentAccount().catch(() => remembered);
       if (active?.id) await openAccount(active);
     } catch (error) { syncStatus = `账号恢复未完成：${error.message}`; }
-    setInterval(() => { if (!document.hidden && syncEngine) syncEngine.run(); }, 60000);
+    setInterval(() => { if (appVisible() && syncEngine) syncEngine.run(); }, 60000);
     window.addEventListener('online', () => syncEngine?.run());
-    setInterval(() => { if (page === 'today' && chosenDate !== today() && !document.hidden && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
+    setInterval(() => { if (page === 'today' && chosenDate !== today() && appVisible() && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
   } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }
   finally { await finishStartup(state ? motionMode() : (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'gentle' : 'full'), () => { if ($('#content')) pageMotion.play('page'); }); }
 })();
 
-window.addEventListener('rater-back', () => { if(document.querySelector('[popover]:popover-open')) { closeControlLayer(); return; } if($('#modal').open) { closeModal(); return; } if(page!=='today') { page='today'; renderContent(true,false,'page'); return; } platform?.quit?.(); });
+window.addEventListener('rater-back', () => { if(document.querySelector('[popover]:popover-open')) { closeControlLayer(); return; } if($('#modal').open) { closeModal(); return; } if(page!=='today') { page='today'; renderContent(true,false,'page');window.scrollTo(0,0); return; } platform?.quit?.(); });
+window.addEventListener('rater-pause',()=>{if(state){pageMotion.cancel();growthStatic();$('.award-confetti')?.remove();}});
 window.addEventListener('rater-resume', () => { if(store) window.raterReload().then(()=>syncEngine?.run()).catch(e=>toast(e.message)); });

@@ -1,2 +1,1 @@
-import { spawn } from 'node:child_process';
-const p=spawn(process.execPath,['node_modules/@capacitor/cli/bin/capacitor',...process.argv.slice(2)],{cwd:'apps/android',stdio:'inherit'});p.on('exit',c=>process.exit(c??1));
+import {spawnSync} from 'node:child_process';import{fileURLToPath}from'node:url';import path from'node:path';const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');function run(args,cwd){const r=spawnSync(process.execPath,args,{cwd,stdio:'inherit'});if(r.status!==0)process.exit(r.status??1);}const args=process.argv.slice(2);if(args[0]==='sync')run([path.join(root,'scripts/android-web.mjs')],root);run(['node_modules/@capacitor/cli/bin/capacitor',...args],path.join(root,'apps/android'));

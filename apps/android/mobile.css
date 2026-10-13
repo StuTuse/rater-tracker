@@ -35,3 +35,8 @@ html[data-platform=android] #startup{padding-top:var(--native-safe-top,24px);pad
 html[data-platform=android].keyboard-open .sidebar{visibility:hidden}
 
 html[data-platform=android] dialog{top:var(--native-safe-top,24px);bottom:calc(100dvh - var(--visual-height,100dvh));max-height:calc(var(--visual-height,100dvh) - var(--native-safe-top,24px) - 24px);margin:auto;overflow-y:auto}
+
+html[data-platform=android] body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--native-safe-top,24px);background:#faf8ef;z-index:30;pointer-events:none}
+
+html[data-platform=android] .topbar{position:relative;min-height:60px}
+html[data-platform=android] .topbar #account-entry-slot{position:absolute;top:8px;right:0}

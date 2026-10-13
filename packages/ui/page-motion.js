@@ -31,7 +31,7 @@ export function createPageMotion(getRoot, motion) {
   const play = (scope = 'page') => {
     cancel();
     const root = getRoot(), mode = motion();
-    if (!root || mode === 'off' || document.hidden) return;
+    if (!root || mode === 'off' || document.hidden || globalThis.raterNative?.active===false) return;
     const token = generation, groups = pageEntryGroups(root, scope);
     if (!groups.length) return;
     root.dataset.entering = scope;

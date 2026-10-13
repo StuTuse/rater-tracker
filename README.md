@@ -167,3 +167,18 @@ CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md
 生图素材与完整提示词：[清单](docs/生图素材清单.md) · [可离线打开的徽章总览](assets/generated/gallery.html) · [alpha.2 验收](docs/alpha.2验收记录.md)。素材使用内置 image_gen 制作，全部最终图片已保存入项目。
 
 alpha.3 经验条历史动效预览：[实际录制](output/playwright/alpha3-xp-flow.mp4)；完整动效可在设置中切换为柔和或关闭，系统减少动态优先。录制是本地忽略产物，重新检出源码时不包含该视频。
+
+
+## 双端工程（Android验收进行中）
+
+Windows原生入口 apps/windows，共享业务 packages/core、存储 packages/data、界面 packages/ui。Android工程 apps/android；独立VERSION和VERSION_CODE，后续更新递增VERSION_CODE，Windows版本仍由根VERSION／package声明。
+
+根目录安装依赖后，安卓子工程单独安装：在 apps/android 执行 npm ci。源码路径含 &，建议直接使用Node工具入口。
+
+实际命令：node scripts/android-command.mjs sync android（准备本地资源后同步原生工程）；node scripts/android-command.mjs open android（打开Android Studio）；node scripts/android-build.mjs（JDK21构建debug／签名release APK）。设置 RATER_JAVA_HOME 为JDK21，ANDROID_SDK_ROOT为SDK；本机测试下载的JDK位于runtime-data/toolchains。RATER_BUILD_PROXY仅在依赖下载需要时设置。
+
+签名默认主Git工作区的runtime-data/android-signing，可用RATER_ANDROID_SIGNING_DIR指定既有私有签名目录；保留密钥与signing.json用于后续覆盖升级，绝不入库。release/android产物忽略。dev包ID local.ratertracker.android.dev，正式包local.ratertracker.android，用户数据分离；Windows开发使用npm run start:dev。
+
+设备验收：node scripts/android-ui-acceptance.mjs ui／controls／pages／flow／stages／max；只用于本次专用emulator-5556，RATER_ANDROID_SERIAL可指定另一隔离测试设备。真实状态与未验收项见WORKLOG W033。
+
+安卓原生操作：node scripts/android-mobility-acceptance.mjs（真实返回／后台／键盘）、node scripts/android-files-acceptance.mjs（真实文件选择器与取消／编码拒绝）。账号与云协议脚本分别为android-account-acceptance.mjs、android-cloud-acceptance.mjs，必须将RATER_ANDROID_TEST_CREDENTIALS指向忽略的虚构测试账号JSON，包含username/password/id。正式包真实UI脚本android-release-acceptance.mjs使用同一测试配置；请只在专用模拟器或隔离测试设备运行。不要把用户账号作为灌入测试业务数据的身份。

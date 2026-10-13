@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 
-def signingFile = file('../../../../runtime-data/android-signing/signing.json')
+def signingFile = file(project.findProperty('raterSigningFile') ?: '../../../../runtime-data/android-signing/signing.json')
+def appVersion = file('../../VERSION').text.trim()
+def appVersionCode = file('../../VERSION_CODE').text.trim().toInteger()
 def localSigning = signingFile.exists() ? new groovy.json.JsonSlurper().parse(signingFile) : null
 
 android {
@@ -12,8 +14,8 @@ android {
         applicationId "local.ratertracker.android"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.1.0-alpha.1"
+        versionCode appVersionCode
+        versionName appVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

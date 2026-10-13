@@ -15,7 +15,7 @@
     "dist": "npm run check && node node_modules/electron-builder/cli.js --win nsis --x64 --publish never",
     "desktop:smoke": "node scripts/desktop-smoke.mjs",
     "start:dev": "node scripts/windows-dev.mjs",
-    "android:sync": "node scripts/android-command.mjs sync",
+    "android:sync": "node scripts/android-command.mjs sync android",
     "android:build": "node scripts/android-build.mjs"
   },
   "devDependencies": {
