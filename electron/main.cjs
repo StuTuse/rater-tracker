@@ -198,6 +198,32 @@ else {
         })()`);
         const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
         await fs.mkdir(directory, { recursive: true });
+        try {
+          Object.assign(report, await window.webContents.executeJavaScript(`(async()=>{
+            const c=await import('./src/core.js'),storage=await import('./src/storage.js'),notices=await import('./src/notices.js');
+            const db=await storage.openStore(),original=await db.read(),stamp=new Date().toISOString(),date=c.hongKong(stamp).date;
+            window.raterSmokeRestore=async()=>{const latest=await db.read();await db.write(original,latest.revision);db.close();await window.raterReload();};
+            let fixture=c.createState();
+            for(let i=19;i>=1;i--)fixture=c.transact(fixture,{id:'notice-fixture-'+i,type:'rate',date:c.addDays(date,-i),dimension:'study',stars:5},stamp);
+            fixture=c.transact(fixture,{id:'notice-today',type:'rate',date,dimension:'study',stars:4},stamp);fixture.revision=original.revision+1;
+            await db.write(fixture,original.revision);await window.raterReload();
+            document.querySelector('[data-dimension=study][data-stars="5"]').click();
+            for(let i=0;i<30;i++){await new Promise(r=>setTimeout(r,40));if(document.querySelector('#modal').open&&document.querySelector('#modal').dataset.kind==='award')break;}
+            const modal=document.querySelector('#modal'),image=modal.querySelector('.award-image');if(!image)throw new Error('No saved badge notice');await image.decode();
+            await new Promise(r=>setTimeout(r,300));
+            const actual=await db.read(),expected=c.transact(fixture,{id:'notice-expected',type:'rate',date,dimension:'study',stars:5},stamp);
+            const badgeAwardSaved=modal.open&&modal.dataset.kind==='award'&&modal.querySelector('#award-count').textContent==='1 / 2'&&image.naturalWidth>0;
+            const badgeConfettiFinite=modal.querySelectorAll('.award-confetti i').length===36&&modal.querySelector('.award-confetti').getAnimations({subtree:true}).every(a=>a.effect.getComputedTiming().iterations===1);
+            const badgeNoExtraXP=c.totalUnits(actual)===c.totalUnits(expected);
+            const title=document.querySelector('.top-kicker').getBoundingClientRect(),line=document.querySelector('#launch-line'),rect=line.getBoundingClientRect();
+            const launchLineOnTop=notices.LAUNCH_LINES.includes(line.textContent)&&rect.left>title.right&&!line.closest('.sidebar');
+            return {badgeAwardSaved,badgeConfettiFinite,badgeNoExtraXP,launchLineOnTop};
+          })()`));
+          await fs.writeFile(path.join(directory, 'badge-award.png'), (await window.webContents.capturePage()).toPNG());
+        } finally {
+          await window.webContents.executeJavaScript(`(async()=>{if(window.raterSmokeRestore){await window.raterSmokeRestore();delete window.raterSmokeRestore;}})()`);
+          await new Promise(resolve=>setTimeout(resolve,350));
+        }
         await fs.writeFile(path.join(directory, 'report.json'), JSON.stringify({ ...report, version: app.getVersion(), packaged: app.isPackaged, userData: app.getPath('userData') }, null, 2));
         await new Promise(resolve => setTimeout(resolve, 1200));
         await fs.writeFile(path.join(directory, 'desktop.png'), (await window.webContents.capturePage()).toPNG());
@@ -207,7 +233,7 @@ else {
         await window.webContents.executeJavaScript(`(async () => { const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});document.querySelector('[data-action="account-open"]').click();document.querySelector('[data-action="account-register-tab"]').click(); })()`);
         await new Promise(resolve => setTimeout(resolve, 500));
         await fs.writeFile(path.join(directory, 'account-motion.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns ? 0 : 1);
+        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });

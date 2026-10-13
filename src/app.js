@@ -9,12 +9,19 @@ import { updateDOM } from './dom.js';
 import { closeControlLayer, enhanceControls } from './controls.js';
 import { createModalController } from './modal.js';
 import { growthStage, paintStage, stageUpgradeFrames } from './growth-stages.js';
+import { chooseLaunchLine, BadgeNoticeQueue } from './notices.js';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
 const fmt = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const today = () => hongKong().date;
 const uid = () => crypto.randomUUID();
+let lastLaunchLine;
+try { lastLaunchLine = localStorage.getItem('rater-last-launch-line'); } catch {}
+const launchLine = chooseLaunchLine(lastLaunchLine);
+try { localStorage.setItem('rater-last-launch-line', launchLine); } catch {}
+const badgeNotices = new BadgeNoticeQueue();
+let badgeNoticeTimer, activeBadge, awardPage = 0;
 let account = null, syncEngine = null, syncStatus = '未登录', accountBusy = false;
 let accountMode = 'login', registrationChallenge = null;
 function accountIdentity() {
@@ -45,6 +52,7 @@ async function openAccount(next) {
   await syncEngine?.running;
   await queue;
   syncEngine = null;
+  resetBadgeNotices();
   store.close(); account = next;
   store = await openStore(next?.id); state = validateState(await store.read());
   localStorage.setItem('rater-active-account', JSON.stringify(next));
@@ -59,7 +67,7 @@ async function openAccount(next) {
       await queue;
       if (store !== activeStore) return;
       const latest = validateState(await store.read());
-      if (latest.revision !== state.revision) { state = latest; applyMotion(); growthStatic(); renderContent(); refreshTaskDialog(); }
+      if (latest.revision !== state.revision) { resetBadgeNotices(); state = latest; applyMotion(); growthStatic(); renderContent(); refreshTaskDialog(); }
       else if (page === 'settings') renderContent();
       $('#save-status').textContent = syncStatus;
     });
@@ -74,6 +82,8 @@ const modalUI = createModalController($('#modal'), motionMode, kind => {
     $('#modal').querySelectorAll('input[type="password"], #account-verify input').forEach(input => { input.value = ''; });
     registrationChallenge = null;
   }
+  if (kind === 'award') { badgeNotices.dismiss(); activeBadge = null; }
+  scheduleBadgeNotice();
 });
 const growthAnimations = new Set();
 const starAnimations = new Map();
@@ -147,8 +157,9 @@ function feedback(before, after, reason) {
   const phrase = changed ? (next.level === 'MAX' ? '抵达 MAX' : `${delta > 0 ? '升级至' : '更正为'} Lv.${next.level}${typeof old.level === 'number' && typeof next.level === 'number' && Math.abs(next.level - old.level) > 1 ? ` · 跨越 ${Math.abs(next.level - old.level)} 级` : ''}`) : reason;
   $('#growth-message').textContent = `${delta >= 0 ? '+' : '−'}${fmt(Math.abs(delta))} XP · ${phrase}`;
   $('#growth-message').className = delta < 0 ? 'xp-message negative' : 'xp-message';
-  const badgeNote = gained.length ? ` · 获得${gained.map(b => `「${b.name}」`).slice(0, 2).join('')}${gained.length > 2 ? `等 ${gained.length} 枚徽章` : ''}` : lost.length ? ` · ${lost.length} 枚徽章因有效记录变化撤回` : '';
-  if (badgeNote) toast(`${reason}${badgeNote}`);
+  badgeNotices.add(gained.map(b => b.id));
+  reconcileBadgeNotices();
+  if (lost.length) toast(`${lost.length} 枚徽章因有效记录变化撤回`);
   if (motionMode() !== 'off') {
     const mode = motionMode(), duration = mode === 'gentle' ? 300 : changed ? 1280 : 820;
     const final = `${next.ratio * 100}%`, initial = `${displayedRatio * 100}%`;
@@ -185,7 +196,7 @@ function save(action, reason) {
       $('#save-status').textContent = '已保存到本机';
       if (syncEngine) { syncStatus = '已保存到本机，待同步'; syncEngine.run(); }
     } catch (error) {
-      if (error instanceof ConflictError) { state = validateState(await store.read()); renderContent(); growthStatic(); }
+      if (error instanceof ConflictError) { resetBadgeNotices(); state = validateState(await store.read()); renderContent(); growthStatic(); }
       $('#save-status').textContent = '本次未保存'; toast(error.message, true);
       throw error;
     }
@@ -199,7 +210,7 @@ function shell() {
     <div class="nav-caption">记录</div>
     <nav>${[['today', '今日', 'sun'], ['tasks', '任务', 'tasks'], ['history', '历史', 'history'], ['rewards', '奖励中心', 'rewards'], ['settings', '设置', 'settings']].map(([id, title, i]) => button('navigate', title, i, `data-page="${id}"`, `nav-link ${page === id ? 'selected' : ''}`)).join('')}</nav>
     <div class="sidebar-bottom"><div id="account-entry-slot">${accountIdentity()}</div><small>v${escape(desktopInfo.version)}</small></div>
-  </aside><div class="workspace"><header class="topbar"><div class="top-kicker">Rater & Tracker</div><span id="save-status">已保存到本机</span></header>
+  </aside><div class="workspace"><header class="topbar"><div class="top-intro"><div class="top-kicker">Rater & Tracker</div><span id="launch-line">${escape(launchLine)}</span></div><span id="save-status">已保存到本机</span></header>
     <section id="growth" class="growth"><div class="level-medallion"><div id="level-art"></div><strong id="level-label"></strong><div id="particles"></div></div><div class="growth-body"><div class="growth-head"><span class="eyebrow">等级经验</span><span class="xp-message" id="growth-message"></span></div><div class="xp-bar" id="xp-bar" role="progressbar" aria-label="当前等级经验进度" aria-valuemin="0" aria-valuemax="100"><div id="xp-ghost"></div><div id="xp-fill"><div class="xp-fluid" aria-hidden="true"><i></i><i></i><i></i></div><div class="xp-stage-stream" aria-hidden="true">${Array.from({length:6},(_,i)=>`<i style="--mote:${i}"></i>`).join('')}</div><div class="xp-glint" aria-hidden="true"></div><div class="xp-tip" aria-hidden="true"></div></div></div><div class="growth-foot"><span id="xp-progress"></span><span id="xp-next"></span></div></div><div class="total-xp"><span>有效累计经验</span><strong id="xp-total"></strong><small>XP</small></div></section>
     <main id="content"></main><footer>Rater & Tracker <span>·</span> 本机保存</footer></div>`;
   growthStatic();
@@ -370,9 +381,44 @@ document.addEventListener('focusout', event => {
   if (control && !control.contains(event.relatedTarget)) previewRating(control, null);
 });
 function openModal(contents, kind = '') {
+  if (kind !== 'award' && $('#modal').dataset.kind === 'award') { badgeNotices.dismiss(); activeBadge = null; }
   modalUI.open(contents, kind);
 }
 function closeModal() { modalUI.close(); }
+function resetBadgeNotices() {
+  clearTimeout(badgeNoticeTimer); badgeNotices.clear();
+  if ($('#modal').open && $('#modal').dataset.kind === 'award') closeModal();
+}
+function scheduleBadgeNotice() {
+  clearTimeout(badgeNoticeTimer);
+  if (!badgeNotices.pending.length) return;
+  badgeNoticeTimer = setTimeout(() => {
+    const modal = $('#modal'), focus = document.activeElement;
+    if (modal.open || modal.hasAttribute('data-closing') || document.hidden || focus?.matches('input,textarea,select,[contenteditable=true]')) return;
+    badgeNotices.reconcile(earned(state).map(b => b.id));
+    if (!badgeNotices.take().length) return;
+    awardPage = 0; showBadgeNotice();
+  }, 180);
+}
+function reconcileBadgeNotices() {
+  badgeNotices.reconcile(earned(state).map(b => b.id));
+  if ($('#modal').open && $('#modal').dataset.kind === 'award') {
+    if (!badgeNotices.current.length) closeModal();
+    else if (!badgeNotices.current.includes(activeBadge)) { awardPage = 0; showBadgeNotice(); }
+    else { awardPage = badgeNotices.current.indexOf(activeBadge); $('#award-count').textContent = `${awardPage + 1} / ${badgeNotices.current.length}`; }
+  }
+  scheduleBadgeNotice();
+}
+function showBadgeNotice() {
+  const ids = badgeNotices.current;
+  if (!ids.length) return;
+  awardPage = Math.min(awardPage, ids.length - 1);
+  const badge = BADGES.find(b => b.id === ids[awardPage]); activeBadge = badge.id;
+  const confetti = motionMode() === 'full' ? `<div class="award-confetti" aria-hidden="true">${Array.from({length:36},(_,i)=>`<i style="--piece:${i};--x:${(i * 37) % 100}%;--drift:${(i % 2 ? 1 : -1) * (20 + i % 6 * 8)}px;--delay:${i % 9 * 35}ms;--spin:${i % 2 ? 250 : -220}deg"></i>`).join('')}</div>` : '';
+  openModal(`<div class="award-heading"><span>获得勋章</span>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>${confetti}<div class="award-body"><div class="award-halo" aria-hidden="true"></div><img class="award-image" src="${badgeArt(badge.id)}" alt="${escape(badge.subject)}"><h2 id="modal-title">${escape(badge.name)}</h2><p>${seriesNames[badge.series]} · 第 ${badge.tier} 级</p></div><div class="award-actions">${ids.length > 1 ? `${button('award-prev', '上一枚', 'chevron', '', 'secondary')}<span id="award-count">${awardPage + 1} / ${ids.length}</span>${button('award-next', '下一枚', 'chevron', '', 'secondary')}` : '<span id="award-count" hidden>1 / 1</span>'}${button('close-modal', '收下', '', '', 'primary')}</div>`, 'award');
+}
+document.addEventListener('focusout', scheduleBadgeNotice);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleBadgeNotice(); else $('.award-confetti')?.remove(); });
 const modalHead = (kicker, title) => `<div class="modal-head"><div><h2 id="modal-title">${escape(title)}</h2></div>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>`;
 function confirmAction(title, body, callback, label = '确认', danger = false) {
   openModal(`${modalHead('请核对这次操作', title)}<p class="confirm-body">${body}</p><div class="modal-actions">${button('close-modal', '取消', '', '', 'secondary')}<button type="button" id="confirm-action" class="${danger ? 'danger' : 'primary'}">${label}</button></div>`, 'confirm');
@@ -436,7 +482,7 @@ async function importBackup() {
       await queue;
       const replacement = structuredClone(restored); replacement.revision = state.revision + 1;
       await store.write(replacement, state.revision); state = replacement; drafts.clear();
-      stopGrowthFeedback();
+      stopGrowthFeedback(); resetBadgeNotices();
       applyMotion(); growthStatic(); renderContent(false); toast('完整恢复成功。历史奖励保持原值。');
     } catch (error) { toast(error.message, true); }
   }, '备份当前数据并恢复');
@@ -515,6 +561,8 @@ document.addEventListener('click', async event => {
       case 'quick-progress': taskDetail(taskId); $('#progress-form')?.scrollIntoView({ block: 'center' }); $('#progress-form [name="note"]')?.focus(); break;
       case 'quick-complete': taskDetail(taskId); $('#complete-form')?.scrollIntoView({ block: 'center' }); $('#complete-form [name="date"]')?.focus(); break;
       case 'close-modal': closeModal(); break;
+      case 'award-prev': awardPage = (awardPage - 1 + badgeNotices.current.length) % badgeNotices.current.length; showBadgeNotice(); break;
+      case 'award-next': awardPage = (awardPage + 1) % badgeNotices.current.length; showBadgeNotice(); break;
       case 'delete-progress': confirmAction('删除这条推进？', '撤回该推进实际所得，必要时同步撤回持续奖励。历史或已完成的分配额度保留取消痕迹，不回流到完成奖。', async () => { await save({ type: 'deleteProgress', taskId, progressId: b.dataset.progress }, '推进已删除'); taskDetail(taskId); }, '删除推进', true); break;
       case 'undo-complete': confirmAction('撤销这次完成？', '撤回这次完成及附属持续奖励，保留创建与有效推进所得；其他任务冻结系数保持。', async () => { await save({ type: 'undoComplete', taskId }, '完成已撤销'); taskDetail(taskId); }, '撤销完成'); break;
       case 'restore-completion': await save({ type: 'complete', taskId, date: state.tasks[taskId].completion.date, note: state.tasks[taskId].completion.note }, '原完成记录已恢复'); break;
@@ -583,11 +631,11 @@ $('#modal').addEventListener('cancel', event => { event.preventDefault(); closeM
 $('#modal').addEventListener('click', event => { if (event.target === $('#modal')) { const rect = $('#modal').getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal(); } });
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) { applyMotion(); growthStatic(); } });
 document.addEventListener('visibilitychange', () => { if (state) { if (document.hidden) growthStatic(); else flowState(); } });
-window.raterReload = async () => { state = validateState(await store.read()); growthStatic(); renderContent(); };
+window.raterReload = async () => { resetBadgeNotices(); state = validateState(await store.read()); growthStatic(); renderContent(); };
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.11', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.12', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');

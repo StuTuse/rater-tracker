@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.11，十阶段成长视觉更新版。** 等级图标、经验条流动和升级动作随阶段变化，由新芽逐渐成长为星翼冠，MAX增加最终星环。登录／注册保留信息、连续外框变形和关闭布局稳定保持。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.12，启动短句与勋章反馈更新版。** 顶部标题右侧每次启动更换平淡短句，只围绕剪辑、写稿、锻炼、睡觉、学习和交新朋友。获得勋章显示账号中心同款居中窗口、原图名称与金色礼花，多枚合并查看。十阶段成长、登录草稿及关闭布局稳定保持。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.11-Setup.exe](release/Rater-Tracker-0.1.0-alpha.11-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.12-Setup.exe](release/Rater-Tracker-0.1.0-alpha.12-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -22,7 +22,7 @@
 
 更新前先从设置页导出 JSON，再运行新安装程序。不要删除数据目录。备份包括历史分配、取消痕迹、冻结额度和 C、评分星数批次、设置及规则／格式版本；恢复不会重新发奖。浏览器预览与桌面数据互相独立。
 
-本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.10 → alpha.11 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
+本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.11 → alpha.12 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
 
 ## 开发命令
 
@@ -34,7 +34,7 @@
 npm ci
 npm start                 # Electron 独立窗口，正常用户数据
 npm run dev               # 浏览器预览 http://127.0.0.1:4173
-npm test                  # 25 项业务＋6 项同步／本机清空＋5 项注册＋2 项十阶段测试
+npm test                  # 25 项业务＋6 项同步／本机清空＋5 项注册＋2 项十阶段＋2 项提示测试
 npm run check             # 版本、语法、51 张独立素材、业务测试
 npm run build             # Windows x64 可运行目录 release/win-unpacked
 npm run dist              # Windows x64 NSIS 安装包，不发布
@@ -52,6 +52,7 @@ node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1
 & .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.5-Setup.exe'
 & .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.10-Setup.exe'
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.11-Setup.exe'
 ```
 
 安装验收脚本先确认没有既有用户安装，再在工作区 `runtime-data/install-check` 测试安装、快捷方式、单实例、同版本重装；指定 `PreviousInstaller` 则先安装旧版，再安装当前版并检查数据保持。结束卸载测试副本。测试数据使用 `runtime-data/desktop-smoke`，不写入正常数据目录。如果检测到已有安装，脚本停止，避免覆盖它。
@@ -69,6 +70,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --f
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/flow-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/stages-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/notices-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check snapshot
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check run-code --filename=scripts/ui-acceptance.cjs
 node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check goto http://127.0.0.1:4173/assets/generated/gallery.html
@@ -86,6 +88,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 | `src/storage.js` | IndexedDB 原子事务、revision 冲突校验、完整备份验证 |
 | `src/app.js` / `src/dom.js` / `src/controls.js` / `src/styles.css` | 五页界面、原位更新、应用内控件、动效与任务详情 |
 | `src/growth-stages.js` / `test/growth-stages.test.mjs` | 十阶段等级映射、独立SVG主体、升级编排与真实门槛回退检查 |
+| `src/notices.js` / `test/notices.test.mjs` | 36句启动短句、排除相邻重复与勋章提示队列去重／撤回；不参与结算 |
 | `assets/generated/` / `src/art.js` / `src/badges.js` | 51 张生图素材、资源入口、名称与门槛；旧 SVG 留作参考 |
 | `electron/` | 固定本地来源、安全隔离、单实例、文件对话框 |
 | `test/core.test.mjs` | 正式方案的结算与更正场景 |
@@ -96,6 +99,8 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 alpha.5 历史验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源，见 [alpha.5 验收](docs/alpha.5验收记录.md)。alpha.6 检查为 30 项业务／同步测试、真实账号与云端、最终桌面和安装升级，见 [alpha.6 验收](docs/alpha.6验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
 
 十阶段范围为Lv.1～9、Lv.10～19，依次至Lv.80～89、Lv.90～MAX。经验门槛保持，撤销或更正后阶段随有效等级回退；打开、导入不重播升级。完整模式显示流光和阶段升级，柔和／关闭减少装饰。38项工程、9项阶段条件和最终桌面检查见[alpha.11验收](docs/alpha.11验收记录.md)。
+
+alpha.12顶部短句运行中保持；上次句子仅作本机界面偏好，不写业务备份。新勋章提示等待当前弹窗或填写结束，多枚在同一窗口切换，点击收下或关闭返回。撤回取消无效提示；恢复／重启不重演，勋章不额外发XP，柔和／关闭／系统减少动态不放礼花。40项工程与21项浏览器专项、实际桌面范围见[alpha.12验收](docs/alpha.12验收记录.md)。
 
 ## 账号登录、注册与同步（alpha.10）
 
@@ -137,7 +142,7 @@ CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.13](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.14](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
 本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.10`。未配置 GitHub 远程或推送。
 
