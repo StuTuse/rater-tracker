@@ -26,6 +26,8 @@
 
 ## 开发命令
 
+桌面 `Rater & Tracker（开发验收）` 快捷方式直接用本项目 Electron 打开最新源码，无需每次打包／安装。保存改动后先退出正在运行的应用（包括已安装版），再双击快捷方式；已打开窗口不会自动热更新。使用正常 `%APPDATA%\RaterTracker` 数据，和安装版共用数据，不是验收脚本的隔离目录。项目目录或依赖路径变化后，在项目根目录执行 `& .\scripts\create-desktop-shortcut.ps1` 重建快捷方式；快捷方式包含机器路径，不入库。
+
 本机实际环境：Windows 11 x64、Node 24.19.0、npm 11.17.0。锁定 Electron 44.7.0、electron-builder 26.15.3、Playwright CLI 0.1.22；`global-agent` 使用兼容的 4.1.3 override 修复开发依赖漏洞。应用资源和官方 CloudBase SDK 本地打包，原生 SDK 使用运行时依赖 ws 8.22.0。
 
 ```powershell

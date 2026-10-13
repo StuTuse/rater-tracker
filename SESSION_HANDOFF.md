@@ -4,7 +4,7 @@
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG 最近 W017、正式方案，结算特别阅读 4～6 节，同步见 8.5。
+1. 读本文件、AGENTS、WORKLOG 最近 W018、正式方案，结算特别阅读 4～6 节，同步见 8.5。
 2. 阅读 `docs/数据契约.md`、`docs/alpha.6验收记录.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.5 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
@@ -68,6 +68,8 @@
 复杂删除、持续份额与同日恢复必须读正式方案和数据契约，不能只根据当前任务状态重新计算旧奖励。
 
 ## 环境与真实命令
+
+2026-10-13 新增桌面 `Rater & Tracker（开发验收）.lnk`，指向当前项目 node_modules/electron/dist/electron.exe，参数为项目绝对路径，工作目录为项目，图标 assets/app.ico。无需每轮重装，保存源码后退出应用并重开即可看到最新改动；不提供运行中热更新。正常数据和安装版共用，已有安装版运行时单实例会聚焦原窗口，因此先退出旧实例。重建命令：`& .\scripts\create-desktop-shortcut.ps1`。本轮只负责该脚本与 README／日志／本交接，未修改业务代码。桌面文件不入库。
 
 Windows 11 x64（10.0.26200）、Node 24.19.0、npm 11.17.0、Git 2.53.0.windows.2。开发依赖锁定；global-agent 4.1.3 override 后 npm audit 为 0 个已知漏洞。日常运行无需网络。
 
