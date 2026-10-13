@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
 
-**当前版本：0.1.0-alpha.9，居中账号弹窗与注册校验修正版。** 账号入口位于左下角，弹窗统一居中，设置不再显示账号卡片。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
+**当前版本：0.1.0-alpha.10，连续账号动效更新版。** 登录／注册切换保留表单和已填信息，外框连续变形，关闭消散中保持布局。已实现真实评分、任务结算、五页界面、本地持久化、48 枚独立生图徽章、手绘底纹和完整备份。不是 1.0 正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.9-Setup.exe](release/Rater-Tracker-0.1.0-alpha.9-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+安装程序：[Rater-Tracker-0.1.0-alpha.10-Setup.exe](release/Rater-Tracker-0.1.0-alpha.10-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -22,7 +22,7 @@
 
 更新前先从设置页导出 JSON，再运行新安装程序。不要删除数据目录。备份包括历史分配、取消痕迹、冻结额度和 C、评分星数批次、设置及规则／格式版本；恢复不会重新发奖。浏览器预览与桌面数据互相独立。
 
-本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.5 → alpha.6 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
+本版没有格式迁移：只接受格式 1、规则 v1.3 的完整备份；不支持的格式拒绝导入，保留现存数据。已验证同版本重装和多个同格式 alpha 升级，最新 alpha.9 → alpha.10 保持经验、事务版本与数据路径；以后格式迁移仍需独立验证。
 
 ## 开发命令
 
@@ -92,17 +92,19 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 
 alpha.5 历史验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源，见 [alpha.5 验收](docs/alpha.5验收记录.md)。alpha.6 检查为 30 项业务／同步测试、真实账号与云端、最终桌面和安装升级，见 [alpha.6 验收](docs/alpha.6验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
 
-## 账号登录、注册与同步（alpha.9）
+## 账号登录、注册与同步（alpha.10）
 
-点击左下角头像入口，弹出登录／注册浮层；已有账号输入账号密码登录。选择“注册账号”，填写账号、邮箱、密码及确认密码，发送并填写邮箱验证码后登录。邮箱认证已开启；已有邮箱可能直接登录已有账号。可以继续在 CloudBase 控制台创建账号，密码重置仍在控制台完成。不要输入腾讯云管理账号密码。左下角密码为固定掩码，关闭浮层会清空密码输入。
+点击左下角头像入口，弹出登录／注册浮层；已有账号输入账号密码登录。选择“注册账号”，填写账号、邮箱、密码及确认密码，发送并填写邮箱验证码后登录。邮箱认证已开启；已有邮箱可能直接登录已有账号。可以继续在 CloudBase 控制台创建账号，密码重置仍在控制台完成。不要输入腾讯云管理账号密码。切换菜单保留各表单与验证码；关闭消散结束后清空密码和验证码，非敏感草稿保留到本次应用运行结束，均不写入备份或凭证。
 
-弹窗在窗口正中，进出／切换节奏与其他二级弹窗一致。注册账号须为6～25位小写字母、数字、_或-，首位为小写字母，例如rater_01；发码前即校验。此前验证码后出现invalid SignUpRequest.Username的用户，请重开应用、修改账号并重新发送验证码。该错误来自此前过宽的客户端账号规则。
+弹窗在窗口正中，打开／关闭使用配对的淡入淡出和收放，切换仅用420ms外框尺寸变形，内容不闪烁、不整体缩放。柔和150ms，关闭动效静态。关闭途中保持外框、内容与背景滚动锁定，消散结束后再清理。注册账号须为6～25位英文字母、数字、_或-，字母开头，可用大写，例如Rater_01。界面保留原输入显示；注册和登录统一使用小写认证标识，登录不区分大小写，不会创建仅大小写不同的两个账号。发码前即校验。
 
 未登录记录保留在原位置；各账号独立保存。若要同步此前记录，登录后使用“将未登录记录复制到此账号”，先导出当前账号备份。应用打开期间自动同步，也可立即同步。两台离线设备修改会提示冲突；先备份再选择云端，不自动合并奖励账本。
 
 所有账号操作在左下角浮层内，设置页不再提供重复入口。“退出账号”保留本机账号记录；“清空本机账号数据”先导出完整备份，再删除当前账号的本机快照／同步缓存并退出，云端、未登录记录与其他账号不受影响。取消导出就取消清空；未同步改动需从导出的备份找回。重新登录可从云端恢复。登录／注册表单还提供“清空输入”。
 
 桌面会话系统加密保存，退出返回未登录数据；导出不包含凭证。服务停服或断网仍可本机使用。首版快照容量限 4 MiB，浏览器／手机登录未交付。居中与注册修正检查见 [alpha.9 验收](docs/alpha.9验收记录.md)；使用合规账号的真实邮箱收码至注册完成仍待用户复验。
+
+连续弹窗与草稿检查见 [alpha.10 验收](docs/alpha.10验收记录.md)：16项动效、账号UI、26项控件与最终打包／升级检查通过；36项工程检查包含大写用户名映射。本轮未重做云端认证实测。
 
 开发／验收新增命令：
 
@@ -118,6 +120,9 @@ node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe
 Remove-Item Env:RATER_ACCOUNT_CLEAR_SMOKE
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component open http://127.0.0.1:4173
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component run-code --filename=scripts/account-ui-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=account-motion open http://127.0.0.1:4173
+node node_modules/@playwright/cli/playwright-cli.js -s=account-motion run-code --filename=scripts/account-motion-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=account-motion close
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component close
 ```
 
@@ -127,9 +132,9 @@ CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.11](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.12](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
 
-本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.9`。未配置 GitHub 远程或推送。
+本地仓库 `main`，规划与旧预览标签保持；本版使用附注标签 `v0.1.0-alpha.10`。未配置 GitHub 远程或推送。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 

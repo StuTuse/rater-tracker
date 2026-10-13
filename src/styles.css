@@ -187,7 +187,7 @@ html{scrollbar-width:none;interpolate-size:allow-keywords}
 html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
 dialog,.table-scroll{scrollbar-width:none}
 dialog::-webkit-scrollbar,.table-scroll::-webkit-scrollbar{display:none;width:0;height:0}
-body:has(dialog[open]){overflow:hidden}
+body:has(dialog[open]),body:has(dialog[data-closing]){overflow:hidden}
 .native-control-source{position:absolute!important;width:1px!important;height:1px!important;margin:0!important;padding:0!important;opacity:0!important;pointer-events:none!important;clip-path:inset(50%);overflow:hidden}
 .control-trigger{width:100%;min-height:43px;justify-content:space-between;border:1px solid #e2e3d6;background:#fffefa;padding:10px 12px;color:var(--ink);box-shadow:0 1px 0 #7e6a2410;text-align:left}
 .control-trigger:hover:not(:disabled){background:#fffdf4;border-color:#d2bd75;box-shadow:0 4px 12px #735d1110;transform:none}
@@ -249,3 +249,14 @@ html[data-motion=gentle] details::details-content,html[data-motion=gentle] dialo
 html[data-motion=off] details::details-content,html[data-motion=off] dialog::backdrop{transition:none!important}
 @media(max-width:620px){.segmented{flex-wrap:nowrap;max-width:100%}.control-popover[popover]{max-width:calc(100vw - 24px)}.date-switch .control-trigger{width:136px}.date-popover{padding:10px!important}}
 @media(prefers-reduced-motion:reduce){.control-popover,.segment-indicator,details::details-content,dialog,dialog::backdrop{transition-duration:.01ms!important}}
+
+/* Resize the paper frame, keeping typography and filled form nodes at full opacity. */
+dialog{position:fixed;inset:0;margin:auto;height:fit-content}
+.account-pane[hidden]{display:none}
+.account-panes{min-width:0}
+dialog[data-morphing]{overflow:hidden}
+dialog[data-closing]{overflow:hidden;pointer-events:none}
+dialog[data-kind=account]{background:linear-gradient(145deg,#fffdf1 0,#fffef8 44%,#fffef7 100%);border-color:#e0d3a3;box-shadow:0 22px 76px #54451a29,0 2px 9px #b59a3412}
+.account-tabs{border-color:#e7ddbd;background:#f3eedc}
+.account-dialog-intro .account-avatar{background:#faf0cc;box-shadow:inset 0 0 0 1px #ead793}
+.account-dialog-intro p{color:#727052}

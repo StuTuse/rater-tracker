@@ -1,11 +1,11 @@
 # SESSION_HANDOFF · 跨会话开发交接
 
-最后更新：2026-10-13，香港时间。产品规范《最终方案》v1.11、视觉 v1.7（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.9**。
+最后更新：2026-10-13，香港时间。产品规范《最终方案》v1.12、视觉 v1.8（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.10**。
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG 最近 W021、正式方案，结算特别阅读 4～6 节，同步见 8.5。
-2. 阅读 `docs/数据契约.md`、`docs/alpha.9验收记录.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.8 与 0.1 验收记录。
+1. 读本文件、AGENTS、WORKLOG 最近 W022、正式方案，结算特别阅读 4～6 节，同步见 8.5。
+2. 阅读 `docs/数据契约.md`、`docs/alpha.10验收记录.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.9 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
 
@@ -13,7 +13,9 @@
 
 ### CloudBase 账号登录与同步 · 2026-10-13
 
-alpha.9最新：账号弹窗统一窗口正中，取消侧边／底部锚点与角落变换原点，使用共同dialog进出／内容切换动画。1440px／390px登录和长注册表单均精确居中，账号／任务弹窗computed时长相同。用户真实验证码后错误为invalid SignUpRequest.Username，云端regex要求^[a-z][0-9a-z_-]{5,24}$；原校验允许大写、5位、点等导致验证后拒绝。现界面、客户端发送、原生注册均发码前检查6～25位小写开头及小写／数字／_-，登录上限25，不静默改写大小写。用户需修正账号并重新发码；真实合规新账号完成注册仍待复验，没有用户验证码，不声称真实注册成功。
+alpha.10最新：新增src/modal.js分离外框几何与关闭清理。登录／注册／验证面板保留form、input和滑块节点，各自草稿保持；已有challenge切到登录再返回仍能填验证码。外框420ms宽高变形（柔和150ms、关闭静态），内容不整体变暗或缩放。关闭期间冻结布局尺寸、保留data-kind与背景滚动锁定，结束后清密码／验证码并返回焦点。尺寸必须读getComputedStyle而非经过缩放的getBoundingClientRect，避免打开途中关闭时重复缩放、文字重排；所有dialog固定定位。快速重开取消旧清理。36项工程、16项动效、账号UI和26项控件通过；最终打包及alpha.9→alpha.10升级、11XP／revision1／路径保持通过，隔离副本卸载。用户新增允许大写开头，src/username.js统一认证标识小写化，显示保留原输入，登录不区分大小写；同名不同大小写是同一账号。注册与登录均适配现有云端小写正则，未批量改云端账号。真实邮箱注册完成仍待用户验证码验收，本轮没有发送登录／注册云端请求。
+
+alpha.9历史：账号弹窗统一窗口正中，取消侧边／底部锚点与角落变换原点。1440px／390px登录和长注册表单居中，账号／任务弹窗computed时长相同。用户真实验证码后错误为invalid SignUpRequest.Username，云端regex要求^[a-z][0-9a-z_-]{5,24}$；原校验允许大写、5位、点等导致验证后拒绝。现界面、客户端发送、原生注册均发码前检查6～25位小写开头及小写／数字／_-，登录上限25，不静默改写大小写。用户需修正账号并重新发码；真实合规新账号完成注册仍待复验，没有用户验证码，不声称真实注册成功。
 
 alpha.8最新：用户要求删除设置账号管理卡片，账号操作统一放到左下角浮层，并明确清空仅指本机账号数据、保留云端。退出保留本机记录，清空输入只清表单；清空本机数据须先成功导出最新完整备份、暂停同步、核对revision后仅删除当前账号快照／同步元数据，再移除本机会话和记忆。云端、未登录、其他账号保持；导出取消／版本冲突中止，重新登录可下载云端。未注销任何云端账号。
 
@@ -35,14 +37,16 @@ alpha.8最新：用户要求删除设置账号管理卡片，账号操作统一�
 | 动效 | 金色液态光层、增长／回退／跨级／MAX；连续显示位置接续；偏好与隐藏暂停；11 项专项与 5 项 MAX 条件 |
 | 桌面 | 本地 app 来源、隔离 preload、单实例、JSON 文件接口；实际打包窗口和截图 |
 | 账号与同步 | 官方用户名密码登录；未登录与账号隔离、自动快照同步、冲突保留、加密会话；5 项同步测试＋真实云端／桌面检查 |
-| 账号组件 | 左下角入口、统一浮层、登录／邮箱注册切换、默认手绘头像、固定密码掩码、关闭密码清空；3项注册流程测试和真实UI检查 |
+| 账号组件 | 稳定登录／注册／验证码面板与草稿、420ms外框变形、消散后清理；大写开头与不区分大小写认证；16项动效专项和5项注册测试 |
 | 本机账号清空 | 最新备份＋暂停同步＋revision保护；只清当前本机账号，云端快照实际保持，取消导出不清空 |
-| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.7 → alpha.8 升级数据保持；隔离测试副本已卸载 |
+| 安装 | NSIS、桌面快捷方式目标、单实例、alpha.9 → alpha.10 升级数据保持；隔离测试副本已卸载 |
 | 尚未覆盖 | 以后格式迁移、Windows 原生文件对话框全程点击、60 fps 实测、长期大数据性能、完整人工体验验收 |
 
-安装包：`release/Rater-Tracker-0.1.0-alpha.9-Setup.exe`，203,236,051 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.9验收记录.md`。
+安装包：`release/Rater-Tracker-0.1.0-alpha.10-Setup.exe`，203,155,181 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.10验收记录.md`。
 
 ## 文件责任与协作
+
+alpha.10本轮负责app／新增modal／username／styles、account客户端与原生account／registration、Electron smoke、账号UI／动效脚本、注册单元、数据契约与版本／规范／交接。未改core／storage／云端SDK／SQL／生图或云端身份配置；没有派遣会话。真实邮箱注册、云端同步与永久删除旧测试账号本轮未操作。
 
 alpha.9本轮负责styles／app／account客户端，Electron registration／account／smoke、账号UI脚本／注册回归测试和规范文档。未改core、storage、SQL、SDK、云端配置或数据清空语义；无派遣其他会话。35项检查与最终打包登录／同步／居中通过，本轮未重做NSIS升级安装。
 
@@ -58,11 +62,13 @@ alpha.7本轮范围：src/app.js／account.js／icons.js／styles.css、electron
 | `src/storage.js` | 原子保存、账号命名空间、同步元数据、备份校验与恢复契约 |
 | `src/account.js`、`src/sync.js`、`electron/account.cjs`、`cloud/` | 认证、会话加密、同步队列、官方 SDK 构建、SQL RPC 与云端验收 |
 | `src/app.js`、`src/dom.js`、`src/controls.js`、`src/styles.css` | 五页与详情、原位更新、应用内菜单／月历／滑块、真实反馈与动效 |
+| `src/modal.js` | 外框尺寸插值、退出期间几何与布局保持、结束清理、重开取消旧回调；账号内容使用稳定DOM更新 |
+| `src/username.js` | 唯一大小写兼容校验与认证标识转换；注册与登录共用，显示标签保留原输入 |
 | `src/art.js`、`src/badges.js`、`assets/generated/` | 51 张生图与入口、徽章元数据、提示词及总览；旧 assets/badges SVG 保留参考 |
 | `src/icons.js`、`assets/app.*` | 矢量图标与安装图标 |
 | `electron/main.cjs`、`electron/preload.cjs` | 桌面来源、窗口、安全与文件接口 |
 | `scripts/` | 预览、资产生成、工程检查、浏览器／桌面／安装验收 |
-| `test/core.test.mjs`、`test/sync.test.mjs`、`test/registration.test.mjs` | 25 项正式方案＋6 项同步／本机清空＋4项注册验证流程测试 |
+| `test/core.test.mjs`、`test/sync.test.mjs`、`test/registration.test.mjs` | 25 项正式方案＋6 项同步／本机清空＋5项注册验证流程测试 |
 | `docs/` | 数据契约与实际验收记录 |
 
 登记不是文件锁。后续用户安排并行时先协调共享入口，不能在共用目录各自切分支。
@@ -102,6 +108,8 @@ node cloud/account-acceptance.cjs
 node scripts/account-desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
 & .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.6-Setup.exe'
 node node_modules/@playwright/cli/playwright-cli.js -s=account-component run-code --filename=scripts/account-ui-acceptance.cjs
+node node_modules/@playwright/cli/playwright-cli.js -s=account-motion run-code --filename=scripts/account-motion-acceptance.cjs
+& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.9-Setup.exe'
 ```
 
 安装验收脚本检测已有用户安装则停止；不为此自动卸载已有版本。源码路径含 `&`，工具入口直接经 Node 启动，避免常规 Windows .cmd 垫片解析错误。沙箱可能阻止 Node 子进程、缓存写入或下载；需要时按实际错误使用受审查的执行权限，不改写工程去关闭安全隔离。
@@ -130,11 +138,11 @@ alpha.7当前：33项检查通过；账号UI真实鼠标／键盘与窄屏检查
 
 ## 版本状态
 
-`VERSION`／package／锁文件为 `0.1.0-alpha.9`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.9`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
+`VERSION`／package／锁文件为 `0.1.0-alpha.10`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.10`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
 alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，alpha.4 提交 3ba94e1；alpha.5 统一应用内控件与二级界面动效，具体当前提交以 Git 查询为准。
 
-本次工作对应 WORKLOG **W009～W013**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
+最近工作对应 WORKLOG **W022**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
 
 ## alpha.2 素材补充
 

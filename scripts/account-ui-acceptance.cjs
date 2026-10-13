@@ -5,7 +5,7 @@ async page => {
     // UI-only fake transport; real Electron login is checked separately.
     window.desktop = {
       exportBackup: async contents => { if (window.uiAllowBackup === false) return false; window.uiBackup = contents; return true; },
-      info: async () => ({ version: '0.1.0-alpha.9', dataDirectory: 'UI 验收隔离浏览器', packaged: false }),
+      info: async () => ({ version: '0.1.0-alpha.10', dataDirectory: 'UI 验收隔离浏览器', packaged: false }),
       accountCurrent: async () => null,
       accountLogin: async () => ({ id: 'ui-account', name: 'rater_ui_test' }),
       accountRegister: async ({ email }) => ({ id: 'ui-challenge', email }),
@@ -30,6 +30,7 @@ async page => {
   assert.equal(await page.locator('#modal').getAttribute('data-kind'), 'account');
   await page.locator('#account-login input[name=password]').fill('Secret_test123');
   await page.keyboard.press('Escape');
+  await page.waitForTimeout(350);
   assert.equal(await page.locator('#account-login input[name=password]').inputValue(), '');
   assert.equal(await page.locator('.account-entry').evaluate(el => el === document.activeElement), true);
   await page.getByRole('button', { name: '登录或注册账号' }).click();
@@ -41,7 +42,7 @@ async page => {
   await page.getByRole('button', { name: '注册账号', exact: true }).click();
   const form = page.locator('#account-register');
   await form.locator('[name=username]').fill('Rater_test');
-  assert.equal(await form.locator('[name=username]').evaluate(el => el.checkValidity()), false);
+  assert.equal(await form.locator('[name=username]').evaluate(el => el.checkValidity()), true);
   await form.locator('[name=username]').fill('a'.repeat(25));
   assert.equal(await form.locator('[name=username]').evaluate(el => el.checkValidity()), true);
   await form.locator('[name=username]').fill('rater_ui_test');
@@ -51,7 +52,7 @@ async page => {
   await form.getByRole('button', { name: '发送验证码' }).click();
   assert.equal(await form.locator('[role=alert]').textContent(), '两次输入的密码不一致');
   await form.locator('[name=confirmation]').fill('Secret_test123');
-  await page.waitForTimeout(320); await assertCentered();
+  await page.waitForTimeout(480); await assertCentered();
   await page.screenshot({ path: 'output/playwright/account-register.png' });
   await form.getByRole('button', { name: '发送验证码' }).click();
   const verify = page.locator('#account-verify');
@@ -82,7 +83,7 @@ async page => {
   await page.getByRole('button', { name: '清空本机账号数据', exact: true }).click();
   await page.getByRole('button', { name: '备份并清空', exact: true }).click();
   await page.locator('#account-login').waitFor();
-  await page.waitForTimeout(320); await assertCentered();
+  await page.waitForTimeout(480); await assertCentered();
   assert.equal(await page.evaluate(() => localStorage.getItem('rater-active-account')), null);
   assert.equal(await page.evaluate(() => JSON.stringify(JSON.parse(window.uiBackup).state)), retained);
   assert.equal(await page.evaluate(async () => { const {openStore}=await import('./src/storage.js'); const store=await openStore('ui-account'); const state=await store.read();store.close();return state.ledger.length; }), 0);
@@ -93,14 +94,14 @@ async page => {
   await page.getByRole('button', { name: '退出账号', exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#account-login').waitFor();
-  await page.waitForTimeout(320); await assertCentered();
+  await page.waitForTimeout(480); await assertCentered();
   assert.equal(await page.locator('.account-entry').isVisible(), true);
   const bounds = await page.locator('#modal').boundingBox();
   assert.ok(bounds.x >= 0 && bounds.x + bounds.width <= 390 && bounds.y >= 0 && bounds.y + bounds.height <= 844);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   await page.screenshot({ path: 'output/playwright/account-login-mobile.png' });
   await page.getByRole('button', { name: '注册账号', exact: true }).click();
-  await page.waitForTimeout(320); await assertCentered();
+  await page.waitForTimeout(480); await assertCentered();
   assert.equal(await page.locator('#modal').evaluate(el => el.scrollWidth > el.clientWidth), false);
   await page.screenshot({ path: 'output/playwright/account-register-mobile.png' });
   await page.keyboard.press('Escape');

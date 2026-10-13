@@ -51,7 +51,8 @@ module.exports = function createAccountService(directory, safeStorage) {
     },
     login: async (username, password) => {
       if (typeof username !== 'string' || typeof password !== 'string' || username.length > 25 || password.length > 128) throw new Error('账号输入无效');
-      await restore(); checked(await auth.signInWithPassword({ username, password })); usernameLabel = username;
+      const { usernameForAuth } = await import('../src/username.js');
+      await restore(); checked(await auth.signInWithPassword({ username: usernameForAuth(username), password })); usernameLabel = username;
       const account = identity(await persist());
       if (!account) throw new Error('未获得账号身份');
       return account;

@@ -176,7 +176,19 @@ else {
           const customCalendarVisible=document.querySelector('.date-popover')?.matches(':popover-open')&&document.querySelector('.calendar-day.is-selected')?.dataset.calendarDate===date;
           const scrollbarHidden=getComputedStyle(document.documentElement).scrollbarWidth==='none';
           const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});
-          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          document.querySelector('[data-action="account-open"]').click();await pause(350);
+          const login=document.querySelector('#account-login');login.username.value='motion_draft';login.password.value='Transient_test123';
+          const loginHeight=modal.getBoundingClientRect().height;
+          document.querySelector('[data-action="account-register-tab"]').click();await pause(100);
+          const accountFrameMorph=getComputedStyle(modal).opacity==='1'&&modal.getBoundingClientRect().height>loginHeight&&modal.getBoundingClientRect().height<parseFloat(modal.style.height);
+          await pause(400);const registration=document.querySelector('#account-register');registration.email.value='motion@example.com';
+          document.querySelector('[data-action="account-login-tab"]').click();await pause(480);
+          const accountDraftsPreserved=login===document.querySelector('#account-login')&&login.username.value==='motion_draft'&&login.password.value==='Transient_test123'&&document.querySelector('#account-register').email.value==='motion@example.com';
+          const exitWidth=modal.offsetWidth,exitHeight=modal.offsetHeight;
+          modal.querySelector('[data-action="close-modal"]').click();await pause(40);
+          const accountExitStable=modal.dataset.kind==='account'&&modal.offsetWidth===exitWidth&&modal.offsetHeight===exitHeight&&login.password.value==='Transient_test123';
+          await pause(340);const accountSecretsCleared=login.password.value===''&&getComputedStyle(modal).display==='none';
+          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
         const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
         await fs.mkdir(directory, { recursive: true });
@@ -186,7 +198,10 @@ else {
         await window.webContents.executeJavaScript(`document.querySelector('[data-control-for="id:rating-date"]').click()`);
         await new Promise(resolve => setTimeout(resolve, 300));
         await fs.writeFile(path.join(directory, 'controls-calendar.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden ? 0 : 1);
+        await window.webContents.executeJavaScript(`(async () => { const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});document.querySelector('[data-action="account-open"]').click();document.querySelector('[data-action="account-register-tab"]').click(); })()`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await fs.writeFile(path.join(directory, 'account-motion.png'), (await window.webContents.capturePage()).toPNG());
+        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });
