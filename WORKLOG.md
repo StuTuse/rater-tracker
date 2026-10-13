@@ -420,3 +420,12 @@
 首次 gh auth status 在沙箱报告无效，获准执行后登录有效；Node 子进程历史扫描受 EPERM 限制，获准只读执行后完成。首次 Git 直连 github.com:443 失败；读取 Windows 现有代理127.0.0.1:7897，命令级 http.proxy 的 ls-remote 成功。首个代理上传过程结束后检查远程仍为空，重新推送成功；main 的22个既有提交上传，18标签全部上传，19个远程引用与本地逐一匹配，默认分支main、isEmpty=false、PRIVATE保持。使用 `git -c http.proxy=http://127.0.0.1:7897 push --set-upstream origin main`、随后 `git -c http.proxy=http://127.0.0.1:7897 push origin --tags`，未改全局网络配置、未强推、未改历史或旧标签。
 
 负责 AGENTS、README、版本管理规范、隔离草案、交接与本日志，记录新授权及已接受的组织方式，本轮文档检查提交后同步 main。VERSION 保持alpha.17、无新标签；未改应用源码／数据、无应用测试／构建、无云端业务请求、无其他聊天派遣。下一步先建立 worktree、独立开发入口与数据隔离，再实施工程拆分及安卓完整移植；这些工程步骤尚未开始。
+
+
+## W033 · 2026-10-14 · Android 移植实现检查点（验收进行中）
+
+用户授权 worktree 隔离后立即移植，负责 apps/android、共享 packages、Windows 入口迁移与双端验收，不派遣其他会话。共享业务与存储迁入 packages，旧路径兼容；规则1.3／格式1／Windows alpha.17保持。Android Capacitor8.5.3、AGP8.13.0、Gradle8.14.3、JDK21、compile/target36、min24，签名release和独立.dev debug真实构建成功。
+
+实际检查：40业务／工程、隔离Android17模拟器UI12／控件26／切页41通过；真实虚构账号登录、网页无明文JWT、Keystore加密文件无明文JWT通过。原生文件选择器虚构JSON真实保存落盘。Windows拆分入口源码Electron smoke和unpacked构建通过，最终包运行待补。用户指定邮箱已发注册验证码；QQ只读可用但两次激活失败，未使用旧码。凭证／验证码／运行数据／签名／输出不入库。
+
+未完成：邮箱验证、重启／覆盖安装／离线／原生导入和取消、release操作、成长专项及Windows最终包回归。不得将此检查点写成完整验收完成。后续补实际结果、规范／README／交接，集成Windows隔离提交80d67b8并同步私有GitHub。

@@ -1,0 +1,13 @@
+{
+  "name": "rater-tracker-windows",
+  "version": "0.1.0-alpha.17",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "start": "node ../../node_modules/electron/cli.js .",
+    "start:dev": "node ../../scripts/windows-dev.mjs",
+    "check": "node ../../scripts/windows-command.mjs check",
+    "build": "node ../../scripts/windows-command.mjs build",
+    "dist": "node ../../scripts/windows-command.mjs dist"
+  }
+}

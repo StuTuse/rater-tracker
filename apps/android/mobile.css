@@ -1,0 +1,37 @@
+/* Android touch layout; the shared visual and reward rules remain unchanged. */
+html[data-platform=android]{overscroll-behavior:none;--safe-bottom:env(safe-area-inset-bottom,0px)}
+html[data-platform=android] body{touch-action:pan-y}
+html[data-platform=android] button{min-height:44px}
+html[data-platform=android] .workspace{padding-bottom:calc(90px + var(--safe-bottom))}
+html[data-platform=android] .sidebar{height:calc(70px + var(--safe-bottom));padding-bottom:var(--safe-bottom);z-index:20}
+html[data-platform=android] .sidebar nav{width:100%;justify-content:space-around}
+html[data-platform=android] .sidebar .nav-link{padding:4px 5px;min-width:52px}
+html[data-platform=android] .sidebar-bottom{position:fixed;top:8px;right:16px;display:block;margin:0;z-index:15}
+html[data-platform=android] .sidebar-bottom>small{display:none}
+html[data-platform=android] .account-entry{width:44px;height:44px;padding:4px;background:#fffbee;border:1px solid #e6dcba;border-radius:50%;box-shadow:0 2px 8px #a4862210}
+html[data-platform=android] .account-entry-text,html[data-platform=android] .account-entry>.icon{display:none}
+html[data-platform=android] .account-avatar{width:32px;height:32px;min-width:32px}
+html[data-platform=android] .topbar{padding-right:48px}
+html[data-platform=android] .top-intro{display:block}
+html[data-platform=android] #launch-line{display:block;white-space:normal;font-size:12px;line-height:1.5}
+html[data-platform=android] .workspace{padding-left:16px;padding-right:16px}
+html[data-platform=android] input,html[data-platform=android] textarea{font-size:16px}
+html[data-platform=android] .nav-link{font-size:11px}
+html[data-platform=android] .toolbar .segmented,html[data-platform=android] .badge-tabs{overflow-x:auto;scrollbar-width:none}
+html[data-platform=android] dialog{max-height:calc(100dvh - 32px);max-width:calc(100vw - 24px)}
+html[data-platform=android] .data-path{overflow-wrap:anywhere}
+html[data-platform=android] table{display:block;max-width:100%;overflow:auto}
+html[data-platform=android] #feedback{bottom:calc(85px + var(--safe-bottom))}
+html[data-platform=android] .control-trigger{min-height:44px}
+
+html[data-platform=android]{--safe-bottom:var(--native-safe-bottom,24px)}
+html[data-platform=android] .workspace{margin-left:0;width:100%;padding-top:var(--native-safe-top,24px)}
+html[data-platform=android] .sidebar{top:auto;bottom:0;left:0;right:0;width:100%;padding:8px 8px var(--safe-bottom);border:0;border-top:1px solid #e7e6d7;height:calc(70px + var(--safe-bottom))}
+html[data-platform=android] .brand,html[data-platform=android] .nav-caption{display:none}
+html[data-platform=android] .sidebar nav{flex-direction:row;margin:0;gap:0}
+html[data-platform=android] .nav-link{flex-direction:column;font-size:11px;gap:3px;width:auto;height:48px;justify-content:center}
+html[data-platform=android] .sidebar-bottom{left:auto;bottom:auto;padding:0;top:calc(var(--native-safe-top,24px) + 8px);width:44px;height:44px}
+html[data-platform=android] #startup{padding-top:var(--native-safe-top,24px);padding-bottom:var(--safe-bottom)}
+html[data-platform=android].keyboard-open .sidebar{visibility:hidden}
+
+html[data-platform=android] dialog{top:var(--native-safe-top,24px);bottom:calc(100dvh - var(--visual-height,100dvh));max-height:calc(var(--visual-height,100dvh) - var(--native-safe-top,24px) - 24px);margin:auto;overflow-y:auto}

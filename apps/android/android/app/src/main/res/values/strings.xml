@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rater &amp; Tracker</string>
+    <string name="title_activity_main">Rater &amp; Tracker</string>
+    <string name="package_name">local.ratertracker.android</string>
+    <string name="custom_url_scheme">local.ratertracker.android</string>
+</resources>

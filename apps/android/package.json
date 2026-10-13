@@ -1,0 +1,19 @@
+{
+  "name": "rater-tracker-android",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare:web": "node ../../scripts/android-web.mjs",
+    "sync": "npm run prepare:web && node node_modules/@capacitor/cli/bin/capacitor sync android",
+    "build": "node ../../scripts/android-build.mjs",
+    "open": "node node_modules/@capacitor/cli/bin/capacitor open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.3",
+    "@capacitor/android": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}

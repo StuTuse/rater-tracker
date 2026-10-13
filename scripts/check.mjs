@@ -23,7 +23,7 @@ for (const file of ART_ASSETS) {
   hashes.push(createHash('sha256').update(data).digest('hex'));
 }
 assert.equal(new Set(hashes).size, 51, 'All generated assets must be independent files');
-for (const dir of ['src','electron','scripts']) for(const name of await readdir(dir)) if(/\.(?:m?js|cjs)$/.test(name)) {
+for (const dir of ['src','electron','scripts','apps/windows/electron','packages/core','packages/data','packages/ui']) for(const name of await readdir(dir)) if(/\.(?:m?js|cjs)$/.test(name)) {
   const result=spawnSync(process.execPath,['--check',`${dir}/${name}`],{encoding:'utf8'});
   assert.equal(result.status,0,result.stderr);
 }

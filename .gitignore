@@ -51,3 +51,13 @@ Desktop.ini
 *~
 
 # Track source assets, lockfiles, planning documents and analysis snapshots.
+
+# Android local build, toolchain, native web bundle and signing
+.gradle/
+.cxx/
+local.properties
+*.jks
+*.keystore
+/apps/android/www/
+/apps/android/android/app/src/main/assets/
+/apps/android/android/capacitor-cordova-android-plugins/

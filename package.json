@@ -5,7 +5,7 @@
   "author": "Rater & Tracker (local)",
   "private": true,
   "type": "module",
-  "main": "electron/main.cjs",
+  "main": "apps/windows/main.cjs",
   "scripts": {
     "start": "node node_modules/electron/cli.js .",
     "dev": "node scripts/serve.mjs",
@@ -13,7 +13,10 @@
     "check": "node scripts/check.mjs",
     "build": "npm run check && node node_modules/electron-builder/cli.js --win --x64 --dir",
     "dist": "npm run check && node node_modules/electron-builder/cli.js --win nsis --x64 --publish never",
-    "desktop:smoke": "node scripts/desktop-smoke.mjs"
+    "desktop:smoke": "node scripts/desktop-smoke.mjs",
+    "start:dev": "node scripts/windows-dev.mjs",
+    "android:sync": "node scripts/android-command.mjs sync",
+    "android:build": "node scripts/android-build.mjs"
   },
   "devDependencies": {
     "@playwright/cli": "0.1.22",
@@ -37,7 +40,9 @@
       "electron/**/*",
       "index.html",
       "VERSION",
-      "package.json"
+      "package.json",
+      "packages/**/*",
+      "apps/windows/**/*"
     ],
     "asar": true,
     "win": {

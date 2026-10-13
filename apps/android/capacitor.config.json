@@ -1,0 +1,20 @@
+{
+  "appId": "local.ratertracker.android",
+  "appName": "Rater & Tracker",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "hostname": "localhost"
+  },
+  "android": {
+    "backgroundColor": "#faf8ef",
+    "allowMixedContent": false,
+    "captureInput": true
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  },
+  "loggingBehavior": "none"
+}
