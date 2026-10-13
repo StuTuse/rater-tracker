@@ -35,7 +35,15 @@ module.exports = function createAccountService(directory, safeStorage) {
     const name = usernameLabel || [user.username, user.name].find(value => typeof value === 'string' && value.length) || '我的账号';
     return id ? { id, name } : null;
   }
+  const registration = require('./registration.cjs')(auth, async username => {
+    usernameLabel = username;
+    const account = identity(await persist());
+    if (!account) throw new Error('注册验证完成但未获得身份，请使用账号密码登录');
+    return account;
+  });
   return {
+    register: async values => { await restore(); return registration.begin(values); },
+    verifyRegistration: (id, code) => registration.confirm(id, code),
     current: async () => {
       await restore();
       try { return identity(await persist()); }
@@ -48,7 +56,7 @@ module.exports = function createAccountService(directory, safeStorage) {
       if (!account) throw new Error('未获得账号身份');
       return account;
     },
-    logout: async () => { checked(await auth.signOut()); await fs.rm(sessionPath, { force: true }); },
+    logout: async () => { registration.clear(); checked(await auth.signOut()); await fs.rm(sessionPath, { force: true }); },
     sync: async data => {
       await restore();
       if (!identity(checked(await auth.getSession()))) throw new Error('请重新登录后同步');

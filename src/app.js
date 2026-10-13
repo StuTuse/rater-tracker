@@ -1,6 +1,6 @@
 import { DIMENSIONS, LABELS, TIERS, SCALE, xp, hongKong, addDays, daysBetween, taskPlan, transact, totalUnits, levelAt, stats, nextCoefficient, progressDays, allocatedProgress, estimate } from './core.js';
 import { openStore, ConflictError, validateState, backupText, parseBackup } from './storage.js';
-import { currentAccount, loginAccount, logoutAccount, cloudSync } from './account.js';
+import { currentAccount, loginAccount, logoutAccount, registerAccount, verifyRegistration, cloudSync } from './account.js';
 import { SyncEngine } from './sync.js';
 import { icon } from './icons.js';
 import { BADGES } from './badges.js';
@@ -14,8 +14,30 @@ const fmt = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigi
 const today = () => hongKong().date;
 const uid = () => crypto.randomUUID();
 let account = null, syncEngine = null, syncStatus = '未登录', accountBusy = false;
+let accountMode = 'login', registrationChallenge = null;
+function accountIdentity() {
+  return `<button type="button" class="account-entry" data-action="account-open" aria-label="${account ? '打开账号中心' : '登录或注册账号'}" aria-haspopup="dialog"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><span class="account-entry-text"><strong>${escape(account?.name ?? '未登录')}</strong><span>${account ? '密码 · ••••••••' : '登录 / 注册'}</span></span>${icon('chevron')}</button>`;
+}
+function refreshAccountIdentity() {
+  if ($('#account-entry-slot')) updateDOM($('#account-entry-slot'), accountIdentity());
+  if ($('#modal').dataset.kind === 'account' && $('#sync-status')) $('#sync-status').textContent = syncStatus;
+}
 function accountPanel() {
-  return `<section class="panel account-panel"><h2>账号与同步</h2><p role="status" id="sync-status">${escape(syncStatus)}</p>${account ? `<p>账号：${escape(account.name)}</p><div class="backup-actions">${button('sync-now', '立即同步', '', '', 'primary')}${button('sync-download', '备份本机并使用云端', '', '', 'secondary')}${button('sync-adopt', '将未登录记录复制到此账号', '', '', 'secondary')}${button('account-logout', '退出账号', '', '', 'secondary')}</div><p class="field-hint">离线保存到本机，联网后同步。两端同时修改会提示冲突；云端更新不重演奖励。未登录记录与各账号分开保存。</p>` : `<form id="account-login"><label class="field">账号<input name="username" autocomplete="username" required minlength="5" maxlength="24"></label><label class="field">密码<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label><button class="primary" type="submit" ${accountBusy ? 'disabled' : ''}>${accountBusy ? '正在登录…' : '登录'}</button></form><p class="field-hint">使用 CloudBase 用户账号，账号可在云开发控制台的身份认证中创建；密码遗忘时在控制台重置。这里不使用腾讯云管理账号密码。</p>`}</section>`;
+  return `<section class="panel account-panel"><h2>账号与同步</h2><p class="field-hint">${account ? escape(syncStatus) : '未登录时也可以离线记录。登录后启用云端同步。'}</p>${button('account-open', account ? '打开账号中心' : '登录 / 注册', 'account', '', 'secondary')}</section>`;
+}
+function openAccountDialog(mode) {
+  accountMode = account ? 'profile' : mode ?? 'login';
+  let contents;
+  if (account) {
+    contents = `${modalHead('', '账号中心')}<div class="account-profile"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><div><strong>${escape(account.name)}</strong><span>密码 · ••••••••</span></div></div><p id="sync-status" class="account-sync-status" role="status">${escape(syncStatus)}</p><div class="account-tools">${button('sync-now', '立即同步', 'check', '', 'primary')}${button('sync-adopt', '复制未登录记录', '', '', 'secondary')}${button('sync-download', '备份本机并使用云端', '', '', 'secondary')}${button('account-logout', '退出账号', '', '', 'text-button')}</div><p class="field-hint">断网时继续保存到本机；两端同时修改会保留冲突。密码仅显示掩码。</p>`;
+  } else {
+    const registering = accountMode === 'register', verifying = accountMode === 'verify';
+    const tabs = `<div class="segmented account-tabs" role="group" aria-label="账号操作">${button('account-login-tab', '登录', '', `aria-pressed="${!registering && !verifying}"`, !registering && !verifying ? 'selected' : '')}${button('account-register-tab', '注册账号', '', `aria-pressed="${registering || verifying}"`, registering || verifying ? 'selected' : '')}</div>`;
+    const fields = `<label class="field">账号<input name="username" autocomplete="username" placeholder="输入账号" required minlength="5" maxlength="24" ${registering ? 'pattern="[A-Za-z0-9][A-Za-z0-9_.:+@\\-]{4,23}"' : ''}></label>${registering ? '<label class="field">邮箱<input name="email" type="email" autocomplete="email" placeholder="用于接收注册验证码" required maxlength="254"></label>' : ''}<label class="field">密码<input name="password" type="password" autocomplete="${registering ? 'new-password' : 'current-password'}" placeholder="${registering ? '8～32 位密码' : '输入密码'}" required ${registering ? 'minlength="8" maxlength="32"' : 'maxlength="128"'}></label>${registering ? '<label class="field">确认密码<input name="confirmation" type="password" autocomplete="new-password" placeholder="再次输入密码" required minlength="8" maxlength="32"></label>' : ''}`;
+    contents = `${modalHead('', verifying ? '验证邮箱' : registering ? '创建账号' : '欢迎回来')}${tabs}<div class="account-dialog-intro"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><p>${verifying ? '完成邮箱验证，即可开始同步。' : registering ? '创建账号，让成长记录随你同行。' : '登录账号，继续你的成长手记。'}</p></div>${verifying ? `<p class="field-hint">验证码已发送至 ${escape(registrationChallenge?.email)}。</p><form id="account-verify"><label class="field">邮箱验证码<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{4,8}" required maxlength="8" placeholder="输入邮箱中的验证码"></label><p class="account-form-error" role="alert"></p><button class="primary account-submit" type="submit">验证并登录</button></form>${button('account-register-tab', '重新填写 / 发送验证码', '', '', 'text-button account-back')}` : `<form id="account-${registering ? 'register' : 'login'}">${fields}<p class="account-form-error" role="alert"></p><button class="primary account-submit" type="submit">${registering ? '发送验证码' : '登录'}</button></form>`}<p class="account-privacy field-hint">${registering || verifying ? '验证成功后创建账号并登录；已有邮箱可能直接登录已有账号。' : '使用应用账号登录。忘记密码可在 CloudBase 控制台重置。'} 密码不会保存到成长记录或显示为明文。</p>`;
+  }
+  openModal(contents, 'account');
+  if (!account) $('#modal input')?.focus({ preventScroll: true });
 }
 async function openAccount(next) {
   await syncEngine?.running;
@@ -24,13 +46,14 @@ async function openAccount(next) {
   store.close(); account = next;
   store = await openStore(next?.id); state = validateState(await store.read());
   localStorage.setItem('rater-active-account', JSON.stringify(next));
-  drafts.clear(); stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog();
+  drafts.clear(); stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog(); refreshAccountIdentity();
   if (next) {
     const activeStore = store;
     syncEngine = new SyncEngine(store, cloudSync, async (status, message) => {
       if (store !== activeStore) return;
       syncStatus = ({ synced: '已同步', pending: '已保存到本机，待同步', conflict: '两端数据有冲突，请先备份并选择云端版本', offline: '已保存到本机，同步暂未完成' })[status];
       if (message) syncStatus += `：${message}`;
+      refreshAccountIdentity();
       await queue;
       if (store !== activeStore) return;
       const latest = validateState(await store.read());
@@ -162,7 +185,7 @@ function shell() {
     <a class="brand" href="#today" data-action="navigate" data-page="today" aria-label="返回今日"><img src="assets/app.svg" alt=""><span>Rater <i>&</i> Tracker</span></a>
     <div class="nav-caption">记录</div>
     <nav>${[['today', '今日', 'sun'], ['tasks', '任务', 'tasks'], ['history', '历史', 'history'], ['rewards', '奖励中心', 'rewards'], ['settings', '设置', 'settings']].map(([id, title, i]) => button('navigate', title, i, `data-page="${id}"`, `nav-link ${page === id ? 'selected' : ''}`)).join('')}</nav>
-    <div class="sidebar-bottom"><div class="tiny-garden">${icon('health')}${icon('star')}${icon('work')}</div><span class="offline-dot"></span> 本机 · 离线<small>v${escape(desktopInfo.version)}</small></div>
+    <div class="sidebar-bottom"><div id="account-entry-slot">${accountIdentity()}</div><small>v${escape(desktopInfo.version)}</small></div>
   </aside><div class="workspace"><header class="topbar"><div class="top-kicker">Rater & Tracker</div><span id="save-status">已保存到本机</span></header>
     <section id="growth" class="growth"><div class="level-medallion">${icon('rewards')}<strong id="level-label"></strong><div id="particles"></div></div><div class="growth-body"><div class="growth-head"><span class="eyebrow">等级经验</span><span class="xp-message" id="growth-message"></span></div><div class="xp-bar" id="xp-bar" role="progressbar" aria-label="当前等级经验进度" aria-valuemin="0" aria-valuemax="100"><div id="xp-ghost"></div><div id="xp-fill"><div class="xp-fluid" aria-hidden="true"><i></i><i></i><i></i></div><div class="xp-glint" aria-hidden="true"></div><div class="xp-tip" aria-hidden="true"></div></div></div><div class="growth-foot"><span id="xp-progress"></span><span id="xp-next"></span></div></div><div class="total-xp"><span>有效累计经验</span><strong id="xp-total"></strong><small>XP</small></div></section>
     <main id="content"></main><footer>Rater & Tracker <span>·</span> 本机保存</footer></div>`;
@@ -346,7 +369,7 @@ function openModal(contents, kind = '') {
   if (!dialog.open) dialog.showModal();
   else if (motionMode() !== 'off') modalSwapAnimation = dialog.animate([{ opacity: .6, transform: 'translateY(5px) scale(.99)' }, { opacity: 1, transform: 'none' }], { duration: motionMode() === 'gentle' ? 150 : 220, easing: 'cubic-bezier(.22,.8,.25,1)' });
 }
-function closeModal() { closeControlLayer({ immediate: true }); modalSwapAnimation?.cancel(); $('#modal').close(); $('#modal').dataset.kind = ''; lastFocused?.focus({ preventScroll: true }); }
+function closeModal() { closeControlLayer({ immediate: true }); modalSwapAnimation?.cancel(); if ($('#modal').dataset.kind === 'account') $('#modal').querySelectorAll('input[type="password"]').forEach(input => { input.value = ''; }); $('#modal').close(); $('#modal').dataset.kind = ''; lastFocused?.focus({ preventScroll: true }); }
 const modalHead = (kicker, title) => `<div class="modal-head"><div><h2 id="modal-title">${escape(title)}</h2></div>${button('close-modal', '', 'close', 'aria-label="关闭"', 'icon-button')}</div>`;
 function confirmAction(title, body, callback, label = '确认', danger = false) {
   openModal(`${modalHead('请核对这次操作', title)}<p class="confirm-body">${body}</p><div class="modal-actions">${button('close-modal', '取消', '', '', 'secondary')}<button type="button" id="confirm-action" class="${danger ? 'danger' : 'primary'}">${label}</button></div>`, 'confirm');
@@ -420,9 +443,12 @@ document.addEventListener('click', async event => {
   const b = event.target.closest('[data-action]'); if (!b || b.disabled || accountBusy) return;
   const action = b.dataset.action, taskId = b.dataset.task;
   try {
-    if (action === 'sync-now') { await queue; await syncEngine?.run(); return; }
+    if (action === 'account-open') { openAccountDialog(); return; }
+    if (action === 'account-login-tab') { registrationChallenge = null; openAccountDialog('login'); return; }
+    if (action === 'account-register-tab') { registrationChallenge = null; openAccountDialog('register'); return; }
+    if (action === 'sync-now') { syncStatus = '正在同步'; refreshAccountIdentity(); await queue; await syncEngine?.run(); return; }
     if (action === 'account-logout') {
-      await syncEngine?.running; await queue; await logoutAccount(); await openAccount(null); renderContent(false); return;
+      await syncEngine?.running; await queue; await logoutAccount(); await openAccount(null); renderContent(false); openAccountDialog('login'); return;
     }
     if (action === 'sync-download') {
       confirmAction('使用云端版本？', '先导出本机完整备份，再使用云端数据。本机未同步改动保留在备份中。', async () => {
@@ -496,14 +522,25 @@ document.addEventListener('change', event => {
   if (el.dataset.stage) save({ type: 'stage', taskId: el.dataset.task, stageId: el.dataset.stage, done: el.checked }, '阶段已更新');
 });
 document.addEventListener('submit', async event => {
-  if (event.target.id === 'account-login') {
+  if (['account-login', 'account-register', 'account-verify'].includes(event.target.id)) {
     event.preventDefault();
     if (accountBusy) return;
     const form = event.target, values = Object.fromEntries(new FormData(form));
-    accountBusy = true; form.querySelector('button').disabled = true;
-    try { const next = await loginAccount(values.username.trim(), values.password); form.reset(); await openAccount(next); }
-    catch (error) { syncStatus = `登录未完成：${error.message}`; toast(syncStatus, true); }
-    finally { values.password = ''; accountBusy = false; renderContent(false); }
+    const submit = form.querySelector('button[type="submit"]'), label = submit.textContent;
+    accountBusy = true; submit.disabled = true; submit.textContent = '正在处理…'; form.querySelector('[role="alert"]').textContent = '';
+    try {
+      if (form.id === 'account-register') {
+        if (values.password !== values.confirmation) throw new Error('两次输入的密码不一致');
+        registrationChallenge = await registerAccount({ username: values.username.trim(), email: values.email.trim(), password: values.password });
+        form.reset(); if ($('#modal').open) openAccountDialog('verify');
+      } else {
+        const next = form.id === 'account-verify' ? await verifyRegistration(registrationChallenge?.id, values.code.trim()) : await loginAccount(values.username.trim(), values.password);
+        if (!next?.id) throw new Error('未获得有效账号身份，请重新登录');
+        form.reset(); registrationChallenge = null; await openAccount(next);
+        if ($('#modal').open && $('#modal').dataset.kind === 'account') openAccountDialog();
+      }
+    } catch (error) { if (form.isConnected) form.querySelector('[role="alert"]').textContent = error.message; else toast(error.message, true); }
+    finally { values.password = ''; values.confirmation = ''; accountBusy = false; if (submit.isConnected) { submit.disabled = false; submit.textContent = label; } }
     return;
   }
   event.preventDefault(); const form = event.target, values = Object.fromEntries(new FormData(form));
@@ -526,7 +563,7 @@ window.raterReload = async () => { state = validateState(await store.read()); gr
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.6', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.7', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');

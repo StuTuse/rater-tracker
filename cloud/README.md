@@ -5,7 +5,11 @@
 
 ## 个人账号与安装应用
 
-在该环境控制台的身份认证／用户管理创建用户名密码用户，已启用 UsernameLogin。应用设置页使用这个应用账号登录，不输入腾讯云管理员密码。首版没有自助注册或找回密码页；修改密码在控制台完成。登录后旧未登录记录仍独立保留，确认需要上传时用“将未登录记录复制到此账号”，先成功备份当前账号。
+用户名密码认证已启用；alpha.7 点击应用左下角账号入口登录／注册。注册经邮箱验证码，账号密码确认后由官方 SDK signUp / verifyOtp 完成。控制台仍可创建账号和重置密码；不输入腾讯云管理员密码。登录后旧未登录记录仍独立保留，确认需要上传时在账号中心复制未登录记录，先成功备份当前账号。
+
+2026-10-13 邮箱认证开启检查：仅 ModifyLoginConfig 返回成功，但回读 EmailLogin=false；发现 email 身份源和默认代发均关闭。通过 ModifyProvider 对 Id=email 设置 On=TRUE、EmailConfig.On=TRUE 后再修改登录策略，实际回读 EmailLogin=true、UserNameLogin=true、email.On=TRUE、email.EmailConfig.On=TRUE。没有启用短信／匿名或购买套餐，没有配置私人SMTP凭证。客户端真实收码到注册完成尚待用户邮箱验收，不将模拟 UI 成功当成云端注册成功。
+
+官方依据：[PG SDK 注册接口](https://docs.cloudbase.net/api-reference/webv3-pg/authentication)、[内置邮件代发](https://docs.cloudbase.net/authentication-v2/method/email-login)、[邮箱身份源配置](https://docs.cloudbase.net/api-reference/manager/node/login-config)。
 
 环境实际使用 PostgreSQL；没有创建 NoSQL 集合。`migrations/001_sync.sql` 已执行：私有账户快照／请求回执表和 authenticated RPC。owner 取认证上下文，客户端无直接表权限；事务内行锁和版本比较避免覆盖。同请求重试返回原版本，两端修改冲突停止并保留本地数据。云端快照限 4 MiB。
 

@@ -29,6 +29,8 @@ else {
     const accounts = require('./account.cjs')(app.getPath('userData'), safeStorage);
     ipcMain.handle('account:current', secure(() => accounts.current()));
     ipcMain.handle('account:login', secure((name, password) => accounts.login(name, password)));
+    ipcMain.handle('account:register', secure(values => accounts.register(values)));
+    ipcMain.handle('account:verify-registration', secure((id, code) => accounts.verifyRegistration(id, code)));
     ipcMain.handle('account:logout', secure(() => accounts.logout()));
     ipcMain.handle('account:sync', secure(data => accounts.sync(data)));
     ipcMain.handle('desktop:info', secure(() => ({ version: app.getVersion(), dataDirectory: app.getPath('userData'), packaged: app.isPackaged })));
@@ -67,6 +69,7 @@ else {
         const report = await window.webContents.executeJavaScript(`(async () => {
           await window.raterReady;
           document.querySelector('[data-page="settings"]').click();
+          document.querySelector('[data-action="account-open"]').click();
           const form = document.querySelector('#account-login');
           if (form) {
             form.username.value = ${JSON.stringify(credentials.username)};
@@ -82,7 +85,7 @@ else {
           const cloud=await window.desktop.accountSync({type:'pull'});
           const storage=await import('./src/storage.js');const core=await import('./src/core.js');
           const store=await storage.openStore(before.id);const state=await store.read();store.close();
-          return { login:true, synchronized:true, xp:core.totalUnits(state)/core.SCALE, cloudVersion:cloud.version, accountIsolated:before.id.length>0, passwordFormRemoved:!document.querySelector('#account-login') };
+          return { login:true, synchronized:true, xp:core.totalUnits(state)/core.SCALE, cloudVersion:cloud.version, accountIsolated:before.id.length>0, passwordFormRemoved:!document.querySelector('#account-login'), sidebarAccount:document.querySelector('.account-entry-text strong').textContent===before.name, passwordMasked:document.querySelector('.account-entry-text>span').textContent.includes('••••'), accountDialog:document.querySelector('#modal').open && document.querySelector('#modal').dataset.kind==='account' };
         })()`);
         report.encryptedSession = safeStorage.isEncryptionAvailable() && (await fs.stat(path.join(app.getPath('userData'), 'account-session.bin'))).size > 0;
         await new Promise(resolve => setTimeout(resolve, 1200));

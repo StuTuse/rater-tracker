@@ -20,6 +20,21 @@ export async function loginAccount(username, password) {
   return account;
 }
 export async function logoutAccount() { if (window.desktop) return window.desktop.accountLogout(); checked(await auth.signOut()); }
+let registration;
+export async function registerAccount(values) {
+  if (window.desktop) return window.desktop.accountRegister(values);
+  registration = null;
+  const data = checked(await auth.signUp(values));
+  if (typeof data?.verifyOtp !== 'function') throw new Error('未获得邮箱验证流程');
+  const id = crypto.randomUUID(); registration = { id, verify: data.verifyOtp };
+  return { id, email: values.email };
+}
+export async function verifyRegistration(id, token) {
+  if (window.desktop) return window.desktop.accountVerifyRegistration(id, token);
+  if (registration?.id !== id) throw new Error('请重新发送验证码');
+  checked(await registration.verify({ token })); registration = null;
+  return currentAccount();
+}
 export async function cloudSync(data) {
   if (window.desktop) return window.desktop.accountSync(data);
   const result = await app.rdb().rpc('rater_sync', {
