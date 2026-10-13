@@ -319,6 +319,14 @@ html[data-motion=off] .xp-stage-stream{display:none}
 /* Page entrance is explicitly owned by page-motion; saves do not replay CSS entry. */
 #content .rating-card,#content .task-card,#content .panel,#content .badge-card img{animation:none}
 
+/* A white first frame with the existing app icon and a quiet creator wordmark. */
+body.is-starting{background:#fff;overflow:hidden}body.is-starting #app{visibility:hidden}body.is-starting.is-revealing #app{visibility:visible}
+#startup{position:fixed;inset:0;z-index:100;background:#fff;color:#2d302b;display:grid;place-items:center;min-height:100dvh;user-select:none}
+.startup-identity{display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;padding:24px;transform:translateY(-25px)}
+.startup-identity img{display:block;width:128px;height:128px;object-fit:contain;filter:drop-shadow(0 8px 18px #ad89351a)}
+.startup-identity h1{font-size:28px;line-height:1.3;font-weight:600;letter-spacing:-.7px}
+.startup-creator{position:absolute;bottom:clamp(36px,7.5vh,80px);left:50%;transform:translateX(-50%);font-size:26px;line-height:1.2;font-weight:850;letter-spacing:-1.1px;white-space:nowrap}
+@media(max-width:620px){.startup-identity{gap:22px;transform:translateY(-20px)}.startup-identity img{width:110px;height:110px}.startup-identity h1{font-size:25px}.startup-creator{font-size:23px;letter-spacing:-.9px}}
 /* A quiet thought beside the top title; awards share the profile window's paper. */
 .topbar{gap:24px}.top-intro{display:flex;align-items:center;gap:22px;min-width:0;flex:1}.top-intro .top-kicker{flex-shrink:0}#launch-line{font-size:13px;line-height:1.6;letter-spacing:.2px;color:#74745e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#save-status{flex-shrink:0}
 dialog[data-kind=award]{width:420px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 48px);padding:24px 28px 28px;border:1px solid #e0d3a3;border-radius:24px;background:linear-gradient(145deg,#fffdf1,#fffef8 44%,#fffef7);box-shadow:0 22px 76px #54451a29,0 2px 9px #b59a3412;overflow:hidden}

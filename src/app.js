@@ -11,6 +11,7 @@ import { createModalController } from './modal.js';
 import { growthStage, paintStage, stageUpgradeFrames } from './growth-stages.js';
 import { chooseLaunchLine, BadgeNoticeQueue } from './notices.js';
 import { createPageMotion } from './page-motion.js';
+import { finishStartup } from './startup.js';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
@@ -639,8 +640,8 @@ window.raterReload = async () => { resetBadgeNotices(); state = validateState(aw
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.15', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
-    applyMotion(); shell(); renderContent(true, false, 'page');
+    desktopInfo = window.desktop ? await window.desktop.info() : { version: '0.1.0-alpha.16', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');
       const active = await currentAccount().catch(() => remembered);
@@ -650,4 +651,5 @@ window.raterReady = (async () => {
     window.addEventListener('online', () => syncEngine?.run());
     setInterval(() => { if (page === 'today' && chosenDate !== today() && !document.hidden && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
   } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }
+  finally { await finishStartup(state ? motionMode() : (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'gentle' : 'full'), () => { if ($('#content')) pageMotion.play('page'); }); }
 })();

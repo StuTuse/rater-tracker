@@ -8,8 +8,15 @@
   <link rel="icon" href="assets/app.svg" type="image/svg+xml">
   <link rel="stylesheet" href="src/styles.css">
 </head>
-<body>
-  <div id="app"><div class="boot">正在打开你的成长手记…</div></div>
+<body class="is-starting">
+  <div id="startup" role="status" aria-label="正在启动 Rater & Tracker">
+    <div class="startup-identity">
+      <img src="assets/app.svg" width="128" height="128" alt="">
+      <h1>Rater &amp; Tracker</h1>
+    </div>
+    <strong class="startup-creator">TuseCreation</strong>
+  </div>
+  <div id="app" inert aria-busy="true"></div>
   <div id="feedback" role="status" aria-live="polite"></div>
   <div id="control-layer"></div>
   <dialog id="modal"></dialog>

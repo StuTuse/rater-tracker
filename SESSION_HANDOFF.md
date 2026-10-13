@@ -1,15 +1,17 @@
 # SESSION_HANDOFF · 跨会话开发交接
 
-最后更新：2026-10-13，香港时间。产品规范《最终方案》v1.17、视觉 v1.13（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.15**。
+最后更新：2026-10-14，香港时间。产品规范《最终方案》v1.18、视觉 v1.14（结算规则仍为 1.3）；应用版本 **0.1.0-alpha.16**。
 
 ## 五分钟接手
 
-1. 读本文件、AGENTS、WORKLOG 最近 W027、正式方案，结算特别阅读 4～6 节，同步见 8.5。
-2. 阅读 `docs/数据契约.md`、`docs/alpha.15验收记录.md`、`docs/启动短句出处.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.14 与 0.1 验收记录。
+1. 读本文件、AGENTS、WORKLOG 最近 W028、正式方案，结算特别阅读 4～6 节，同步见 8.5。
+2. 阅读 `docs/数据契约.md`、`docs/alpha.16验收记录.md`、`docs/启动短句出处.md`、`cloud/README.md`；素材见 `docs/生图素材清单.md`，历史检查保留在 alpha.2～alpha.15 与 0.1 验收记录。
 3. 查 `git status --short`、`git log -3 --oneline`、`git tag --list`、`git remote -v`，不覆盖未提交改动。
 4. 用户已授权构建 0.1，应用工程已经建立；后续开发无须重复审批已拍板机制。
 
 ## 当前真实状态
+
+alpha.16最新：同一窗口纯白启动页，中央现有软件图标／Rater & Tracker，底部850字重TuseCreation字标。静态HTML先显示，主界面隐藏／inert，约1.2秒最短展示与本机准备并行；完整320ms纯消散与主页面入场衔接，柔和／减少动态150ms，关闭静态，读取失败也退出并显示重试。页内操作不重播。40工程＋18启动专项＋41切页回归、源码／最终EXE五个新增首屏条件与既有smoke通过；实际桌面startup.png已查看。验收首帧capturePage曾UnknownVizError，等待ready-to-show与150ms后最终包通过；延迟模块专项先等就绪Promise存在，详见alpha.16记录。安装升级未重测。
 
 alpha.15最新：src/page-motion.js明确由切页触发独立内容组入场，不依赖DOM新建。五页全部可见标题／文字／图像／控件／卡片统一上移淡入；完整380ms／12px、22ms错峰最多132ms，柔和160ms纯淡入，关闭静态。奖励子页／任务状态／徽章系列／趋势按内容区动画，共同标题／统计／菜单保持；保存／搜索／同标签不重播，快速切换和隐藏取消旧动画，独立translate不覆盖悬停transform。40工程＋41切页＋12原位UI＋26控件、最终EXE新增四条件与既有smoke通过。旧UI全局[data-stage]误选经验卡，修正为任务checkbox后实际阶段保存通过，结算未改。安装升级未重测，见alpha.15验收。
 
@@ -44,6 +46,7 @@ alpha.8最新：用户要求删除设置账号管理卡片，账号操作统一�
 | 保存 | IndexedDB 完整快照、原子 revision CAS、串行保存、备份结构校验；真实保存失败与冲突注入 |
 | 界面 | 五页与任务详情；原位更新、局部星级反馈；应用内下拉／月历、横向选中滑块、双向弹窗／折叠动画，隐藏系统滚动条；26 项控件与 12 项交互条件 |
 | 全标签切换 | 五页所有可见内容与页内标签统一入场；有上限错峰、取消与减少动态；41专项／12原位UI／26控件及最终桌面 |
+| 启动页 | 纯白／软件图标与名称／底部粗体TuseCreation，数据准备后自然消散；18浏览器专项、源码及最终EXE首屏与就绪检查 |
 | 资产 | 48 个逐枚生图的透明 PNG 徽章、底纹与两张插画；旧 SVG 参考＋应用图标；资源与总览检查 |
 | 动效 | 金色液态光层、增长／回退／跨级／MAX；连续显示位置接续；偏好与隐藏暂停；11 项专项与 5 项 MAX 条件 |
 | 十阶段成长 | 十个独立SVG等级主体、十种流动和升级编排；阶段回退与MAX最终形态；2项边界单元＋9项浏览器＋最终桌面渲染 |
@@ -55,9 +58,13 @@ alpha.8最新：用户要求删除设置账号管理卡片，账号操作统一�
 | 安装 | NSIS、桌面快捷方式目标、单实例、alpha.11 → alpha.12 升级数据保持；隔离测试副本已卸载 |
 | 尚未覆盖 | 以后格式迁移、Windows 原生文件对话框全程点击、60 fps 实测、长期大数据性能、完整人工体验验收 |
 
-安装包：`release/Rater-Tracker-0.1.0-alpha.15-Setup.exe`，203,247,600 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.15验收记录.md`。本轮最终包运行验收，安装升级未重测。
+安装包：`release/Rater-Tracker-0.1.0-alpha.16-Setup.exe`，203,249,343 字节；可运行目录 `release/win-unpacked`。未签名，原图尚未压缩优化。产物不入库，SHA256 与检查范围见 `docs/alpha.16验收记录.md`。本轮最终包运行验收，安装升级未重测。
 
 ## 文件责任与协作
+
+alpha.16负责index／startup／app／styles、Electron白底及首屏smoke、启动专项、package／VERSION与规范／README／验收／版本／交接。未改core／storage／账号云端／92句池／队列／素材，不派遣会话。window.raterReady现在包含启动页完成；初始页面入场由finishStartup的reveal回调触发，不能提前在隐藏内容上播放。正常窗口与单实例沿用，不创建额外启动窗口。
+
+startup专用浏览器和本轮自建4173服务已关闭。开发验收快捷方式退出重开即可体验源码；普通安装需使用alpha.16包。后续按实际反馈打磨，无本轮阻塞项，完整人工体验／60fps／长期数据／原生对话框及真实邮箱注册仍待后续。
 
 alpha.15负责page-motion／app／styles、页面验收／旧UI验收选择器、Electron smoke、package／VERSION与规范／版本／验收／交接。不改core／storage／账号云端／队列／生图或句池，不派遣会话。切页必须显式调用renderContent的entrance参数，普通保存保持默认无入场；不要恢复零散卡片CSS入场或每个父子一起淡入。
 
@@ -154,7 +161,9 @@ node node_modules/@playwright/cli/playwright-cli.js -s=notices run-code --filena
 
 ## 检查与后续
 
-alpha.15当前：41切页条件、12UI、26控件与40工程通过；最终EXE五页、实际位移／透明度、48徽章／四设置面板四项新增条件通过。脚本中间帧受控，不是60fps测量；原生默认任务列表为空，浏览器实际事务有多状态任务。长期大列表性能、原生文件对话框等边界保留。
+alpha.16当前：40工程＋18启动浏览器＋41切页回归、源码和最终EXE首屏／就绪及既有smoke通过。启动专项命令为 `node node_modules/@playwright/cli/playwright-cli.js --session startup run-code --filename scripts/startup-acceptance.cjs`，先npm run dev并打开专用浏览器；最终桌面命令保持 `node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'`。首屏截图output/desktop/startup.png，最终report packaged=true。正常数据／云端未操作，安装升级未重测。
+
+alpha.15历史：41切页条件、12UI、26控件与40工程通过；最终EXE五页、实际位移／透明度、48徽章／四设置面板四项新增条件通过。脚本中间帧受控，不是60fps测量；原生默认任务列表为空，浏览器实际事务有多状态任务。长期大列表性能、原生文件对话框等边界保留。
 
 alpha.14当前：40工程＋13浏览器内容条件，最终包92／22回读及EXE既有smoke通过。九位均2～3句，新四位各3句，逐条桌面／390px显示和全文title验证；不能将临时渲染说成92次随机启动。后续语录继续核对本人／学校／公司一手出处，区分译句、中文摘句和转引，不添加冒名原创。
 
@@ -182,11 +191,11 @@ alpha.7当前：33项检查通过；账号UI真实鼠标／键盘与窄屏检查
 
 ## 版本状态
 
-`VERSION`／package／锁文件为 `0.1.0-alpha.15`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.15`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
+`VERSION`／package／锁文件为 `0.1.0-alpha.16`；原有规划与预览标签保持，当前里程碑使用附注标签 `v0.1.0-alpha.16`。提交哈希由 Git 查询，不在日志中造自引用哈希。没有配置远程或 GitHub。
 
 alpha.1 源码提交为 `49fda5c`，交接为 `3ae0d46`；alpha.2 素材提交为 `e0be78c`。alpha.3 提交 41562cc，alpha.4 提交 3ba94e1；alpha.5 统一应用内控件与二级界面动效，具体当前提交以 Git 查询为准。
 
-最近工作对应 WORKLOG **W027**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
+最近工作对应 WORKLOG **W028**。后续结束时追加实际结果、更新本文件与 README，只有检查符合的部分标记完成。
 
 ## alpha.2 素材补充
 

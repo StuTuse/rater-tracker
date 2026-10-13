@@ -56,7 +56,8 @@ else {
       return fs.readFile(file, 'utf8');
     }));
     Menu.setApplicationMenu(null);
-    window = new BrowserWindow({ width: 1440, height: 960, minWidth: 760, minHeight: 620, show: !smoke, backgroundColor: '#faf8ef', title: 'Rater & Tracker', icon: path.join(root, 'assets/app.png'), webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
+    window = new BrowserWindow({ width: 1440, height: 960, minWidth: 760, minHeight: 620, show: !smoke, backgroundColor: '#ffffff', title: 'Rater & Tracker', icon: path.join(root, 'assets/app.png'), webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
+    const firstPaint = smoke ? new Promise(resolve => window.once('ready-to-show', resolve)) : null;
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     window.webContents.on('will-navigate', (event, url) => { if (!url.startsWith('app://rater/')) event.preventDefault(); });
     window.webContents.session.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
@@ -132,8 +133,26 @@ else {
     }
     if (smoke) {
       try {
+        await firstPaint;
+        // capturePage needs a submitted compositor frame, beyond DOM readiness.
+        await new Promise(resolve => setTimeout(resolve, 150));
+        const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
+        await fs.mkdir(directory, { recursive: true });
+        const startup = await window.webContents.executeJavaScript(`(async () => {
+          const splash=document.querySelector('#startup'),image=splash?.querySelector('img');
+          if(!splash||!image)return {startupWhite:false,startupIdentity:false,startupCreator:false,startupBlocksInput:false};
+          await image.decode();
+          const rect=splash.getBoundingClientRect(),icon=image.getBoundingClientRect(),title=splash.querySelector('h1').getBoundingClientRect(),brand=splash.querySelector('strong'),word=brand.getBoundingClientRect();
+          const centered=r=>Math.abs(r.x+r.width/2-innerWidth/2)<2;
+          return {startupWhite:getComputedStyle(splash).backgroundColor==='rgb(255, 255, 255)'&&rect.width===innerWidth&&rect.height===innerHeight,
+            startupIdentity:image.naturalWidth>0&&centered(icon)&&centered(title)&&title.top>icon.bottom&&splash.querySelector('h1').textContent==='Rater & Tracker',
+            startupCreator:brand.textContent==='TuseCreation'&&Number(getComputedStyle(brand).fontWeight)>=800&&centered(word)&&word.top>innerHeight*.8,
+            startupBlocksInput:document.querySelector('#app').inert&&getComputedStyle(document.querySelector('#app')).visibility==='hidden'};
+        })()`);
+        await fs.writeFile(path.join(directory, 'startup.png'), (await window.webContents.capturePage()).toPNG());
         const report = await window.webContents.executeJavaScript(`(async () => {
           await window.raterReady;
+          const startupDismissed=!document.querySelector('#startup')&&!document.querySelector('#app').inert&&!document.body.classList.contains('is-starting');
           const core = await import('./src/core.js');
           const storage = await import('./src/storage.js');
           const store = await storage.openStore();
@@ -205,10 +224,9 @@ else {
           const layouts=[],patterns=[];
           for(const phase of phases.GROWTH_STAGES){phases.paintStage(probe,phase.from);const box=probe.querySelector('.level-emblem').getBBox();layouts.push(box.width>20&&box.height>20);patterns.push(getComputedStyle(probe.querySelector('.xp-fluid i')).animationName);}
           probe.remove();const tenStageEmblemsRender=layouts.length===10&&layouts.every(Boolean),tenStageFlowPatterns=new Set(patterns).size===10;
-          return { title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, pageEntryAllFive, pageEntryLiftAndFade, pageEntry48Badges, pageEntryFourSettings, currentStageMatches, tenStageEmblemsRender, tenStageFlowPatterns, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          return { startupDismissed, title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, pageEntryAllFive, pageEntryLiftAndFade, pageEntry48Badges, pageEntryFourSettings, currentStageMatches, tenStageEmblemsRender, tenStageFlowPatterns, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
-        const directory = process.env.RATER_SMOKE_OUTPUT ? path.resolve(process.env.RATER_SMOKE_OUTPUT) : smokeDirectory;
-        await fs.mkdir(directory, { recursive: true });
+        Object.assign(report,startup);
         try {
           Object.assign(report, await window.webContents.executeJavaScript(`(async()=>{
             const c=await import('./src/core.js'),storage=await import('./src/storage.js'),notices=await import('./src/notices.js');
@@ -244,7 +262,7 @@ else {
         await window.webContents.executeJavaScript(`(async () => { const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});document.querySelector('[data-action="account-open"]').click();document.querySelector('[data-action="account-register-tab"]').click(); })()`);
         await new Promise(resolve => setTimeout(resolve, 500));
         await fs.writeFile(path.join(directory, 'account-motion.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
+        app.exit(report.startupWhite && report.startupIdentity && report.startupCreator && report.startupBlocksInput && report.startupDismissed && report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });
