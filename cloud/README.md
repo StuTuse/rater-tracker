@@ -7,13 +7,13 @@
 
 用户名密码认证已启用；alpha.7 点击应用左下角账号入口登录／注册。注册经邮箱验证码，账号密码确认后由官方 SDK signUp / verifyOtp 完成。控制台仍可创建账号和重置密码；不输入腾讯云管理员密码。登录后旧未登录记录仍独立保留，确认需要上传时在账号中心复制未登录记录，先成功备份当前账号。
 
-2026-10-13 邮箱认证开启检查：仅 ModifyLoginConfig 返回成功，但回读 EmailLogin=false；发现 email 身份源和默认代发均关闭。通过 ModifyProvider 对 Id=email 设置 On=TRUE、EmailConfig.On=TRUE 后再修改登录策略，实际回读 EmailLogin=true、UserNameLogin=true、email.On=TRUE、email.EmailConfig.On=TRUE。没有启用短信／匿名或购买套餐，没有配置私人SMTP凭证。客户端真实收码到注册完成尚待用户邮箱验收，不将模拟 UI 成功当成云端注册成功。
+2026-10-13邮箱认证配置过程及回读结果：首次只修改登录策略后，回读`EmailLogin=false`；随后启用email身份源与默认代发，再次回读`EmailLogin=true`、`UserNameLogin=true`、`email.On=true`、`email.EmailConfig.On=true`。未启用短信／匿名认证、未购买套餐、未配置私人SMTP凭证。真实收码及注册完成已在Android模拟器验证，身份验证范围见[Android验收记录](../docs/Android验收记录.md)；不能将此范围扩大到实体设备或所有账号情形。
 
 官方依据：[PG SDK 注册接口](https://docs.cloudbase.net/api-reference/webv3-pg/authentication)、[内置邮件代发](https://docs.cloudbase.net/authentication-v2/method/email-login)、[邮箱身份源配置](https://docs.cloudbase.net/api-reference/manager/node/login-config)。
 
 环境实际使用 PostgreSQL；没有创建 NoSQL 集合。`migrations/001_sync.sql` 已执行：私有账户快照／请求回执表和 authenticated RPC。owner 取认证上下文，客户端无直接表权限；事务内行锁和版本比较避免覆盖。同请求重试返回原版本，两端修改冲突停止并保留本地数据。云端快照限 4 MiB。
 
-桌面使用官方 @cloudbase/js-sdk 3.10.2 的原生接口，通过受限 Electron IPC 访问，safeStorage 保存加密会话。部署凭证只在本机工具配置，不进入应用。免费环境拒绝添加网页安全域名，浏览器／手机登录尚未交付；没有购买套餐或关闭桌面隔离。
+Windows桌面使用官方@cloudbase/js-sdk 3.10.2原生接口，通过受限Electron IPC访问，safeStorage保存加密会话。Android原生客户端也接入认证与快照同步，具体使用范围见Android验收记录。部署凭证只在本机工具配置，不进入应用。免费环境未添加网页安全域名，因此浏览器登录尚未交付；没有购买套餐或关闭桌面隔离。
 
 ## 工程与验收命令
 
@@ -31,7 +31,7 @@ build 生成并提交 src/vendor/cloudbase.js 与 electron/cloudbase.cjs，打�
 
 account-acceptance 会创建一次性 externalUser 和虚构 11 XP 数据，验证登录／退出、账号隔离、上传下载、重复请求和旧版本冲突；第二账号检查后删除，第一账号保留供桌面测试。凭证仅写入忽略的 runtime-data/cloud-test/account.json，不输出密码。desktop-smoke 使用独立 runtime-data/account-package，不访问正常用户目录。再次运行验收应先记录旧测试账号并在获授权后清理，不能删除其他用户。
 
-本轮两个临时验收账号 ID 为 2109848299591114753、2109850418322677762。自动审批因外部永久删除缺少明确授权拒绝收尾清理，目前保留，等待用户确认；不是个人正式账号。
+历史验收曾留下两个临时云端验收账号；原记录中的账号ID不再列入项目文档。曾有自动审批拒绝执行外部永久删除的记录；这不是当前待执行的清理授权。任何以后需要删除云端账号的任务，都应先核实账号归属和当前数据，再遵守当时适用的授权要求。
 
 实际结果与边界见 ../docs/alpha.6验收记录.md。SDK 及依赖许可证保留于生成文件法律注释和依赖包；SDK 官方源码：https://github.com/TencentCloudBase/cloudbase-js-sdk 。
 

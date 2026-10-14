@@ -1,12 +1,12 @@
 # Rater & Tracker
 
-个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；离线 Windows 桌面应用。
+个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前版本：0.1.0-alpha.17，淡黄色启动页更新版。** 启动页使用与软件背景一致的纸色（#faf8ef），中央软件图标与名称，底部加粗TuseCreation字标，数据准备后自然消散进入主界面。五页及页内切换动效、顶部92句、勋章窗口／礼花、十阶段成长与登录草稿保持。已实现真实评分、任务结算、本地持久化、48枚独立生图徽章、手绘底纹和完整备份。不是1.0正式验收版。
+**当前双平台预览：Windows 0.1.0-alpha.17；Android 0.1.0-alpha.2（VERSION_CODE=2）。** Android按压反馈使用与桌面悬浮状态一致的暖色背景、金色描边、柔和阴影和轻抬升。Windows启动页为与软件背景一致的纸色（#faf8ef）；两端共享已实现的评分、任务结算、持久化、完整JSON备份和48枚独立生图徽章。均为预览版本，不是1.0正式验收版。
 
 ## 安装与使用
 
-安装程序：[Rater-Tracker-0.1.0-alpha.17-Setup.exe](release/Rater-Tracker-0.1.0-alpha.17-Setup.exe)。双击安装，选择安装目录；安装后从桌面 `Rater & Tracker` 快捷方式打开。程序包含运行时，无需安装 Node，也无需启动服务。当前产物是未签名的本地预览包。
+下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)并选择`Rater-Tracker-0.1.0-alpha.17-Setup.exe`。双击安装，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。当前Windows预览包未签名。Android签名APK也在同一Release附件中。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -34,10 +34,10 @@
 npm ci
 npm start                 # Electron 独立窗口，正常用户数据
 npm run dev               # 浏览器预览 http://127.0.0.1:4173
-npm test                  # 25 项业务＋6 项同步／本机清空＋5 项注册＋2 项十阶段＋2 项提示测试
-npm run check             # 版本、语法、51 张独立素材、业务测试
+npm test                  # 运行仓库配置的业务测试
+npm run check             # 当前项目版本、语法、素材与业务检查
 npm run build             # Windows x64 可运行目录 release/win-unpacked
-npm run dist              # Windows x64 NSIS 安装包，不发布
+npm run dist              # 本地构建 Windows x64 NSIS 安装包；GitHub 发布另按发布流程执行
 npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结果
 ```
 
@@ -100,7 +100,7 @@ node node_modules/@playwright/cli/playwright-cli.js -s=alpha5-check close
 | [数据契约.md](docs/数据契约.md) | 金额精度、历史分配、持久化和备份格式 |
 | [0.1验收记录.md](docs/0.1验收记录.md) | 实际检查、产物和未覆盖范围 |
 
-alpha.5 历史验证包含 25 项业务测试、26 项控件条件、12 项浏览器条件、12 项交互条件、11 项动效／可读性条件、5 项 MAX 条件与 51 张生图资源，见 [alpha.5 验收](docs/alpha.5验收记录.md)。alpha.6 检查为 30 项业务／同步测试、真实账号与云端、最终桌面和安装升级，见 [alpha.6 验收](docs/alpha.6验收记录.md)。仍需长历史量性能、60 fps、原生文件对话框完整点击、完整辅助功能和人工连续使用检查。
+alpha.5与alpha.6数据是对应历史构建的检查记录，见[alpha.5验收](docs/alpha.5验收记录.md)与[alpha.6验收](docs/alpha.6验收记录.md)。当前已覆盖项目和仍未覆盖的设备／性能／辅助功能范围分别见最新平台验收记录；历史报告不代表当前构建的全量回归。
 
 十阶段范围为Lv.1～9、Lv.10～19，依次至Lv.80～89、Lv.90～MAX。经验门槛保持，撤销或更正后阶段随有效等级回退；打开、导入不重播升级。完整模式显示流光和阶段升级，柔和／关闭减少装饰。38项工程、9项阶段条件和最终桌面检查见[alpha.11验收](docs/alpha.11验收记录.md)。
 
@@ -126,7 +126,7 @@ alpha.17按新要求把首屏改为软件背景同款淡黄色#faf8ef，窗口�
 
 所有账号操作在左下角浮层内，设置页不再提供重复入口。“退出账号”保留本机账号记录；“清空本机账号数据”先导出完整备份，再删除当前账号的本机快照／同步缓存并退出，云端、未登录记录与其他账号不受影响。取消导出就取消清空；未同步改动需从导出的备份找回。重新登录可从云端恢复。登录／注册表单还提供“清空输入”。
 
-桌面会话系统加密保存，退出返回未登录数据；导出不包含凭证。服务停服或断网仍可本机使用。首版快照容量限 4 MiB，浏览器／手机登录未交付。居中与注册修正检查见 [alpha.9 验收](docs/alpha.9验收记录.md)；使用合规账号的真实邮箱收码至注册完成仍待用户复验。
+桌面会话系统加密保存，退出返回未登录数据；导出不包含凭证。服务停服或断网仍可本机使用。首版快照容量限 4 MiB；Android原生客户端登录与真实邮箱验证码注册已按验收记录完成模拟器检查，浏览器登录仍未交付。居中与注册界面历史检查见[alpha.9验收](docs/alpha.9验收记录.md)，Android身份验证范围见[Android验收记录](docs/Android验收记录.md)。
 
 连续弹窗与草稿检查见 [alpha.10 验收](docs/alpha.10验收记录.md)：16项动效、账号UI、26项控件与最终打包／升级检查通过；36项工程检查包含大写用户名映射。本轮未重做云端认证实测。
 
@@ -152,15 +152,15 @@ node node_modules/@playwright/cli/playwright-cli.js -s=account-component close
 
 迁移和云端验收需要 CloudBase CLI 本机登录；验收会创建临时账号及虚构数据，详见 cloud/README。UI验收先启动 npm run dev，传输使用模拟，不证明云端注册成功。正常安装使用已经打包的官方 SDK，不需安装部署工具。
 
-CloudBase 部署、账号配置和真实验收见 [cloud/README](cloud/README.md)。2026-10-13 用户认证、桌面调用和完整快照同步通过；手机和网页客户端待后续开发。
+CloudBase 部署、账号配置和验收见[cloud/README](cloud/README.md)。Windows桌面和Android原生客户端已接入账号与完整快照同步；浏览器客户端登录尚未交付。
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.17](最终方案.md) · [视觉与动效规范](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅保留历史。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.22](最终方案.md) · [视觉与动效规范 v1.18](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅作历史参考。
 
-当前版本为 `0.1.0-alpha.17`，主分支 `main`，既有规划与预览附注标签保持。2026-10-14 用户授权接入 [GitHub 私有仓库 StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)，`origin` 为 `https://github.com/StuTuse/rater-tracker.git`；访问需要获授权的 GitHub 账号。源码、文档、锁文件与素材入库，安装包、个人数据、备份、私有配置及签名材料不入库。
+当前双平台版本为Windows `0.1.0-alpha.17`与Android `0.1.0-alpha.2`／`VERSION_CODE=2`，规则1.3、JSON格式1。主分支为`main`。GitHub仓库[StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)保持private；源码、文档、锁文件与源素材入库，安装包、个人数据、备份、私有配置及签名材料不入源码Git。
 
-用户已同意单仓库双应用工程、共享规则与独立 Git worktree 方案，见 [双端工程与工作区隔离方案](docs/双端工程与工作区隔离草案.md)。Windows与Android工程均可运行；两个 worktree 与 Windows 开发数据隔离已建立，见 [隔离登记](docs/工作区隔离登记.md)；安卓签名APK、真实邮箱注册和移动排版已完成列明的模拟器验收，范围见[Android验收记录](docs/Android验收记录.md)。Windows 工作区使用 npm run start:dev 进入独立开发数据目录。
+单仓库双应用工程结构见[双端工程与工作区说明](docs/双端工程与工作区隔离草案.md)，工作目录登记见[工作区隔离登记](docs/工作区隔离登记.md)。Android签名APK、真实邮箱注册、移动排版及按压反馈的模拟器检查见[Android验收记录](docs/Android验收记录.md)和[Android alpha.2验收](docs/Android-alpha.2验收记录.md)。
 
 规划模拟仍在 `analysis/`，不能替代应用业务测试；没有重新运行或覆盖历史模拟结果。
 
@@ -189,4 +189,4 @@ alpha.2 将安卓按压反馈统一为桌面悬浮的暖色背景、金色描边
 
 ## 双平台 GitHub Release
 
-[当前双平台预览 Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)提供Windows alpha.17安装程序和Android alpha.2签名APK。用户已授权此私有仓库的持续发布：每次完成改动都推送源码并创建新双平台Release；受影响平台附当前安装包，未改变平台链接最近版本。具体步骤见[双平台GitHub发布流程](docs/双平台GitHub发布流程.md)。
+[当前双平台预览 Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)提供Windows alpha.17安装程序和Android alpha.2签名APK。用户已要求每次完成改动都推送源码并创建新双平台Release；受影响平台上传新安装包，未改变平台链接最近版本，纯文档改动也发布源码但不重建应用。具体步骤见[双平台GitHub发布流程](docs/双平台GitHub发布流程.md)。

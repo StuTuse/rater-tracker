@@ -528,3 +528,11 @@ W044所列源代码与未来流程文档已提交`f7e6943`并推送`main`，创�
 Release附件：Windows `Rater-Tracker-0.1.0-alpha.17-Setup.exe`（203,249,318字节，SHA256 `7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140`）；Android `Rater-Tracker-Android-0.1.0-alpha.2-release.apk`（98,111,149字节，SHA256 `74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711`）；`SHA256SUMS-dual-2026.10.14.1.txt`（223字节）。GitHub资产字节数及二进制SHA256与本地一致，下载远端清单后逐行核对一致。仓库可见性仍为PRIVATE。
 
 本轮Windows unpacked smoke失败且没有新packaged报告；未验证本次Windows安装／升级。Windows包未签名。Android APK使用原证书且v2签名验证通过；按压验收边界见W043。未来每次完成改动推送`main`并按文档创建双平台prerelease的规则已在同一Release源码提交中生效。后续收尾文档提交只记录上述发布结果，不另开重复Release。
+
+## W046 · 2026-10-14 · 全项目文档状态与规则清理
+
+按用户要求盘点全部项目Markdown文档；以`最终方案`v1.22、`视觉与动效规范`v1.18、`徽章设计清单`、规则1.3／JSON1、双平台当前实现及每次改动创建GitHub Release的授权为依据。保留带版本号的历史验收报告、CHANGELOG和工作日志原始结果，避免把旧构建结果改写成当前验证；对规划、候选和情景模拟增加显眼归档说明，明确旧“待确认”、33枚和“尚未开发”只属历史，不是当前规则或需要再次确认的事项。
+
+修订README、SESSION_HANDOFF、版本管理规范、双端工程说明、Android移植检查点、工作区登记、数据契约、CloudBase说明、徽章清单及早期分析文档；同步当前双平台版本、已完成的Android邮箱／按压验收、浏览器登录尚未交付、私有发布规则和工作区边界。移除README里指向被忽略本地安装包的下载链接，改指向GitHub Release；删去文档中不必要的历史测试账号ID。没有改变产品结算、应用代码、应用版本或JSON格式。
+
+检查：所有相对Markdown链接解析到现有路径；`git diff --check`通过。因本次仅为文档修订，未运行应用构建或业务测试。保留的历史验收中旧版本“未测／待后续”陈述描述的是当时范围，不作为本次当前状态。按持续发布规则，待推送本次源码后创建文档专用双平台Release，不重建Windows／Android包；应用版本不递增。
