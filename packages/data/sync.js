@@ -1,7 +1,17 @@
 import { validateState } from './storage.js';
 export class SyncEngine {
-  constructor(store, remote, onChange = () => {}) { this.store = store; this.remote = remote; this.onChange = onChange; this.running = null; }
-  run() { if (!this.running) this.running = this.perform().finally(() => { this.running = null; }); return this.running; }
+  constructor(store, remote, onChange = () => {}) { this.store = store; this.remote = remote; this.onChange = onChange; this.running = null; this.rerun = false; }
+  run() {
+    if (this.running) { this.rerun = true; return this.running; }
+    this.running = this.drain().finally(() => { this.running = null; });
+    return this.running;
+  }
+  async drain() {
+    do {
+      this.rerun = false;
+      await this.perform();
+    } while (this.rerun);
+  }
   async perform() {
     let local = await this.store.readSync();
     if (local.meta.conflict !== null) return this.onChange('conflict');

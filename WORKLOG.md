@@ -552,3 +552,13 @@ Release附件：Windows `Rater-Tracker-0.1.0-alpha.17-Setup.exe`（203,249,318�
 PowerShell解析、diff检查、npm工程47检查通过。真实源码Electron隔离smoke首轮仅startupBlocksInput=false导致exit1，复跑全部条件true／exit0；两轮报告及截图保留output/desktop/startup-repair*，已查看真实画面。不把首轮当通过，不把来源app://rater、packaged=false扩大为本轮安装包验收。GUI工具窗口抓取曾返回Computer Use app approval timed out，采用应用既有隔离capturePage截图及正常窗口列表检查；没有自动点击SmartScreen。
 
 新增Windows桌面启动修复记录与README，更新交接。Windowsalpha.17／Androidalpha.2/code2及两安装包未变，仅工程源码Release，不重建包。GitHub回读PRIVATE及原dual1／2／3成功，本轮按下一个dual/2026.10.14.4批次推送发布，结果由实际远端回读确认。后续常规改源码仍退出重开；依赖或项目路径变化重建快捷方式。未覆盖其他系统SmartScreen、受信任代码签名、NSIS升级／安装、安卓或云写入；源码与发布边界见专项记录。
+
+## W049 · 2026-10-14 · 双端自动同步与评分星级动画
+
+按用户要求优化Windows／Android星级反馈；并完成此前已开始的双端自动同步增强。先核对交接、W048、正式方案／视觉规范、工作区与发布规则；仅在main主工作区修改共享数据同步、UI、测试及对应文档，Windows／Android开发worktree未动。Windows升至alpha.18；Android升至alpha.3／VERSION_CODE=3；方案v1.24、视觉规范v1.19；结算1.3／JSON1保持。
+
+同步侧保留已有登录启动、每次保存、重连、前台及周期自动触发，新增上传中有新保存时排队再推送最新快照，成功恢复备份后自动上传；冲突、账号隔离和离线本地写入策略不变。新增真实云端传输竞态测试：上传期间保存的新快照在本次同步返回前完成推送并更新版本。星级侧移除SVG透明度脉冲，完整模式以平滑缩放、轻转和回正播放390／270ms有限动效，20ms错峰；柔和模式仅短缩放，连续改分由可见变换接续，关闭模式无动画。两个平台共用渲染代码。
+
+验证：`npm run check`为48/48；浏览器真实打分专项4项全部通过（不透明度稳定、关键帧只变换、快速改分接续当前形态、保存星数一致）；既有UI交互回归12项全部通过。Android Web资源同步、Gradle debug／release均成功，aapt核对包名／版本码3；APK v2签名通过（RSA3072，CN与项目既有签名配置一致）。Windows x64 NSIS安装包生成203,279,418字节，SHA-256为`f616f00685ea804cbccb1c5b733daedf85d87656941d2aa59950f1e2c1b0e07b`；Android alpha.3 APK 98,111,281字节，SHA-256为`5a3b24718a378281eea80d03d73155ca628c461f7085abf47848c6c3339ac1eb`；清单在release输出目录。
+
+边界：当前工作区没有隔离Android AVD，未作设备安装／WebView现场验收。Windows安装包未签名；当前执行环境运行Electron子进程时静默退出1，故本次未完成新包smoke或安装／升级检查。未登录真实云账号或连接真实云端。Windows NSIS构建步骤曾执行受控运行保护，构建时临时用已验证文件解析方式提取卸载器并在命令结束后还原node_modules依赖文件，没有修改系统安全设置。GitHub提交／双端Release结果待本次收尾。

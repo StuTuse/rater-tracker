@@ -2,7 +2,7 @@
 
 ## 现行状态
 
-Windows 桌面当前为`0.1.0-alpha.17`，Android 当前为`0.1.0-alpha.2`／`VERSION_CODE=2`；产品方案`v1.22`、视觉规范`v1.18`、结算规则`1.3`、JSON格式`1`。Android alpha.2 完成全组件按压反馈优化，细节及实际验收范围见[Android alpha.2验收记录](docs/Android-alpha.2验收记录.md)。
+Windows 桌面当前为`0.1.0-alpha.18`，Android 当前为`0.1.0-alpha.3`／`VERSION_CODE=3`；产品方案`v1.24`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。本轮双端登录后启动及每次成功本机写入即触发自动云同步；正在上传时的新修改自动接续，恢复入口同样触发上传。星星动画取消透明度脉冲，改为从当前帧连续缩放并轻转落定；两端共用实现。构建、渲染验收和发布状态见最新工作日志。
 
 双端源码已集成到`main`并推送私有GitHub仓库`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 
@@ -10,7 +10,7 @@ Windows 桌面当前为`0.1.0-alpha.17`，Android 当前为`0.1.0-alpha.2`／`VE
 
 ## 当前工作区
 
-2026-10-14本轮在main负责`scripts/create-desktop-shortcut.ps1`、README、Windows启动修复记录和日志交接。用户通过SmartScreen后仍无窗口；定位到同字节Electron从项目目录退出`0x80000003`、从普通用户目录正常运行。现桌面开发快捷方式使用`%LOCALAPPDATA%/RaterTrackerDevRuntime`中73文件校验一致的44.7.0运行时，仍打开本项目源码及正常`%APPDATA%/RaterTracker`数据。正常窗口已从原快捷方式打开并保留；47检查和真实源码Electron隔离smoke复跑通过，首轮启动阻隔采样失败保留。细节及边界见[Windows桌面启动修复](docs/Windows桌面启动修复记录.md)、W048。应用版本、安装包及Android未改；本轮源码发布批次使用下一个`dual/2026.10.14.4`，发布状态以实际远端引用和Release为准。
+上轮Windows开发快捷方式修复见[Windows桌面启动修复](docs/Windows桌面启动修复记录.md)与W048。当前本轮在main负责`packages/data/sync.js`、`packages/ui/app.js`、星级共享样式／动画、同步测试与双端构建集成；Windows／Android开发worktree未修改，使用前需重新检查其Git可用状态。构建包哈希及发布结果待W049记录。
 
 本目录为集成`main`。本轮接手时HEAD为`4535570`，历史文档收尾tag及Release`dual/2026.10.14.3`已存在；本次GitHub回读确认仓库PRIVATE、批次1／2／3均为prerelease，W047的网络回读限制已解除。开始下一任务前检查`git status`、最新远程分支和Release序号。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 

@@ -37,6 +37,35 @@ test('input saved during upload stays pending after acknowledging older snapshot
   assert.equal(totalUnits(pair.state), 15e6); assert.equal((await a.beginPush()).baseVersion, 1);
   a.close();
 });
+test('a change during an automatic upload is pushed before the sync run completes', async () => {
+  const a = await openStore('sync-drain');
+  await a.write(rating(await a.read()), 0);
+  let finishFirstPush, pushCount = 0, cloudState;
+  const firstPush = new Promise(resolve => { finishFirstPush = resolve; });
+  const engine = new SyncEngine(a, async request => {
+    if (request.type === 'push') {
+      pushCount++;
+      if (pushCount === 1) await firstPush;
+      cloudState = request.state;
+      return { accepted: true, version: pushCount };
+    }
+    return cloudState ? { state: cloudState, version: pushCount } : { state: null, version: pushCount };
+  });
+  const firstRun = engine.run();
+  while (pushCount === 0) await new Promise(resolve => setTimeout(resolve, 0));
+  const before = await a.read();
+  await a.write(rating(before, 5), before.revision);
+  assert.equal(engine.run(), firstRun);
+  finishFirstPush();
+  await firstRun;
+  const pair = await a.readSync();
+  assert.equal(pushCount, 2);
+  assert.equal(pair.meta.dirty, false);
+  assert.equal(pair.meta.inFlight, null);
+  assert.equal(pair.meta.baseVersion, 2);
+  assert.equal(totalUnits(pair.state), 15e6);
+  a.close();
+});
 test('cloud conflicts keep local rewards and stop automatic overwrites', async () => {
   const a = await openStore('conflict'); await a.write(rating(await a.read()), 0);
   let calls = 0;

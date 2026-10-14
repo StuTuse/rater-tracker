@@ -349,15 +349,19 @@ function renderContent(preserveInputs = true, animateChanges = false, entrance =
 }
 function animateStar(button, lit) {
   const svg = button.querySelector('svg'), previous = starAnimations.get(svg);
-  const transform = previous ? getComputedStyle(svg).transform : lit ? 'scale(.72) rotate(-9deg)' : 'scale(1.08)';
+  // Read the visible frame before cancelling so rapid corrections continue in place.
+  const transform = getComputedStyle(svg).transform;
   previous?.cancel(); starAnimations.delete(svg);
   if (motionMode() === 'off' || !appVisible()) return;
   const gentle = motionMode() === 'gentle';
-  const animation = svg.animate(gentle ? [{ opacity: .55 }, { opacity: 1 }] : [
-    { transform, opacity: .65 },
-    { transform: lit ? 'scale(1.14) rotate(3deg)' : 'scale(.94)', opacity: 1, offset: .58 },
-    { transform: 'scale(1) rotate(0deg)', opacity: 1 }
-  ], { duration: gentle ? 150 : lit ? 360 : 240, delay: gentle ? 0 : lit ? (Number(button.dataset.stars) - 1) * 24 : 0, easing: 'cubic-bezier(.22,.8,.25,1)' });
+  const frames = lit
+    ? [{ transform }, { transform: 'scale(1.18) rotate(5deg)', offset: .52 }, { transform: 'scale(.97) rotate(-1.5deg)', offset: .78 }, { transform: 'scale(1) rotate(0deg)' }]
+    : [{ transform }, { transform: 'scale(1.06) rotate(-2deg)', offset: .42 }, { transform: 'scale(.98) rotate(1deg)', offset: .76 }, { transform: 'scale(1) rotate(0deg)' }];
+  const animation = svg.animate(frames, {
+    duration: gentle ? 150 : lit ? 390 : 270,
+    delay: gentle ? 0 : lit ? (Number(button.dataset.stars) - 1) * 20 : 0,
+    easing: 'cubic-bezier(.2,.72,.24,1)'
+  });
   starAnimations.set(svg, animation);
   const finished = () => { if (starAnimations.get(svg) === animation) starAnimations.delete(svg); };
   animation.finished.then(finished, finished);
@@ -490,7 +494,7 @@ async function importBackup() {
       const replacement = structuredClone(restored); replacement.revision = state.revision + 1;
       await store.write(replacement, state.revision); state = replacement; drafts.clear();
       stopGrowthFeedback(); resetBadgeNotices();
-      applyMotion(); growthStatic(); renderContent(false); toast('完整恢复成功。历史奖励保持原值。');
+      applyMotion(); growthStatic(); renderContent(false); toast('完整恢复成功。历史奖励保持原值。'); syncEngine?.run();
     } catch (error) { toast(error.message, true); }
   }, '备份当前数据并恢复');
 }
@@ -642,7 +646,7 @@ window.raterReload = async () => { resetBadgeNotices(); state = validateState(aw
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = platform ? await platform.info() : { version: '0.1.0-alpha.17', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = platform ? await platform.info() : { version: '0.1.0-alpha.18', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');
