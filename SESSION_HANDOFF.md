@@ -10,9 +10,11 @@ Windows 桌面当前为`0.1.0-alpha.17`，Android 当前为`0.1.0-alpha.2`／`VE
 
 ## 当前工作区
 
-本目录为集成`main`。文档审核提交`e98622d`及附注tag`dual/2026.10.14.2`已成功推送；GitHub Release创建命令返回链接[dual/2026.10.14.2](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.2)。随后GitHub API回读多次网络错误，无法再核实Release元数据；W047记录该边界。开始下一任务前检查`git status`、最新远程分支和Release序号。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
+2026-10-14本轮在main负责`scripts/create-desktop-shortcut.ps1`、README、Windows启动修复记录和日志交接。用户通过SmartScreen后仍无窗口；定位到同字节Electron从项目目录退出`0x80000003`、从普通用户目录正常运行。现桌面开发快捷方式使用`%LOCALAPPDATA%/RaterTrackerDevRuntime`中73文件校验一致的44.7.0运行时，仍打开本项目源码及正常`%APPDATA%/RaterTracker`数据。正常窗口已从原快捷方式打开并保留；47检查和真实源码Electron隔离smoke复跑通过，首轮启动阻隔采样失败保留。细节及边界见[Windows桌面启动修复](docs/Windows桌面启动修复记录.md)、W048。应用版本、安装包及Android未改；本轮源码发布批次使用下一个`dual/2026.10.14.4`，发布状态以实际远端引用和Release为准。
 
-本次全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046，Release创建结果见W047。仅文档变化，不升Windows／Android应用版本、不重建安装包。后续若GitHub回读恢复，可补核tag／Release元数据，不要重复创建同名Release。
+本目录为集成`main`。本轮接手时HEAD为`4535570`，历史文档收尾tag及Release`dual/2026.10.14.3`已存在；本次GitHub回读确认仓库PRIVATE、批次1／2／3均为prerelease，W047的网络回读限制已解除。开始下一任务前检查`git status`、最新远程分支和Release序号。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
+
+此前全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046，Release创建结果见W047及上述本次回读。保持原有标签与Release，不重复创建同名批次。
 
 ## 权威文档
 

@@ -26,7 +26,9 @@
 
 ## 开发命令
 
-桌面 `Rater & Tracker（开发验收）` 快捷方式直接用本项目 Electron 打开最新源码，无需每次打包／安装。保存改动后先退出正在运行的应用（包括已安装版），再双击快捷方式；已打开窗口不会自动热更新。使用正常 `%APPDATA%\RaterTracker` 数据，和安装版共用数据，不是验收脚本的隔离目录。项目目录或依赖路径变化后，在项目根目录执行 `& .\scripts\create-desktop-shortcut.ps1` 重建快捷方式；快捷方式包含机器路径，不入库。
+桌面 `Rater & Tracker（开发验收）` 快捷方式打开本项目最新源码，无需每次打包／安装。保存改动后先退出正在运行的应用（包括已安装版），再双击快捷方式；已打开窗口不会自动热更新。使用正常 `%APPDATA%\RaterTracker` 数据，和安装版共用数据，不是验收脚本的隔离目录。
+
+在普通 Windows PowerShell 中进入项目根目录，执行 `& .\scripts\create-desktop-shortcut.ps1` 创建或重建快捷方式。脚本将锁定版本的完整 Electron 运行时复制到 `%LOCALAPPDATA%\RaterTrackerDevRuntime\electron-<版本>-<EXE哈希前12位>`，逐文件核对 SHA-256；快捷方式仍以本项目为源码入口和工作目录。这样避免本机受管理工作区内直接启动 Electron 时的立即退出，不修改工作区权限。再次执行会复用校验一致的文件；项目位置或 Electron 依赖变化后需重新执行。机器路径、运行时副本及快捷方式不入库。诊断、实际验收范围与未签名边界见[Windows桌面启动修复记录](docs/Windows桌面启动修复记录.md)。
 
 本机实际环境：Windows 11 x64、Node 24.19.0、npm 11.17.0。锁定 Electron 44.7.0、electron-builder 26.15.3、Playwright CLI 0.1.22；`global-agent` 使用兼容的 4.1.3 override 修复开发依赖漏洞。应用资源和官方 CloudBase SDK 本地打包，原生 SDK 使用运行时依赖 ws 8.22.0。
 

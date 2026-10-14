@@ -542,3 +542,13 @@ Release附件：Windows `Rater-Tracker-0.1.0-alpha.17-Setup.exe`（203,249,318�
 文档审核提交`e98622d`已推送`main`；附注标签`dual/2026.10.14.2`已推送至`StuTuse/rater-tracker`。`gh release create`成功返回[dual/2026.10.14.2](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.2)，说明这是Windows alpha.17／Android alpha.2的文档版预览，不重建或重复上传未变化的安装包，并链接上一双端Release。
 
 创建后`gh release view`、`gh repo view`及`git ls-remote`因GitHub API／网络解析多次失败，未能读回Release元数据；tag推送本身有成功回执。故记录为Release创建命令成功，后续连接恢复时可补做远端回读，不重复创建或覆盖该Release。应用版本、结算规则与JSON格式均未变化。
+
+## W048 · 2026-10-14 · Windows 开发快捷方式启动修复
+
+用户报告SmartScreen手动允许后仍不显示应用。接手main为4535570、工作区干净；本轮仅负责快捷方式脚本、README、Windows启动验收记录和交接日志，不改其他worktree。旧开发快捷方式指向项目Electron44.7.0，未签名且EXE／lnk无Zone.Identifier；启动退出2147483651／0x80000003，隔离数据及禁GPU仍失败。缓存同版本解压普通临时目录后显示窗口，17顶层文件SHA-256逐项相同，确认目录环境是触发差异，具体ACL原因未进一步证实；不修改工作区或系统安全设置。
+
+脚本新增按版本／EXE哈希的本机应用目录运行时副本，全73文件SHA-256校验后更新原开发快捷方式，重复执行复用相同文件。源码参数、工作目录、图标和正常AppData数据路径不变。两次脚本执行与回读成功。正常窗口已从修复后原快捷方式打开并持续存在，供用户继续使用；个人数据不写入测试记录。
+
+PowerShell解析、diff检查、npm工程47检查通过。真实源码Electron隔离smoke首轮仅startupBlocksInput=false导致exit1，复跑全部条件true／exit0；两轮报告及截图保留output/desktop/startup-repair*，已查看真实画面。不把首轮当通过，不把来源app://rater、packaged=false扩大为本轮安装包验收。GUI工具窗口抓取曾返回Computer Use app approval timed out，采用应用既有隔离capturePage截图及正常窗口列表检查；没有自动点击SmartScreen。
+
+新增Windows桌面启动修复记录与README，更新交接。Windowsalpha.17／Androidalpha.2/code2及两安装包未变，仅工程源码Release，不重建包。GitHub回读PRIVATE及原dual1／2／3成功，本轮按下一个dual/2026.10.14.4批次推送发布，结果由实际远端回读确认。后续常规改源码仍退出重开；依赖或项目路径变化重建快捷方式。未覆盖其他系统SmartScreen、受信任代码签名、NSIS升级／安装、安卓或云写入；源码与发布边界见专项记录。
