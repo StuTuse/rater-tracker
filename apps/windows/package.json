@@ -1,6 +1,6 @@
 {
   "name": "rater-tracker-windows",
-  "version": "0.1.0-alpha.18",
+  "version": "0.1.0-alpha.19",
   "private": true,
   "main": "main.cjs",
   "scripts": {

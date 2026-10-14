@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前双平台预览：Windows 0.1.0-alpha.18；Android 0.1.0-alpha.3（VERSION_CODE=3）。** 登录后启动自动同步云端，每次成功本机保存后立即同步；上传中的新修改自动接续，断网数据待网络恢复后补传。星级反馈在桌面与安卓共用平滑弹性动画，并避免透明度闪烁。两端继续使用规则1.3／JSON格式1，冲突时不自动覆盖。均为预览版本，不是1.0正式验收版。
+**当前双平台预览：Windows 0.1.0-alpha.19；Android 0.1.0-alpha.4（VERSION_CODE=4）。** 登录账号启动后立即后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。均为预览版本，不是1.0正式验收版。
 
 ## 安装与使用
 
-下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.5)并选择`Rater-Tracker-0.1.0-alpha.18-Setup.exe`。双击安装，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。当前Windows预览包未签名。Android签名APK也在同一Release附件中。
+下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)并选择`Rater-Tracker-0.1.0-alpha.19-Setup.exe`。双击安装，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。当前Windows预览包未签名。Android签名APK也在同一Release附件中。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -158,9 +158,9 @@ CloudBase 部署、账号配置和验收见[cloud/README](cloud/README.md)。Win
 
 ## 文档与版本入口
 
-[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.24](最终方案.md) · [视觉与动效规范 v1.19](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅作历史参考。
+[交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.25](最终方案.md) · [视觉与动效规范 v1.19](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅作历史参考。
 
-当前双平台版本为Windows `0.1.0-alpha.18`与Android `0.1.0-alpha.3`／`VERSION_CODE=3`，规则1.3、JSON格式1。登录账号后，启动及每次本机成功保存都会自动同步；断网保留本机数据并待网络恢复补传。主分支为`main`。GitHub仓库[StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)保持private；源码、文档、锁文件与源素材入库，安装包、个人数据、备份、私有配置及签名材料不入源码Git。
+当前双平台版本为Windows `0.1.0-alpha.19`与Android `0.1.0-alpha.4`／`VERSION_CODE=4`，规则1.3、JSON格式1。登录账号启动先后台读取云端并按修改时间自动保留较新快照；成功本机保存后同步，断网待网络恢复补传。主分支为`main`。GitHub仓库[StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)保持private；源码、文档、锁文件与源素材入库，安装包、个人数据、备份、私有配置及签名材料不入源码Git。
 
 单仓库双应用工程结构见[双端工程与工作区说明](docs/双端工程与工作区隔离草案.md)，工作目录登记见[工作区隔离登记](docs/工作区隔离登记.md)。Android签名APK、真实邮箱注册、移动排版及按压反馈的模拟器检查见[Android验收记录](docs/Android验收记录.md)和[Android alpha.2验收](docs/Android-alpha.2验收记录.md)。
 
@@ -171,7 +171,7 @@ CloudBase 部署、账号配置和验收见[cloud/README](cloud/README.md)。Win
 alpha.3 经验条历史动效预览：[实际录制](output/playwright/alpha3-xp-flow.mp4)；完整动效可在设置中切换为柔和或关闭，系统减少动态优先。录制是本地忽略产物，重新检出源码时不包含该视频。
 
 
-## 双端工程（Android alpha.3）
+## 双端工程（Android alpha.4）
 
 Windows原生入口 apps/windows，共享业务 packages/core、存储 packages/data、界面 packages/ui。Android工程 apps/android；独立VERSION和VERSION_CODE，后续更新递增VERSION_CODE，Windows版本仍由根VERSION／package声明。
 
@@ -185,10 +185,12 @@ Windows原生入口 apps/windows，共享业务 packages/core、存储 packages/
 
 安卓原生操作：node scripts/android-mobility-acceptance.mjs（真实返回／后台／键盘）、node scripts/android-files-acceptance.mjs（真实文件选择器与取消／编码拒绝）。账号与云协议脚本分别为android-account-acceptance.mjs、android-cloud-acceptance.mjs，必须将RATER_ANDROID_TEST_CREDENTIALS指向忽略的虚构测试账号JSON，包含username/password/id。正式包真实UI脚本android-release-acceptance.mjs使用同一测试配置；请只在专用模拟器或隔离测试设备运行。不要把用户账号作为灌入测试业务数据的身份。
 
-Android正式安装包在主工作区 release/android/Rater-Tracker-Android-0.1.0-alpha.3-release.apk，SHA256.txt为校验值。该目录不入库，重新检出后需按上述命令构建；后续发布递增安卓VERSION_CODE并保留原签名。Windows alpha.18，安卓alpha.3、VERSION_CODE=3。
+Android正式安装包在主工作区 release/android/Rater-Tracker-Android-0.1.0-alpha.4-release.apk，SHA256.txt为校验值。该目录不入库，重新检出后需按上述命令构建；后续发布递增安卓VERSION_CODE并保留原签名。Windows alpha.19，安卓alpha.4、VERSION_CODE=4。
 
 alpha.2 将安卓按压反馈统一为桌面悬浮的暖色背景、金色描边、柔和阴影与轻抬升，移除原生蓝色触摸方框；松手、滚动、取消和后台清理，保留减少动态与输入金色焦点。专项命令：node scripts/android-press-acceptance.mjs（隔离dev模拟器24类按压与桌面对照），node scripts/android-release-press-acceptance.mjs（隔离正式包覆盖安装、取消按压与五页操作）。验收范围见[Android alpha.2验收](docs/Android-alpha.2验收记录.md)。
 
 ## 双平台 GitHub Release
 
-[当前双平台预览 Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.5)提供Windows alpha.18安装程序和Android alpha.3签名APK。用户已要求每次完成改动都推送源码并创建新双平台Release；受影响平台上传新安装包，未改变平台链接最近版本，纯文档改动也发布源码但不重建应用。具体步骤见[双平台GitHub发布流程](docs/双平台GitHub发布流程.md)。
+启动同步专项命令：设置`RATER_PORT=4175`后运行`node scripts/serve.mjs`，在全新隔离Playwright会话运行`run-code --filename scripts/sync-startup-acceptance.cjs`。账号模块和RPC由虚构数据替换；结果与边界见[同步验收记录](docs/双端同步时间策略验收.md)。
+
+[当前双平台预览 Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)提供Windows alpha.19安装程序和Android alpha.4签名APK。用户已要求每次完成改动都推送源码并创建新双平台Release；受影响平台上传新安装包，未改变平台链接最近版本，纯文档改动也发布源码但不重建应用。具体步骤见[双平台GitHub发布流程](docs/双平台GitHub发布流程.md)。

@@ -564,3 +564,13 @@ PowerShell解析、diff检查、npm工程47检查通过。真实源码Electron�
 边界：当前工作区没有隔离Android AVD，未作设备安装／WebView现场验收。Windows安装包未签名；当前执行环境运行Electron子进程时静默退出1，故本次未完成新包smoke或安装／升级检查。未登录真实云账号或连接真实云端。Windows NSIS构建步骤曾执行受控运行保护，构建时临时用已验证文件解析方式提取卸载器并在命令结束后还原node_modules依赖文件，没有修改系统安全设置。
 
 GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14.5`指向该提交；[双端预览Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.5)已创建为prerelease。远端回读确认仓库PRIVATE，Windows安装包203,279,418字节、Android APK 98,111,281字节及219字节SHA-256清单的文件名／大小／digest均匹配本地，远端标签提交与`68becbe2132dc949a88a19ee17ac767bbbbc000d`一致。两端版本与哈希见本节；APK证书及v2签名通过。
+
+## W050 · 2026-10-15 · 启动先读云端与修改时间自动同步
+
+用户要求启动立即后台核对云端，保留修改时间较新端，云端较早则上传本机。接手main为2d72b61且干净；仅主工作区负责共享同步／持久化、UI账号说明、专项测试及版本文档／构建，其他worktree未动。旧引擎先推dirty／inFlight，冲突后停止；旧快照缺少修改时间。
+
+改为每轮pull先行，读取返回后取最新本机状态比较；账号成功保存附ISO modifiedAt并保证单机至少递增1ms，云端较新完整校验后原子替换，本机较新即上传，不依赖dirty。按最新云version准备上传；旧flight替换为最新revision，丢失响应无新输入保留稳定requestId。上传CAS冲突重新pull，连续3次停止即时循环并保留待续传。相同已同步快照轮询不增加revision；并发新输入有revision保护。历史无时间快照按云version与baseVersion兼容，不伪造旧修改时刻。方案v1.25；Windowsalpha.19、Androidalpha.4／code4；规则1.3／JSON1。
+
+检查55/55通过，新增较新两端／clean标记／旧flight／拉取与上传中输入／有限冲突／相同轮询条件。Playwright隔离虚构账号与模拟RPC真实页面3条件通过，已查看较新云快照显示截图；未连接真实账号。新Windows NSIS203260545字节，SHA256 1fa39e482dbe4cb5fa9b9943bab34214f00b20067d96da352a059b268a6dc332；默认目录运行0x80000003无报告，复制同包至独立普通临时目录ASAR摘要一致，packaged=true／alpha.19／smoke exit0且所有布尔条件true，真实画面已查看。Android构建成功，98112165字节，SHA256 8950c28749b34934ed0bcfe664d70756ee263660edb8b36650a92077440c0aea，aapt版本code4，原证书v2签名通过。两包内sync／storage／app源码逐字节匹配。
+
+构建失败记录：默认隔离下Gradle连续无法连接本机daemon，允许本机构建后成功；Windows默认依赖realpath权限失败，之后运行时下载超时，使用已有Electron离线构建成功。NSIS临时使用工具内置文件解析器提取卸载器，finally恢复依赖原文件，未修改系统安全策略。未覆盖Android设备现场、真实云账号、Windows安装升级。日期跨至15日，发布目标dual/2026.10.15.1；回读PRIVATE及当日无tag，准备只提交本次检查文件并附两包／SHA清单，实际结果在后续收尾记录。

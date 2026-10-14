@@ -39,7 +39,7 @@ function openAccountDialog(mode) {
   accountMode = account ? 'profile' : mode ?? 'login';
   let contents;
   if (account) {
-    contents = `${modalHead('', '账号中心')}<div class="account-profile"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><div><strong>${escape(account.name)}</strong><span>密码 · ••••••••</span></div></div><p id="sync-status" class="account-sync-status" role="status">${escape(syncStatus)}</p><div class="account-tools">${button('sync-now', '立即同步', 'check', '', 'primary')}${button('sync-adopt', '复制未登录记录', '', '', 'secondary')}${button('sync-download', '备份本机并使用云端', '', '', 'secondary')}${button('account-logout', '退出账号', '', '', 'text-button')}</div><p class="field-hint">断网时继续保存到本机；两端同时修改会保留冲突。密码仅显示掩码。</p>`;
+    contents = `${modalHead('', '账号中心')}<div class="account-profile"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><div><strong>${escape(account.name)}</strong><span>密码 · ••••••••</span></div></div><p id="sync-status" class="account-sync-status" role="status">${escape(syncStatus)}</p><div class="account-tools">${button('sync-now', '立即同步', 'check', '', 'primary')}${button('sync-adopt', '复制未登录记录', '', '', 'secondary')}${button('sync-download', '备份本机并使用云端', '', '', 'secondary')}${button('account-logout', '退出账号', '', '', 'text-button')}</div><p class="field-hint">启动后后台核对云端，并按最后修改时间保留较新快照；断网时继续保存到本机。密码仅显示掩码。</p>`;
   } else {
     const registering = accountMode === 'register', verifying = accountMode === 'verify';
     const tabs = `<div class="segmented account-tabs" role="group" aria-label="账号操作">${button('account-login-tab', '登录', '', `aria-pressed="${!registering && !verifying}"`, !registering && !verifying ? 'selected' : '')}${button('account-register-tab', '注册账号', '', `aria-pressed="${registering || verifying}"`, registering || verifying ? 'selected' : '')}</div>`;
@@ -646,7 +646,7 @@ window.raterReload = async () => { resetBadgeNotices(); state = validateState(aw
 window.raterReady = (async () => {
   try {
     store = await openStore(); state = validateState(await store.read());
-    desktopInfo = platform ? await platform.info() : { version: '0.1.0-alpha.18', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = platform ? await platform.info() : { version: '0.1.0-alpha.19', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');

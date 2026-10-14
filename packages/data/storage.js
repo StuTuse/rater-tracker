@@ -25,6 +25,7 @@ export async function openStore(accountId = null) {
     request.onsuccess = () => {
       if ((request.result?.revision ?? 0) !== expectedRevision) { conflict = true; tx.abort(); }
       else { try {
+        if (accountId) state.modifiedAt = new Date(Math.max(Date.now(), (Date.parse(request.result?.modifiedAt ?? '') || 0) + 1)).toISOString();
         store.put(state, key);
         if (accountId) { const meta = store.get(metaKey); meta.onsuccess = () => store.put({ ...(meta.result ?? defaults()), dirty: true }, metaKey); }
       } catch (error) { writeError = error; tx.abort(); } }
@@ -75,6 +76,20 @@ export async function openStore(accountId = null) {
       pair.meta.baseVersion = version; pair.meta.inFlight = null; pair.meta.lastSync = new Date().toISOString();
     }),
     markConflict: version => mutateSync(pair => { pair.meta.conflict = version; }),
+    preparePush: (version, expectedRevision) => mutateSync(pair => {
+      if (pair.state.revision !== expectedRevision) throw new ConflictError();
+      if (pair.meta.inFlight?.baseVersion !== version || pair.meta.inFlight?.state.revision !== expectedRevision) pair.meta.inFlight = null;
+      pair.meta.baseVersion = version; pair.meta.dirty = true; pair.meta.conflict = null;
+    }),
+    noteSync: (version, expectedRevision) => mutateSync(pair => {
+      if (pair.state.revision !== expectedRevision) throw new ConflictError();
+      pair.meta.baseVersion = version; pair.meta.lastSync = new Date().toISOString(); pair.meta.conflict = null;
+    }),
+    acceptCloud: (incoming, version, expectedRevision) => mutateSync(pair => {
+      if (pair.state.revision !== expectedRevision) throw new ConflictError();
+      pair.state = structuredClone(incoming); pair.state.revision = expectedRevision + 1;
+      pair.meta = { ...defaults(), baseVersion: version, lastSync: new Date().toISOString() };
+    }),
     acceptPull: (incoming, version, expectedRevision) => mutateSync(pair => {
       if (pair.meta.dirty || pair.meta.inFlight || pair.state.revision !== expectedRevision) throw new ConflictError();
       if (version < pair.meta.baseVersion) throw new Error('云端版本回退');
@@ -97,6 +112,7 @@ const timestamp = value => typeof value === 'string' && Number.isFinite(Date.par
 export function validateState(s) {
   check(plain(s) && s.format === FORMAT_VERSION && s.rule === RULE_VERSION, '不支持的数据格式或规则版本');
   check(integer(s.revision) && integer(s.sequence), '版本序号无效');
+  check(s.modifiedAt === undefined || timestamp(s.modifiedAt), '快照修改时间无效');
   check(plain(s.ratings) && plain(s.tasks) && Array.isArray(s.ledger) && Array.isArray(s.processed), '记录结构无效');
   check(s.ledger.length <= 500000 && Object.keys(s.tasks).length <= 50000 && Object.keys(s.ratings).length <= 50000, '记录数量超过本版本支持范围');
   const ids = new Set(), ledger = new Map();
