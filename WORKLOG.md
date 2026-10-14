@@ -520,3 +520,11 @@ main、codex/android-port、codex/windows-dev 均为 b9e7684，三处工作区�
 如需复现更新流程，当前待上传材料计划用`dual/2026.10.14.1`，合并SHA-256清单，Release说明将列两端版本／Windows未签名／检查边界。记录实际GitHub结果与发布链接须在完成上传、读回校验后再补；当前还未声称GitHub Release已创建。
 
 本轮试执行Windows unpacked smoke命令返回exit 1，`output/desktop/report.json`仍为8:38的旧源码模式报告（packaged=false），未发现新packaged验收报告；故不将其写成通过，也不声称此次重跑Windows安装／覆盖升级。alpha.17最终EXE smoke通过及界限仅引用原[alpha.17验收记录](docs/alpha.17验收记录.md)。
+
+## W045 · 2026-10-14 · 首个双平台GitHub Release完成
+
+W044所列源代码与未来流程文档已提交`f7e6943`并推送`main`，创建附注tag`dual/2026.10.14.1`指向该提交；Windows `0.1.0-alpha.17`与Android `android/v0.1.0-alpha.2`旧应用标签保持。私有仓库`StuTuse/rater-tracker`上的首个双平台Release已创建且为非Draft prerelease：[dual/2026.10.14.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)。
+
+Release附件：Windows `Rater-Tracker-0.1.0-alpha.17-Setup.exe`（203,249,318字节，SHA256 `7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140`）；Android `Rater-Tracker-Android-0.1.0-alpha.2-release.apk`（98,111,149字节，SHA256 `74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711`）；`SHA256SUMS-dual-2026.10.14.1.txt`（223字节）。GitHub资产字节数及二进制SHA256与本地一致，下载远端清单后逐行核对一致。仓库可见性仍为PRIVATE。
+
+本轮Windows unpacked smoke失败且没有新packaged报告；未验证本次Windows安装／升级。Windows包未签名。Android APK使用原证书且v2签名验证通过；按压验收边界见W043。未来每次完成改动推送`main`并按文档创建双平台prerelease的规则已在同一Release源码提交中生效。后续收尾文档提交只记录上述发布结果，不另开重复Release。

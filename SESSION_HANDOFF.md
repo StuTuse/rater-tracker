@@ -2,9 +2,9 @@
 
 用户要求首次同步当前两端并发布，以及未来每次改动都创建Release。当前已在`AGENTS.md`、`版本管理规范.md`第10节、README及`docs/双平台GitHub发布流程.md`记录：每次完成改动推送main，创建下一个附注tag`dual/YYYY.MM.DD.N`与PRIVATE prerelease；只在相应平台产品代码改变时递增其app版本；上传受影响平台的签名／安装产物和校验，未变平台链接上次版本，纯文档仍发布源码但不重建安装包。保留所有旧tag、私有仓库、不强推。
 
-本次双端资产已确认：Windows alpha.17 NSIS 203,249,318字节、SHA256 7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140（未签名）；Android alpha.2／code2 APK 98,111,149字节、SHA256 74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711（原证书APK v2验证通过）。Windows alpha.17历史smoke范围见其验收记录；本轮指定unpacked smoke返回1且没有新报告，未据此声称最新Windows EXE验收或NSIS升级通过。双端Release流程与预定资产记录见W044，成功回读链接须记于本段。
+本次双端资产已成功发布：Windows alpha.17 NSIS 203,249,318字节、SHA256 7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140（未签名）；Android alpha.2／code2 APK 98,111,149字节、SHA256 74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711（原证书APK v2验证通过）。GitHub Release三项附件大小和二进制远端SHA256与本地一致；SHA256清单下载逐行相同。Windows alpha.17历史smoke范围见其验收记录；本轮unpacked smoke返回1且没有新报告，未据此声称最新Windows EXE验收或NSIS升级通过。发布结果见W045。
 
-双平台应用版本Windows alpha.17／Android alpha.2；规则1.3／JSON1。Release前提交main源码／文档，然后使用新dual批次Tag；不要移动Android／Windows旧应用tag。附件源码提交与GitHub Release状态须以实际Git／gh回读为准。Windows／Android开发worktree仍保留alpha.1基线，之后跨工作区同步前检查暂存和用户改动。
+双平台应用版本Windows alpha.17／Android alpha.2；规则1.3／JSON1。双端发布文档提交f7e6943及附注tag均已推送；应用版本旧tag未移动。Windows／Android开发worktree仍保留alpha.1基线，之后跨工作区同步前检查暂存和用户改动。
 
 ## 双平台GitHub Release基线 · 2026-10-14
 
