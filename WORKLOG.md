@@ -574,3 +574,9 @@ GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14
 检查55/55通过，新增较新两端／clean标记／旧flight／拉取与上传中输入／有限冲突／相同轮询条件。Playwright隔离虚构账号与模拟RPC真实页面3条件通过，已查看较新云快照显示截图；未连接真实账号。新Windows NSIS203260545字节，SHA256 1fa39e482dbe4cb5fa9b9943bab34214f00b20067d96da352a059b268a6dc332；默认目录运行0x80000003无报告，复制同包至独立普通临时目录ASAR摘要一致，packaged=true／alpha.19／smoke exit0且所有布尔条件true，真实画面已查看。Android构建成功，98112165字节，SHA256 8950c28749b34934ed0bcfe664d70756ee263660edb8b36650a92077440c0aea，aapt版本code4，原证书v2签名通过。两包内sync／storage／app源码逐字节匹配。
 
 构建失败记录：默认隔离下Gradle连续无法连接本机daemon，允许本机构建后成功；Windows默认依赖realpath权限失败，之后运行时下载超时，使用已有Electron离线构建成功。NSIS临时使用工具内置文件解析器提取卸载器，finally恢复依赖原文件，未修改系统安全策略。未覆盖Android设备现场、真实云账号、Windows安装升级。日期跨至15日，发布目标dual/2026.10.15.1；回读PRIVATE及当日无tag，准备只提交本次检查文件并附两包／SHA清单，实际结果在后续收尾记录。
+
+## W051 · 2026-10-15 · 同步修复双端发布完成
+
+修复提交07485af487b61981b4db9f4921f837dfbedfa658已推送main，附注标签dual/2026.10.15.1已推送并指向该提交。Release https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.15.1 已创建为prerelease且draft=false；回读仓库PRIVATE。Windows203260545字节、Android98112165字节，远端sha256 digest与W050及本地清单完全一致；221字节清单digest为08f62a5493b22cb439c7224a1d57932d4a08a8ecf07a81f10549ec6e7334f0d1，与本地相同。远端main及tag解引用匹配07485af；没有改旧标签或其他worktree。
+
+已关闭隔离Playwright会话和本机预览服务。收尾只更新交接、验收发布结果及版本规范当前基线，不改变应用版本／包／检查边界；按持续发布规则推送收尾源码并发布文档prerelease，引用上述安装包，不重建或重复上传。

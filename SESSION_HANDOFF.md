@@ -2,7 +2,7 @@
 
 ## 现行状态
 
-Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_CODE=4`；产品方案`v1.25`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。用户要求启动立即后台读取云端并保留修改时间较新一端。已改为pull先行，账号保存附modifiedAt；云端较新自动下载，本机较新自动上传，云版本变化重新核对。旧快照无时间按版本兼容；记录不合并、不重算奖励。55项检查、模拟账号真实页面3项、新Windows包普通临时目录隔离smoke、Android构建／原证书v2验证通过。Android设备现场、真实云账号和安装升级未覆盖；详见W050与[同步验收](docs/双端同步时间策略验收.md)。此次双端发布目标为[dual/2026.10.15.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)，当前包已生成，发布结果待远端回读后记录。
+Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_CODE=4`；产品方案`v1.25`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。用户要求启动立即后台读取云端并保留修改时间较新一端。已改为pull先行，账号保存附modifiedAt；云端较新自动下载，本机较新自动上传，云版本变化重新核对。旧快照无时间按版本兼容；记录不合并、不重算奖励。55项检查、模拟账号真实页面3项、新Windows包普通临时目录隔离smoke、Android构建／原证书v2验证通过。Android设备现场、真实云账号和安装升级未覆盖；详见W050与[同步验收](docs/双端同步时间策略验收.md)。修复提交07485af已推送main；[dual/2026.10.15.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)已发布为prerelease，仓库PRIVATE，附件大小／SHA-256及远端标签指向均回读一致，见W051。
 
 双端源码已集成到`main`并推送私有GitHub仓库`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 
@@ -12,7 +12,7 @@ Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_
 
 上轮Windows开发快捷方式修复见W048；星级动画见W049。本轮仅在main负责`packages/data/sync.js`／`storage.js`、UI账号说明、同步测试与双端版本／构建／文档。其他worktree未修改。Windows Setup 203,260,545字节，SHA-256 `1fa39e482dbe4cb5fa9b9943bab34214f00b20067d96da352a059b268a6dc332`；Android alpha.4 APK 98,112,165字节，SHA-256 `8950c28749b34934ed0bcfe664d70756ee263660edb8b36650a92077440c0aea`；包和统一清单在忽略的release目录。默认受管项目目录运行新Windows包返回0x80000003，同一包复制到普通临时目录通过，未改系统设置。
 
-本目录为集成`main`。本轮接手HEAD为`2d72b61`且干净，已有10月14日dual批次1～6；10月15日发布前回读PRIVATE且当日无tag。開始下一任务前检查Git状态及远端批次。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
+本目录为集成`main`。本轮接手HEAD为`2d72b61`且干净，已有10月14日dual批次1～6；10月15日发布前回读PRIVATE且当日无tag。开始下一任务前检查Git状态及远端批次。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 
 此前全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046，Release创建结果见W047及上述本次回读。保持原有标签与Release，不重复创建同名批次。
 
