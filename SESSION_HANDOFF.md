@@ -1,4 +1,20 @@
-# Android按压反馈交接 · 2026-10-14
+# 双平台GitHub发布交接 · 2026-10-14
+
+用户要求首次同步当前两端并发布，以及未来每次改动都创建Release。当前已在`AGENTS.md`、`版本管理规范.md`第10节、README及`docs/双平台GitHub发布流程.md`记录：每次完成改动推送main，创建下一个附注tag`dual/YYYY.MM.DD.N`与PRIVATE prerelease；只在相应平台产品代码改变时递增其app版本；上传受影响平台的签名／安装产物和校验，未变平台链接上次版本，纯文档仍发布源码但不重建安装包。保留所有旧tag、私有仓库、不强推。
+
+本次双端资产已确认：Windows alpha.17 NSIS 203,249,318字节、SHA256 7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140（未签名）；Android alpha.2／code2 APK 98,111,149字节、SHA256 74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711（原证书APK v2验证通过）。Windows alpha.17历史smoke范围见其验收记录；本轮指定unpacked smoke返回1且没有新报告，未据此声称最新Windows EXE验收或NSIS升级通过。双端Release流程与预定资产记录见W044，成功回读链接须记于本段。
+
+双平台应用版本Windows alpha.17／Android alpha.2；规则1.3／JSON1。Release前提交main源码／文档，然后使用新dual批次Tag；不要移动Android／Windows旧应用tag。附件源码提交与GitHub Release状态须以实际Git／gh回读为准。Windows／Android开发worktree仍保留alpha.1基线，之后跨工作区同步前检查暂存和用户改动。
+
+## 双平台GitHub Release基线 · 2026-10-14
+
+用户授权的私有GitHub `StuTuse/rater-tracker` 已建立main源码与首个双平台预览Release：`dual/2026.10.14.1`，Windows `0.1.0-alpha.17`／Android `0.1.0-alpha.2`。Release附件包含Windows Setup EXE、Android已签名APK和两端SHA-256清单；远程可见性PRIVATE。main源码已推送。双平台Release网址：https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1。
+
+以后每次完成的项目改动都推送main并创建双平台GitHub prerelease，依据见`AGENTS.md`、`版本管理规范.md`第10节和`docs/双平台GitHub发布流程.md`。发布tag为唯一的`dual/YYYY.MM.DD.N`；仅上传受影响平台的新二进制，另一平台链接最近Release；纯文档改动发源码Release，不重建APK／EXE。只在对应平台软件改变时升级其VERSION，安卓再递增VERSION_CODE。保持仓库private，不上传个人数据／凭证／签名配置，不强推或移动旧标签。
+
+当前两端预览包／哈希和历史alpha.2触控实现见下方W043交接及[双平台发布记录](docs/双平台GitHub发布流程.md)。继续工作前查看`git status`与远程最新提交，保持worktree隔离。
+
+## Android按压反馈基线
 
 本轮用户要求安卓按下使用桌面悬浮效果，已完成Androidalpha.2／VERSION_CODE=2。负责main中的apps/android触控样式与独立反馈模块、共享styles仅Android排除条件、安卓资源准备与验收脚本、版本／规范／记录；未派遣会话，未在其他worktree改源码或切分支。Android／Windows工作区仍为上一alpha.1基线，开始下一轮开发前先检查改动并快进同步main；不得覆盖未提交工作。
 

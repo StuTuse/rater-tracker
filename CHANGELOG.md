@@ -6,6 +6,11 @@
 
 - 后续预览继续依据真实使用体验打磨；暂无新增已实施的未发布功能。
 
+## 双平台预览 Release · 2026-10-14
+
+- 首次将当前Windows alpha.17和Android alpha.2一起打包发布；Android APK沿用原证书，Windows安装包未签名。GitHub双端批次标签为`dual/2026.10.14.1`；两个应用自身版本与规则保持。
+- 附Windows安装程序、Android APK及校验值；后续按每次改动建立双端Release，具体流程见[发布规范](docs/双平台GitHub发布流程.md)。
+
 ## Android 0.1.0-alpha.2 · 2026-10-14
 
 - 安卓触控改用桌面悬浮效果，移除WebView蓝色方框，复用暖色／金色描边、柔和阴影与轻抬升。

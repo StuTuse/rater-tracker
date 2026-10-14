@@ -186,3 +186,7 @@ Windows原生入口 apps/windows，共享业务 packages/core、存储 packages/
 Android正式安装包在主工作区 release/android/Rater-Tracker-Android-0.1.0-alpha.2-release.apk，SHA256.txt为校验值。该目录不入库，重新检出后需按上述命令构建；后续发布递增安卓VERSION_CODE并保留原签名。Windows仍alpha.17，安卓alpha.2、VERSION_CODE=2。
 
 alpha.2 将安卓按压反馈统一为桌面悬浮的暖色背景、金色描边、柔和阴影与轻抬升，移除原生蓝色触摸方框；松手、滚动、取消和后台清理，保留减少动态与输入金色焦点。专项命令：node scripts/android-press-acceptance.mjs（隔离dev模拟器24类按压与桌面对照），node scripts/android-release-press-acceptance.mjs（隔离正式包覆盖安装、取消按压与五页操作）。验收范围见[Android alpha.2验收](docs/Android-alpha.2验收记录.md)。
+
+## 双平台 GitHub Release
+
+[当前双平台预览 Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)提供Windows alpha.17安装程序和Android alpha.2签名APK。用户已授权此私有仓库的持续发布：每次完成改动都推送源码并创建新双平台Release；受影响平台附当前安装包，未改变平台链接最近版本。具体步骤见[双平台GitHub发布流程](docs/双平台GitHub发布流程.md)。

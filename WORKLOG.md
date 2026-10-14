@@ -508,3 +508,15 @@ main、codex/android-port、codex/windows-dev 均为 b9e7684，三处工作区�
 失败记录：沙箱npm离线缓存缺包，使用本机缓存锁定安装成功；首个构建先于依赖就绪并缺日志目录，准备后成功。初次选择器通用替换误伤hover媒体查询，真实对照发现后修正。CDP触控未可靠采到活动态，改原生输入；系统长按发pointercancel，非按钮原生active松手残留，改临时标记。scale=none/1归一化、头像原阴影分别比较；首轮长按截图带系统选择菜单，控件标签禁用选择后正式画面通过。控件modalExit首轮漏采，观察增至12帧并等待实际中间帧后26全通过。一次首行注释替换被自动审查拒绝，精确上下文补丁完成，无遗留阻塞。
 
 最终Androidalpha.2／code2，产品v1.22／视觉v1.18，Windowsalpha.17／规则1.3／JSON1；APK98,111,149字节，SHA256 74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711，原证书v2验证通过。产物／校验／两张按压预览保存在release/android并忽略；新增Android-alpha.2验收记录、README命令、CHANGELOG与交接。main本轮负责集成；另两worktree保留alpha.1，下一轮先核对并同步，不覆盖其他工作。源码提交和Android附注里程碑按Git实际结果；实体设备／其他系统／FPS／长数据／完整辅助功能未测，下一步按真实手机反馈打磨。
+
+## W044 · 2026-10-14 · 双平台GitHub Release与未来发布规则
+
+用户要求将当前Windows和Android版本都上传GitHub并发布Release，同时要求以后每次改动都发布上传。先读最新交接／工作日志／AGENTS／版本管理规范，确认main为51ffb80、干净且已推送；GitHub仓库PRIVATE，默认main，无既有GitHub Release。现有应用版本为Windows alpha.17和Android alpha.2/code2；当前双端Tag分属应用版本，新增独立的双端Release批次Tag，不移动旧Tag。
+
+核验当前两份授权发布附件：Windows `release/Rater-Tracker-0.1.0-alpha.17-Setup.exe`，203,249,318字节，SHA256 7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140，与alpha.17验收记录一致；Authenticode显示未签名。Android `release/android/Rater-Tracker-Android-0.1.0-alpha.2-release.apk`，98,111,149字节，SHA256 74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711，APK v2签名／原证书通过。Android包及触控专项见W043／Android-alpha.2验收记录；不上传生成目录至源码历史。
+
+新增GitHub后续Release规则、双平台流程文档、AGENTS／版本管理／README／交接，定义每个完成改动推送main并创建独立dual日期序号prerelease；受影响平台附新包和SHA-256，另平台链接已有Release，纯文档也发源码Release但不重建APP。
+
+如需复现更新流程，当前待上传材料计划用`dual/2026.10.14.1`，合并SHA-256清单，Release说明将列两端版本／Windows未签名／检查边界。记录实际GitHub结果与发布链接须在完成上传、读回校验后再补；当前还未声称GitHub Release已创建。
+
+本轮试执行Windows unpacked smoke命令返回exit 1，`output/desktop/report.json`仍为8:38的旧源码模式报告（packaged=false），未发现新packaged验收报告；故不将其写成通过，也不声称此次重跑Windows安装／覆盖升级。alpha.17最终EXE smoke通过及界限仅引用原[alpha.17验收记录](docs/alpha.17验收记录.md)。
