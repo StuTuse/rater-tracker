@@ -491,3 +491,8 @@ main、codex/android-port、codex/windows-dev 均为 b9e7684，三处工作区�
 依W039顺序，邮箱注册5项成功后完成安卓专属排版优化；最终补横屏紧凑页头／成长／导航。47工程业务、26控件、41切页、10键盘返回生命周期、8真实SAF、四尺寸20页边界均通过，实际手机／横屏截图已查看。最终签名正式包8条件重跑全通过。首轮真实登录失败，发现旧测试以输入框用户名误判，修正非编辑身份＋退出按钮断言及原生输入稳定／清空，回查凭据有效和实际输入一致后通过；保留失败记录，不改认证业务。
 
 最终APK98,109,524字节，SHA256 825460cd1bf81027a5c167f245f7455f90fbb80e3be8b8fdb763d6b8b5d464a0，原证书SHA256 648b3a169d4b63da50312f44fc09241e8e796a39b781baa60e48a42719c60448，v2验证通过。已复制主目录release/android，附SHA256.txt与三张真实预览；不入库。产品v1.21／视觉v1.17，Windows版本alpha.17保持，Androidalpha.1及code1独立。GitHub回读PRIVATE。准备检查暂存、提交、快进双端并建立Android附注里程碑，具体提交结果以Git为准。真机／其他系统／长期性能／完整辅助功能及Windows NSIS升级未覆盖。
+
+
+## W042 · 2026-10-14 · 私有发布与工作区最终同步
+
+最终源码6e6e2e7已快进集入main和Windows工作区，三处干净；main与Windows各47检查通过。main、codex/android-port、codex/windows-dev均已成功推送私有origin；Android附注标签android/v0.1.0-alpha.1指向6e6e2e7并已推送，18个旧标签保持。最终APK／校验／预览见W041与主目录release/android。邮箱验证码阻塞已解除，用户要求的移植和之后的手机排版已按已列模拟器场景完成，未验证的实体设备等边界保持明示。

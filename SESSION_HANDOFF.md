@@ -18,4 +18,4 @@ Native认证完整SDK缓存仅进程内存并由Keystore AES-GCM／AtomicFile保
 
 验收命令 node scripts/check.mjs；node scripts/android-ui-acceptance.mjs ui|controls|pages|flow|stages|max；android-mobility-acceptance.mjs、android-files-acceptance.mjs。账号／云／正式包分别android-account-acceptance.mjs、android-cloud-acceptance.mjs、android-release-acceptance.mjs，RATER_ANDROID_TEST_CREDENTIALS指向忽略的username/password/id虚构账号JSON。只在隔离测试设备运行；不使用用户真实账号灌入测试数据。报告与截图output/android、output/desktop忽略。原虚构云业务快照已恢复，版本正常递增；正式包虚构账号本地可保留既有冲突，最后退出访客，不替用户清空数据。
 
-未覆盖：实体手机、其他Android版本／厂商系统、长期大数据、帧率及完整辅助功能，Windows NSIS安装升级未重跑。没有待取验证码。后续使用／发布手机新包前按实际设备继续验证。当前收尾为检查提交、同步main及Windows分支、私有推送和Android附注标签，以Git实际结果为准。
+未覆盖：实体手机、其他Android版本／厂商系统、长期大数据、帧率及完整辅助功能，Windows NSIS安装升级未重跑。没有待取验证码。后续使用／发布手机新包前按实际设备继续验证。最终源码提交6e6e2e7已快进同步三工作区；main、codex/android-port、codex/windows-dev均已推送PRIVATE。附注标签android/v0.1.0-alpha.1指向6e6e2e7并已推送。集成后main和Windows工作区47检查各通过。当前没有待完成的已授权移植或排版事项。
