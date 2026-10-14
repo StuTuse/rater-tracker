@@ -10,9 +10,9 @@ Windows 桌面当前为`0.1.0-alpha.17`，Android 当前为`0.1.0-alpha.2`／`VE
 
 ## 当前工作区
 
-本目录为集成`main`。本次开始时工作区干净，`main`相对`origin/main`领先1个已提交的交接记录`d893a8f`；前次推送因无法连接GitHub失败。开始新的发布前先核对`git status`、远程分支和当日双平台Release序号，再将本轮已审阅文档变更一并提交、推送并发布。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
+本目录为集成`main`。文档审核提交`e98622d`及附注tag`dual/2026.10.14.2`已成功推送；GitHub Release创建命令返回链接[dual/2026.10.14.2](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.2)。随后GitHub API回读多次网络错误，无法再核实Release元数据；W047记录该边界。开始下一任务前检查`git status`、最新远程分支和Release序号。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 
-本次全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046。仅文档变化，不升Windows／Android应用版本、不重建安装包；仍需网络恢复后核对远程最新状态，推送审核提交并按双平台流程发下一个未占用Release序号。
+本次全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046，Release创建结果见W047。仅文档变化，不升Windows／Android应用版本、不重建安装包。后续若GitHub回读恢复，可补核tag／Release元数据，不要重复创建同名Release。
 
 ## 权威文档
 

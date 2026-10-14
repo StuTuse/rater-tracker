@@ -536,3 +536,9 @@ Release附件：Windows `Rater-Tracker-0.1.0-alpha.17-Setup.exe`（203,249,318�
 修订README、SESSION_HANDOFF、版本管理规范、双端工程说明、Android移植检查点、工作区登记、数据契约、CloudBase说明、徽章清单及早期分析文档；同步当前双平台版本、已完成的Android邮箱／按压验收、浏览器登录尚未交付、私有发布规则和工作区边界。移除README里指向被忽略本地安装包的下载链接，改指向GitHub Release；删去文档中不必要的历史测试账号ID。没有改变产品结算、应用代码、应用版本或JSON格式。
 
 检查：所有相对Markdown链接解析到现有路径；`git diff --check`通过。因本次仅为文档修订，未运行应用构建或业务测试。保留的历史验收中旧版本“未测／待后续”陈述描述的是当时范围，不作为本次当前状态。按持续发布规则，待推送本次源码后创建文档专用双平台Release，不重建Windows／Android包；应用版本不递增。
+
+## W047 · 2026-10-14 · 文档审核Release发布结果
+
+文档审核提交`e98622d`已推送`main`；附注标签`dual/2026.10.14.2`已推送至`StuTuse/rater-tracker`。`gh release create`成功返回[dual/2026.10.14.2](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.2)，说明这是Windows alpha.17／Android alpha.2的文档版预览，不重建或重复上传未变化的安装包，并链接上一双端Release。
+
+创建后`gh release view`、`gh repo view`及`git ls-remote`因GitHub API／网络解析多次失败，未能读回Release元数据；tag推送本身有成功回执。故记录为Release创建命令成功，后续连接恢复时可补做远端回读，不重复创建或覆盖该Release。应用版本、结算规则与JSON格式均未变化。
