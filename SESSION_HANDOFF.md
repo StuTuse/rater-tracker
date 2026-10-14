@@ -2,7 +2,7 @@
 
 ## 现行状态
 
-Windows 桌面当前为`0.1.0-alpha.18`，Android 当前为`0.1.0-alpha.3`／`VERSION_CODE=3`；产品方案`v1.24`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。本轮双端登录后启动及每次成功本机写入即触发自动云同步；正在上传时的新修改自动接续，恢复入口同样触发上传。星星动画取消透明度脉冲，改为从当前帧连续缩放并轻转落定；两端共用实现。构建、渲染验收和发布状态见最新工作日志。
+Windows 桌面当前为`0.1.0-alpha.18`，Android 当前为`0.1.0-alpha.3`／`VERSION_CODE=3`；产品方案`v1.24`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。登录后启动及每次成功本机写入均自动同步；上传期间的新修改自动接续，恢复入口也会触发上传。星星动画取消透明度脉冲，改为从当前帧连续缩放并轻转落定；两端共用实现。源码提交`68becbe`已推送main；双端包和SHA-256已在[dual/2026.10.14.5](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.5)发布并回读匹配。Android实体模拟器未配置，Windows安装／升级与此次打包程序smoke未验证；详情见W049。
 
 双端源码已集成到`main`并推送私有GitHub仓库`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 
@@ -10,7 +10,7 @@ Windows 桌面当前为`0.1.0-alpha.18`，Android 当前为`0.1.0-alpha.3`／`VE
 
 ## 当前工作区
 
-上轮Windows开发快捷方式修复见[Windows桌面启动修复](docs/Windows桌面启动修复记录.md)与W048。当前本轮在main负责`packages/data/sync.js`、`packages/ui/app.js`、星级共享样式／动画、同步测试与双端构建集成；Windows／Android开发worktree未修改，使用前需重新检查其Git可用状态。构建包哈希及发布结果待W049记录。
+上轮Windows开发快捷方式修复见[Windows桌面启动修复](docs/Windows桌面启动修复记录.md)与W048。本轮在main负责`packages/data/sync.js`、`packages/ui/app.js`、共享星级动画、同步／星级验收与双端构建集成；Windows／Android开发worktree未修改，使用前需重新检查其Git可用状态。Windows Setup 203,279,418字节、SHA-256 `f616f00685ea804cbccb1c5b733daedf85d87656941d2aa59950f1e2c1b0e07b`；Android alpha.3 release APK 98,111,281字节、SHA-256 `5a3b24718a378281eea80d03d73155ca628c461f7085abf47848c6c3339ac1eb`；均在主工作区`release/`，只作为GitHub附件，不入库。
 
 本目录为集成`main`。本轮接手时HEAD为`4535570`，历史文档收尾tag及Release`dual/2026.10.14.3`已存在；本次GitHub回读确认仓库PRIVATE、批次1／2／3均为prerelease，W047的网络回读限制已解除。开始下一任务前检查`git status`、最新远程分支和Release序号。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 

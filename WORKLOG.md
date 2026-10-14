@@ -561,4 +561,6 @@ PowerShell解析、diff检查、npm工程47检查通过。真实源码Electron�
 
 验证：`npm run check`为48/48；浏览器真实打分专项4项全部通过（不透明度稳定、关键帧只变换、快速改分接续当前形态、保存星数一致）；既有UI交互回归12项全部通过。Android Web资源同步、Gradle debug／release均成功，aapt核对包名／版本码3；APK v2签名通过（RSA3072，CN与项目既有签名配置一致）。Windows x64 NSIS安装包生成203,279,418字节，SHA-256为`f616f00685ea804cbccb1c5b733daedf85d87656941d2aa59950f1e2c1b0e07b`；Android alpha.3 APK 98,111,281字节，SHA-256为`5a3b24718a378281eea80d03d73155ca628c461f7085abf47848c6c3339ac1eb`；清单在release输出目录。
 
-边界：当前工作区没有隔离Android AVD，未作设备安装／WebView现场验收。Windows安装包未签名；当前执行环境运行Electron子进程时静默退出1，故本次未完成新包smoke或安装／升级检查。未登录真实云账号或连接真实云端。Windows NSIS构建步骤曾执行受控运行保护，构建时临时用已验证文件解析方式提取卸载器并在命令结束后还原node_modules依赖文件，没有修改系统安全设置。GitHub提交／双端Release结果待本次收尾。
+边界：当前工作区没有隔离Android AVD，未作设备安装／WebView现场验收。Windows安装包未签名；当前执行环境运行Electron子进程时静默退出1，故本次未完成新包smoke或安装／升级检查。未登录真实云账号或连接真实云端。Windows NSIS构建步骤曾执行受控运行保护，构建时临时用已验证文件解析方式提取卸载器并在命令结束后还原node_modules依赖文件，没有修改系统安全设置。
+
+GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14.5`指向该提交；[双端预览Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.5)已创建为prerelease。远端回读确认仓库PRIVATE，Windows安装包203,279,418字节、Android APK 98,111,281字节及219字节SHA-256清单的文件名／大小／digest均匹配本地，远端标签提交与`68becbe2132dc949a88a19ee17ac767bbbbc000d`一致。两端版本与哈希见本节；APK证书及v2签名通过。
