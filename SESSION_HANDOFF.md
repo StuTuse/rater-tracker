@@ -1,26 +1,21 @@
 # 双端移植交接 · 2026-10-14
 
-GitHub已为PRIVATE：https://github.com/StuTuse/rater-tracker；保留完整历史与18个旧标签。Android完整邮箱验收尚未完成，不得宣称全部完成或创建完成标签。
+用户授权的GitHub私有上传、工作区隔离、Android移植、真实邮箱注册与后续手机排版已完成列明模拟器场景验收。GitHub https://github.com/StuTuse/rater-tracker 回读PRIVATE。不要将模拟器验收扩大为真机／所有系统或性能承诺。历史过程与失败见WORKLOG W033～W041，最终范围见docs/Android验收记录.md。
 
-工作区：主目录D:/Project/AgentPAGE/Codex Project/Rater&Tracker为main集成；Android C:/Users/15817/.codex/worktrees/android-port/Rater&Tracker（codex/android-port）；Windows C:/Users/15817/.codex/worktrees/windows-dev/Rater&Tracker（codex/windows-dev）。本聊天统一负责共享模块／双端集成，不派遣其他会话。Windows隔离80d67b8已集入安卓分支。各自依赖／运行数据／构建输出独立，Windows开发用npm run start:dev，数据runtime-data/windows-dev，正式%APPDATA%/RaterTracker不用于验收。
+工作区：主目录 D:/Project/AgentPAGE/Codex Project/Rater&Tracker 为main集成；Android C:/Users/15817/.codex/worktrees/android-port/Rater&Tracker，codex/android-port；Windows C:/Users/15817/.codex/worktrees/windows-dev/Rater&Tracker，codex/windows-dev。本聊天统一负责共享模块及集成，不派遣其他会话。三个工作区独立依赖、暂存与运行数据，不在别人目录切分支／覆盖改动。Windows开发 npm run start:dev 的数据在本工作区runtime-data/windows-dev，正式%APPDATA%/RaterTracker未用于验收。
 
-apps/windows是实际Electron入口；apps/android是Capacitor8.5.3原生工程；packages/core、data、ui共享，旧src／electron路径兼容。Windows版本alpha.17（根VERSION及package／lock、apps/windows/VERSION）；Androidalpha.1、VERSION_CODE=1。规则1.3／JSON格式1、48徽章／51PNG／十阶段／92语录不变；金额microXP、冻结C/F／正常额度痕迹／导入不发奖不可改回按当前任务重算。
+apps/windows为实际Electron入口，apps/android为Capacitor原生工程；packages/core、data、ui共享，旧src／electron保留兼容。规则1.3、JSON格式1、48徽章／51PNG／十阶段／92语录保持。Windows alpha.17由根VERSION/package及apps/windows维护；Androidalpha.1、VERSION_CODE=1独立；产品v1.21／视觉v1.17。后续安卓覆盖更新必须递增VERSION_CODE并沿用签名，Android附注标签android/v<版本>，18个旧标签不动。
 
-实际构建：node scripts/android-build.mjs；JDK21（本机Android工作区runtime-data/toolchains/jdk-21.0.12.1+1），SDK C:/Users/15817/AppData/Local/Android/Sdk。RATER_JAVA_HOME可指定Java21；RATER_BUILD_PROXY只在本次下载需要时设为本机现有代理。Gradle8.14.3／AGP8.13.0／compile,target36／min24。Android Studio自带JBR25不适合此Gradle，工程忽略的本地配置已指Java21。签名已保存主目录runtime-data/android-signing，构建自动通过Git common dir使用它；RATER_ANDROID_SIGNING_DIR可指定既有私有目录。保留原密钥才能更新，不入库，不归档仍需使用的忽略文件。正式ID local.ratertracker.android，dev后缀.dev；本次测试emulator-5556，独立数据镜像runtime-data/emulator，不改原AVD快照。
+构建 node scripts/android-build.mjs；同步 node scripts/android-command.mjs sync android；Android Studio node scripts/android-command.mjs open android。JDK21路径Android工作区runtime-data/toolchains/jdk-21.0.12.1+1，可用RATER_JAVA_HOME；SDK C:/Users/15817/AppData/Local/Android/Sdk。Capacitor8.5.3、Gradle8.14.3、AGP8.13.0，compile/target36、min24；Studio的JBR25不适用。签名主目录runtime-data/android-signing，脚本通过git common dir定位；RATER_ANDROID_SIGNING_DIR可指定既有私有目录。保留密钥/config，绝不入库、不打印。工作区工具链、模拟器、签名为忽略文件，未经保全不要归档工作区。
 
-已通过47业务／工程；真实WebView105条件（12UI、26控件、41切页、11flow、9阶段、6MAX），头像改动后控件26复验；10真实返回／后台／键盘／草稿，8真实文件读写／取消／UTF8错误保持数据；真实账号12与原生云协议6；签名正式包8真实UI条件（登录、冷启、覆盖、退出、四页）通过；另有今日评分保存、正式包与Windows双向互导199.902727XP／0星／冻结参数保持。Windows源码和最新unpacked实际smoke通过packaged=true。详见docs/Android验收记录.md与WORKLOG W033～W035，失败与修复有记录，帧率／真机／其他安卓版本／长期大数据／完整辅助功能未验证，NSIS升级未重跑。
+最终正式包在主目录release/android/Rater-Tracker-Android-0.1.0-alpha.1-release.apk，98,109,524字节，SHA256 825460cd1bf81027a5c167f245f7455f90fbb80e3be8b8fdb763d6b8b5d464a0，附SHA256.txt及Android-Today／Rewards／Landscape.png。签名v2、RSA3072，证书SHA256 648b3a169d4b63da50312f44fc09241e8e796a39b781baa60e48a42719c60448。正式ID local.ratertracker.android，dev为后缀.dev，存储分离。实际测试为隔离emulator-5556，Android17/API37 GooglePlay x86_64，WebView145，1080×2400／420dpi；独立数据镜像runtime-data/emulator，不写原AVD快照。
 
-Native认证完整SDK缓存仅进程内存并由Keystore AES-GCM／AtomicFile保存，SDK令牌自动刷新加密；userinfo缺失仅按同一subject恢复已验证身份；同步绑定UI账号作用域；断网退出失败恢复缓存，未登录可幂等退出。注册挑战10分钟，仅内存；取消／超期／重复不登录。原生inactive／active暂停动画与轮询，不能仅依赖Android WebView的document.hidden；头像随页头滚动，原生系统栏／键盘适配，SAF后台IO且严格UTF8。
+已通过47工程／业务；真实WebView105（UI12、控件26、切页41、flow11、阶段9、MAX6）；原生返回／后台／键盘／草稿10、真实SAF8、真实虚构账号12与Native云协议6、正式签名UI8、真实邮箱注册5。Windows源码与unpacked EXE smoke通过packaged=true；双向JSON互导199.902727XP／0星／冻结参数与账本保持。邮箱验收仅身份与恢复，未灌业务测试记录，已退出。凭证保留忽略runtime-data/android-test/registration.json，不输出邮箱／密码／OTP／JWT。
 
-待办首要：QQ邮箱窗口可只读，但两次激活失败（failed to activate captured window），按工具恢复规则停止输入；用户已被请求刷新，未回复。首次注册验证码已超过10分钟且旧挑战因重建失效，需要最后重新发码；用户指定邮箱保存在忽略runtime-data/android-test/registration.json，不写入源码。通过电脑操作skill的Sky读取最新CloudBase邮件，可由用户手动刷新／提供新码。只验证身份和持久恢复，若邮箱对应已有账号，不灌测试记录／不改其云数据。尚无真实邮箱验证成功证据。
+用户要求先完成功能验收，再优化手机排版，已按此顺序执行。仅apps/android/mobile.css调整页头分层、紧凑成长／评分卡、整行日期、横向筛选、横向系数卡、纵向备份、五等分导航、44px点击和弹窗滚动、横屏紧凑布局；Windows样式未改。最终复验控件26／切页41／原生操作10／文件8／正式包8，280／320／411px竖屏和914×411横屏共20页边界通过，实际截图已查看。首轮正式登录失败且旧脚本用户名断言过宽，已修正为账号中心非编辑身份＋退出按钮，增加输入焦点等待／清空；真实复验全通过。详情W041。
 
-验证码阶段之后：更新实际验收与日志／交接、核对并集入main、Windows工作区合并共享基线、保持私有并推送，完成时才建Android附注标签。当前源码检查点提交可上传为WIP，不能把上传／实现等同全验收。最终APK在Android工作区release/android，签名已验证v2、RSA3072；最终校验／主目录稳定产物复制仍需补录。
+Native认证完整SDK缓存仅进程内存并由Keystore AES-GCM／AtomicFile保存；恢复按同一已验证subject，刷新随会话加密，同步绑定UI账号作用域；退出失败恢复缓存。注册10分钟挑战仅内存，取消／过期／重复不登录。原生inactive／active暂停成长和轮询，不能仅依赖Android后台仍false的document.hidden；SAF后台IO严格UTF8。历史冻结奖励不能按当前任务重算，导入不发奖。
 
-验收命令：node scripts/check.mjs；node scripts/android-ui-acceptance.mjs ui|controls|pages|flow|stages|max；android-mobility-acceptance.mjs／android-files-acceptance.mjs；RATER_ANDROID_TEST_CREDENTIALS指向忽略JSON（username,password,id），运行android-account-acceptance.mjs／android-cloud-acceptance.mjs／android-release-acceptance.mjs。仅本次虚构云账号作写测试，原业务快照恢复，云版本正常增长。报告与截图output/android、output/desktop忽略。下一会话先看最新WORKLOG和本文件，不能输出密码／验证码／JWT／QQ邮件会话URL。
+验收命令 node scripts/check.mjs；node scripts/android-ui-acceptance.mjs ui|controls|pages|flow|stages|max；android-mobility-acceptance.mjs、android-files-acceptance.mjs。账号／云／正式包分别android-account-acceptance.mjs、android-cloud-acceptance.mjs、android-release-acceptance.mjs，RATER_ANDROID_TEST_CREDENTIALS指向忽略的username/password/id虚构账号JSON。只在隔离测试设备运行；不使用用户真实账号灌入测试数据。报告与截图output/android、output/desktop忽略。原虚构云业务快照已恢复，版本正常递增；正式包虚构账号本地可保留既有冲突，最后退出访客，不替用户清空数据。
 
-
-最新W037：main及Windows工作区已快进至eb83ea2，私有main／codex/android-port已推送，47检查通过。最新debug包已安装、账号12补查通过；正式包8通过并已回读签名，稳定APK在主目录release/android，98,107,848字节，SHA256见W037。本次新邮箱验证码已重发，验证页保持，用户未回复刷新／新码，不能reload或重装dev以免挑战失效。用户回复后直接只读Sky邮箱取最新码，或用其提供新码完成验证；超过10分钟重新发一次。还未创建Android完成标签。
-
-最新W038：三工作区已核对同步到 b9e7684 且干净；06:20 邮箱只读仍旧列表，上一轮验证码已过期。不要使用旧码或持续重复发送。待用户刷新邮箱／提供取码条件后重新发一次，10分钟内完成验证；仍不可宣称全验收或打完成标签。主目录稳定APK可供安装预览。
-
-用户新增明确顺序：先完成剩余移植／功能验收，再优化移动端界面排版。后续范围包括五页信息层级、间距与卡片布局、底部导航、安全区、弹窗滚动和软键盘遮挡；保持现行黄／绿手绘风格、业务规则与Windows布局。必须在安卓真实渲染环境复验并重建安装包后交付；此项仅记录待办，尚未实施，不得因已有移动适配检查通过而标为完成。邮箱阻塞仍见W038。
+未覆盖：实体手机、其他Android版本／厂商系统、长期大数据、帧率及完整辅助功能，Windows NSIS安装升级未重跑。没有待取验证码。后续使用／发布手机新包前按实际设备继续验证。当前收尾为检查提交、同步main及Windows分支、私有推送和Android附注标签，以Git实际结果为准。
