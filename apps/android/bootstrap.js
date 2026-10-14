@@ -1,4 +1,5 @@
 import { registerPlugin } from "./capacitor-core.js";
+import './touch-feedback.js';
 const Native=registerPlugin('RaterPlatform');
 async function nativeInfo(){let timer;try{return await Promise.race([Native.info(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('应用信息暂未读取，请重新打开')),5000);})]);}finally{clearTimeout(timer);}}
 document.documentElement.dataset.platform='android';

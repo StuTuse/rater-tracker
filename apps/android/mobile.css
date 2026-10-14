@@ -1,4 +1,36 @@
 /* Android touch layout; the shared visual and reward rules remain unchanged. */
+/* Match desktop hover while held, then return to the saved/selected state.
+   Disable WebView's blue tap overlay on all nodes, including nested SVGs. */
+html[data-platform=android] *{-webkit-tap-highlight-color:transparent}
+html[data-platform=android] button,html[data-platform=android] summary{-webkit-user-select:none;user-select:none}
+html[data-platform=android] button[data-touch-pressed]:not(:disabled){transform:translateY(-1px);background:#f1efe3}
+html[data-platform=android] .primary[data-touch-pressed]:not(:disabled){background:#e7bc3e;box-shadow:0 4px 12px #ad83152b;transform:translateY(-1px)}
+html[data-platform=android] .secondary[data-touch-pressed]:not(:disabled){background:#f2f0e1;border-color:#cfb969;box-shadow:0 3px 10px #80631614}
+html[data-platform=android] .icon-button[data-touch-pressed]:not(:disabled){border-color:#cfb969;box-shadow:0 3px 10px #80631614}
+html[data-platform=android] .rating-card[data-touch-pressed]{border-color:#d6bd74;box-shadow:0 5px 18px #8063160d}
+html[data-platform=android] .task-card[data-touch-pressed]{border-color:#d6bd74;box-shadow:0 6px 20px #80631612}
+html[data-platform=android] .star-button[data-touch-pressed]:not(:disabled){background:#f8df8b40;color:#cdad4c;box-shadow:0 2px 8px #a5791012}
+html[data-platform=android] .star-button[data-touch-pressed] .icon{scale:1}
+html[data-platform=android] .zero[data-touch-pressed]:not(:disabled){background:#eee9d8}
+html[data-platform=android] .nav-link[data-touch-pressed]:not(:disabled){background:#eee9d8;transform:translateX(2px)}
+html[data-platform=android] .segmented button[data-touch-pressed]:not(:disabled),html[data-platform=android] .chip[data-touch-pressed]:not(:disabled){background:#f2e8c8;transform:translateY(-1px)}
+html[data-platform=android] .text-button[data-touch-pressed]:not(:disabled),html[data-platform=android] .title-button[data-touch-pressed]:not(:disabled){background:none;color:#89651b}
+html[data-platform=android] .danger-text[data-touch-pressed]:not(:disabled){background:#faece0}
+html[data-platform=android] .badge-card[data-touch-pressed]:not(:disabled){background:#fffdf5;transform:translateY(-3px);box-shadow:0 8px 24px #78611a12}
+html[data-platform=android] .badge-card[data-touch-pressed]:not(:disabled) img{transform:scale(1.035)}
+html[data-platform=android] summary[data-touch-pressed]{color:#805f1f}
+html[data-platform=android] .account-entry[data-touch-pressed]:not(:disabled){background:#f1efe3;border-color:#e8d79e;transform:translateY(-1px)}
+html[data-platform=android] .xp-bar[data-touch-pressed] #xp-fill{filter:brightness(1.035)}
+html[data-platform=android] .control-trigger[data-touch-pressed]:not(:disabled){background:#fffdf4;border-color:#d2bd75;box-shadow:0 4px 12px #735d1110;transform:none}
+html[data-platform=android] .date-switch .control-trigger[data-touch-pressed]:not(:disabled){background:#f7f1dc;box-shadow:none}
+html[data-platform=android] .control-option[data-touch-pressed]:not(:disabled){background:#f6efd8;transform:none}
+html[data-platform=android] .calendar-day[data-touch-pressed]:not(:disabled){box-shadow:0 3px 9px #80631618;border-color:#c6a743}
+html[data-platform=android] .control-popover .calendar-nav[data-touch-pressed]:not(:disabled),html[data-platform=android] .calendar-today[data-touch-pressed]:not(:disabled){background:#f4e7bb;transform:none}
+html[data-platform=android] .control-popover .calendar-day[data-touch-pressed]:not(:disabled){background:#f7edcd;border-color:#e2ca79;box-shadow:none;transform:none}
+html[data-platform=android][data-motion=gentle] button[data-touch-pressed],html[data-platform=android][data-motion=off] button[data-touch-pressed],
+html[data-platform=android][data-motion=gentle] .badge-card[data-touch-pressed] img,html[data-platform=android][data-motion=off] .badge-card[data-touch-pressed] img{transform:none!important}
+@media(prefers-reduced-motion:reduce){html[data-platform=android] button[data-touch-pressed],html[data-platform=android] .badge-card[data-touch-pressed] img{transform:none!important}}
+
 html[data-platform=android]{overscroll-behavior:none;--safe-bottom:env(safe-area-inset-bottom,0px)}
 html[data-platform=android] body{touch-action:pan-y}
 html[data-platform=android] button{min-height:44px}

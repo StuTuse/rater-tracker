@@ -1,4 +1,16 @@
-# 双端移植交接 · 2026-10-14
+# Android按压反馈交接 · 2026-10-14
+
+本轮用户要求安卓按下使用桌面悬浮效果，已完成Androidalpha.2／VERSION_CODE=2。负责main中的apps/android触控样式与独立反馈模块、共享styles仅Android排除条件、安卓资源准备与验收脚本、版本／规范／记录；未派遣会话，未在其他worktree改源码或切分支。Android／Windows工作区仍为上一alpha.1基线，开始下一轮开发前先检查改动并快进同步main；不得覆盖未提交工作。
+
+移除全节点蓝色tap overlay，24类组件按住使用桌面暖色／金色描边、阴影与轻抬升；独立data-touch-pressed在松手、取消、移动超过8px、滚动、失焦、隐藏、rater-pause清理。禁用目标不标记，输入保持金色焦点，柔和／关闭／系统减少动态取消位移缩放；操作标签禁止长按文字选择，正文输入保留。业务／存储／认证未改。共享CSS去掉零特异性Android条件后与上一提交桌面样式逐字一致。
+
+最终47工程、24类×4＋6专项（102条件）、UI12、控件26、源码Electron smoke和正式签名包6条件通过；查看原生按住／恢复截图。控件关闭帧首轮漏采，测试观察扩至12帧并等待实际中间帧后通过，产品弹窗未改；完整失败与检查范围见docs/Android-alpha.2验收记录.md。部分按压对照落定有限CSS过渡，后台清理使用事件专项，不当成FPS或真实后台验收；实体手机／其他系统仍未覆盖。
+
+最新APK release/android/Rater-Tracker-Android-0.1.0-alpha.2-release.apk，98,111,149字节，SHA256 74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711；原证书及v2签名保持，附SHA256.txt、Android-Press-Held.png与Android-Press-Restored.png。命令node scripts/android-press-acceptance.mjs、android-release-press-acceptance.mjs，既有构建／验收命令保持；本轮main构建设置RATER_JAVA_HOME为Android工作区既有JDK21、ANDROID_SDK_ROOT为既有SDK，独立依赖npm ci --offline --prefix apps/android。产物／运行数据／签名忽略。Windowsalpha.17、产品v1.22／视觉v1.18、规则1.3／JSON1。收尾提交与android/v0.1.0-alpha.2附注标签以Git为准。
+
+下一步：用户可用同签名alpha.2 APK覆盖安装体验，按实体设备反馈继续优化；本次按压任务没有待完成实现。以下保留上一轮双端交付的工具链与历史基线。
+
+## 双端移植基线 · alpha.1
 
 用户授权的GitHub私有上传、工作区隔离、Android移植、真实邮箱注册与后续手机排版已完成列明模拟器场景验收。GitHub https://github.com/StuTuse/rater-tracker 回读PRIVATE。不要将模拟器验收扩大为真机／所有系统或性能承诺。历史过程与失败见WORKLOG W033～W041，最终范围见docs/Android验收记录.md。
 
