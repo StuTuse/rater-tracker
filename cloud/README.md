@@ -9,6 +9,12 @@
 
 2026-10-13邮箱认证配置过程及回读结果：首次只修改登录策略后，回读`EmailLogin=false`；随后启用email身份源与默认代发，再次回读`EmailLogin=true`、`UserNameLogin=true`、`email.On=true`、`email.EmailConfig.On=true`。未启用短信／匿名认证、未购买套餐、未配置私人SMTP凭证。真实收码及注册完成已在Android模拟器验证，身份验证范围见[Android验收记录](../docs/Android验收记录.md)；不能将此范围扩大到实体设备或所有账号情形。
 
+## 验证邮件外观草稿（2026-10-15）
+
+按启动页的视觉制作了[注册／登录验证码模板草稿](email/register-sign-in.html)：淡黄色手账底纹、居中高分辨率启动图标、`Rater & Tracker`、`TuseCreation`和醒目的居中验证码。模板用CloudBase支持的`{{.VerificationCode}}`及有效期变量，未包含脚本或外部样式表。
+
+本次通过`ModifyProvider`提交模板后，`GetProviders`仍回读`EmailConfig.TemplateConfig=null`；CloudBase计费接口也没有返回可核实的套餐信息。官方套餐能力表将“邮件样式”列为标准版部分支持（自定义登录页）及企业版支持的自定义配置；本地已知环境尚未购买套餐，因此当前不能确认该环境具备邮件样式配置权限，也不能称模板已上线。按[官方模板字段说明](https://cloud.tencent.com/document/product/876/34822)的字段重试不会改变这一回读结果。不要未经用户授权升级套餐或新增SMTP服务。邮件正文可显示产品名称与创作者字标；邮箱服务的发件地址仍为默认`cloudbase_noreply@tencent.com`，接口没有提供单独的发件人显示名字段。
+
 官方依据：[PG SDK 注册接口](https://docs.cloudbase.net/api-reference/webv3-pg/authentication)、[内置邮件代发](https://docs.cloudbase.net/authentication-v2/method/email-login)、[邮箱身份源配置](https://docs.cloudbase.net/api-reference/manager/node/login-config)。
 
 环境实际使用 PostgreSQL；没有创建 NoSQL 集合。`migrations/001_sync.sql` 已执行：私有账户快照／请求回执表和 authenticated RPC。owner 取认证上下文，客户端无直接表权限；事务内行锁和版本比较避免覆盖。同请求重试返回原版本，两端修改冲突停止并保留本地数据。云端快照限 4 MiB。

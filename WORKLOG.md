@@ -588,3 +588,13 @@ GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14
 已通过GitHub CLI将可见性改为PUBLIC。GitHub元数据回读`isPrivate=false`／`visibility=PUBLIC`成功；无凭据的HTTPS `git ls-remote`可读取main，HEAD为`a7a0318994826e4924b6db82e6c1fe8f2b0bf4f6`。同步更新AGENTS、版本管理规范、README、交接、双平台Release流程及工作区登记；应用源码、平台版本与安装包不变。相称检查为历史模式扫描、文档差异及链接／格式检查；真实用户数据语义扫描未覆盖。
 
 文档修改作为源代码专用双平台prerelease发布。提交`eb5a330c31738ebf0140a550997c3f50cb94c5db`已推送`main`；附注标签`dual/2026.10.15.3`解引用至该提交，Release已创建为`draft=false`／`prerelease=true`，说明列明Windows alpha.19与Android alpha.4，未重复上传安装包。GitHub回读`visibility=PUBLIC`／`isPrivate=false`；无凭据HTTPS读取的远端`main`与标签均指向`eb5a330`。Release链接：[dual/2026.10.15.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.3)。
+
+## W053 · 2026-10-15 · 邮件验证码模板草稿与双端启动图标
+
+按用户要求，将邮件正文排成与启动页一致的居中品牌：新版图标、`Rater & Tracker`、`TuseCreation`和大号居中验证码，背景采用淡黄色与应用手账底纹。CloudBase官方文档确认模板变量／HTML限制和套餐能力；尝试`ModifyProvider`后`GetProviders`仍为`EmailConfig.TemplateConfig=null`，计费接口未返回套餐值。官方套餐表将邮件样式列为付费自定义配置能力。模板草稿已保存于`cloud/email/register-sign-in.html`并在`cloud/README.md`如实标记未上线；没有升级套餐、设置私人SMTP或发送测试邮件。
+
+用户指出应用外部图标仍是旧图形。检查发现启动页用新版描边星叶`assets/app.svg`，Windows `.ico`、邮件／Android PNG仍为旧简化素材。新增`/scripts/app-icon.mjs`：按启动页图形生成512像素PNG、含16／24／32／48／64／128／256多尺寸Windows ICO，并同步Android的`drawable/rater_icon.png`。`scripts/assets.mjs`接入该生成器，避免素材重生成覆盖新图标。Windows升至alpha.20；Android升至alpha.5／code5；规则1.3与JSON1未变。
+
+检查：`npm run check`55/55及`npm test`55/55通过，素材再生成一致，ICO含7尺寸、Android源图与邮件图标共用PNG；新版APK内512px图标已提取检查。Windows NSIS包203,225,129字节，SHA-256 `B6A793A2C1F0D2057292443D22365BE91A213EAB690D8ADDEE9A59874E0AD09B`；默认工作目录启动未生成报告，复制完整app目录到本机临时目录后隔离smoke通过：`packaged=true`、alpha.20、启动页品牌／背景正常且所有报告布尔项通过。Android release APK 98,130,449字节，SHA-256 `2F532363CB664A5DD8627C09FD9EDD33361F20FCC8DB56BA13F21D819B80C480`；`aapt`确认versionCode 5／alpha.5，v2签名验证通过，证书SHA-256与前版相同（`648b3a169d4b63da50312f44fc09241e8e796a39b781baa60e48a42719c60448`）。`git diff --check`通过。
+
+构建期间受限环境的Gradle缓存锁／系统临时目录和Windows目录执行限制已通过工作区缓存、临时目录及已记录的NSIS卸载器解析方案解决；NSIS依赖文件构建后恢复原样。未安装升级Windows版或在Android设备上验收；真实邮箱送达和云端邮件样式也未覆盖。待提交本节及对应源码后，按持续发布规则建立`dual/2026.10.15.5`双端prerelease，上传两个安装包与SHA-256清单，再回读校验。

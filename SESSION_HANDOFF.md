@@ -2,7 +2,11 @@
 
 ## 现行状态
 
-Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_CODE=4`；产品方案`v1.25`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。用户要求启动立即后台读取云端并保留修改时间较新一端。已改为pull先行，账号保存附modifiedAt；云端较新自动下载，本机较新自动上传，云版本变化重新核对。旧快照无时间按版本兼容；记录不合并、不重算奖励。55项检查、模拟账号真实页面3项、新Windows包普通临时目录隔离smoke、Android构建／原证书v2验证通过。Android设备现场、真实云账号和安装升级未覆盖；详见W050与[同步验收](docs/双端同步时间策略验收.md)。修复提交07485af已推送main；[dual/2026.10.15.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)已发布为prerelease，发布时仓库PRIVATE，附件大小／SHA-256及远端标签指向均回读一致，见W051。仓库于2026-10-15按用户明确要求改为PUBLIC；[dual/2026.10.15.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.3)源码预发布已创建，扫描与公开状态验证见W052。
+Windows桌面当前为`0.1.0-alpha.20`，Android为`0.1.0-alpha.5`／`VERSION_CODE=5`；结算规则`1.3`、JSON格式`1`。本轮统一了启动页、Windows安装程序与Android的星叶高质量图标，完整检查及边界见W053。`npm run check`／`npm test`各55项通过；Windows Setup 203,225,129字节、SHA-256 `B6A793A2C1F0D2057292443D22365BE91A213EAB690D8ADDEE9A59874E0AD09B`，复制到普通临时目录运行的隔离smoke通过；Android alpha.5 APK 98,130,449字节、SHA-256 `2F532363CB664A5DD8627C09FD9EDD33361F20FCC8DB56BA13F21D819B80C480`，versionCode5及既有证书v2验证通过。Windows安装升级及Android设备未测。
+
+本轮邮件验证码样式草稿位于`cloud/email/register-sign-in.html`：淡黄色应用手账底纹、居中新版图标、软件名称、`TuseCreation`与大号验证码。CloudBase `ModifyProvider`后读回`TemplateConfig=null`，计费接口无套餐返回；官方套餐表指示邮件样式需要相应套餐。没有升级或声称线上已生效，见W053及`cloud/README.md`。
+
+本轮提交源码及双端附件待推送，发布批次为`dual/2026.10.15.5`；发布结果完成后在此更新远端tag／Release回读信息。仓库`StuTuse/rater-tracker`为PUBLIC。此前同步策略及公开状态详见W050—W052。
 
 双端源码已集成到`main`并推送GitHub仓库（当时为PRIVATE，当前为PUBLIC）`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 
@@ -10,9 +14,9 @@ Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_
 
 ## 当前工作区
 
-上轮Windows开发快捷方式修复见W048；星级动画见W049。本轮仅在main负责`packages/data/sync.js`／`storage.js`、UI账号说明、同步测试与双端版本／构建／文档。其他worktree未修改。Windows Setup 203,260,545字节，SHA-256 `1fa39e482dbe4cb5fa9b9943bab34214f00b20067d96da352a059b268a6dc332`；Android alpha.4 APK 98,112,165字节，SHA-256 `8950c28749b34934ed0bcfe664d70756ee263660edb8b36650a92077440c0aea`；包和统一清单在忽略的release目录。默认受管项目目录运行新Windows包返回0x80000003，同一包复制到普通临时目录通过，未改系统设置。
+此前Windows开发快捷方式修复见W048；星级动画见W049。本轮只在main负责`assets/app.png`／`.ico`、图标生成脚本、Android drawable图标、邮箱模板草稿及发布文档，不修改另一worktree或同步业务。
 
-本目录为集成`main`。上轮同步修复前HEAD为`2d72b61`；当前仓库可见性和发布批次以W052及远端回读为准。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
+本目录为集成`main`。当前发布批次及仓库可见性以W053和本节后续远端回读为准。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 
 此前全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046，Release创建结果见W047及上述本次回读。保持原有标签与Release，不重复创建同名批次。
 

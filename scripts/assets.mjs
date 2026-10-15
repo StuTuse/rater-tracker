@@ -1,5 +1,4 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { deflateSync } from 'node:zlib';
 await mkdir('assets/badges', { recursive: true });
 // Every subject is explicitly drawn, rather than recolouring one template.
 const subjects = [
@@ -62,22 +61,5 @@ const badges = rows.map((row, i) => {
 });
 await writeFile('src/badges.js', `// Generated from the authoritative badge list by scripts/assets.mjs.\nexport const BADGES = ${JSON.stringify(await Promise.all(badges), null, 2)};\n`);
 await writeFile('assets/app.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect x="4" y="4" width="88" height="88" rx="27" fill="#f3c747"/><path d="M47 18 55 38 77 42 61 57 64 78 46 67 26 78 31 56 15 42 38 38Z" fill="#fff9e8" stroke="#6b5933" stroke-width="3" stroke-linejoin="round"/><path d="M65 77q-2-19 18-21 6 19-18 21Z" fill="#99b777" stroke="#6b5933" stroke-width="2"/></svg>');
-// A deterministic 256px PNG/ICO with a star and leaf; no external image service.
-const size = 256, scan = Buffer.alloc(size * (size * 4 + 1));
-const star = [[125,45],[145,97],[206,110],[164,149],[171,208],[123,178],[72,208],[84,148],[42,110],[103,97]];
-function inside(x,y,points) { let c=false; for(let i=0,j=points.length-1;i<points.length;j=i++) { const a=points[i],b=points[j]; if((a[1]>y)!==(b[1]>y) && x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0]) c=!c; } return c; }
-for(let y=0;y<size;y++) for(let x=0;x<size;x++) {
-  const i=y*(size*4+1)+1+x*4, radius=67, dx=Math.max(0,Math.abs(x-128)-55),dy=Math.max(0,Math.abs(y-128)-55);
-  const bg=dx*dx+dy*dy<=radius*radius;
-  let color=inside(x,y,star)?[255,249,232,255]:[243,199,71,bg?255:0];
-  if(((x-191)/27)**2+((y-194)/15)**2<1) color=[153,183,119,255];
-  scan.set(color,i);
-}
-function crc(data) { let c=0xffffffff; for(const b of data) { c^=b; for(let i=0;i<8;i++) c=(c>>>1)^((c&1)?0xedb88320:0); } return (c^0xffffffff)>>>0; }
-function chunk(type,data) { const b=Buffer.alloc(data.length+12); b.writeUInt32BE(data.length); b.write(type,4); data.copy(b,8); b.writeUInt32BE(crc(b.subarray(4,-4)),b.length-4); return b; }
-const ihdr=Buffer.alloc(13); ihdr.writeUInt32BE(size); ihdr.writeUInt32BE(size,4); ihdr[8]=8; ihdr[9]=6;
-const png=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(scan)),chunk('IEND',Buffer.alloc(0))]);
-await writeFile('assets/app.png',png);
-const ico=Buffer.alloc(22); ico.writeUInt16LE(1,2); ico.writeUInt16LE(1,4); ico.writeUInt16LE(1,10); ico.writeUInt16LE(32,12); ico.writeUInt32LE(png.length,14); ico.writeUInt32LE(22,18);
-await writeFile('assets/app.ico',Buffer.concat([ico,png]));
-console.log('48 independent SVG badges and application icons generated.');
+await import('./app-icon.mjs');
+console.log('48 independent SVG badges generated.');
