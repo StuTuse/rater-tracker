@@ -1,8 +1,8 @@
 {
   "name": "rater-tracker",
-  "version": "0.1.0-alpha.20",
+  "version": "0.1.0-alpha.21",
   "description": "离线每日评分与任务成长记录器",
-  "author": "Rater & Tracker (local)",
+  "author": "TuseCreation",
   "private": true,
   "type": "module",
   "main": "apps/windows/main.cjs",
@@ -13,10 +13,12 @@
     "check": "node scripts/check.mjs",
     "build": "npm run check && node node_modules/electron-builder/cli.js --win --x64 --dir",
     "dist": "npm run check && node node_modules/electron-builder/cli.js --win nsis --x64 --publish never",
+    "dist:signed": "npm run check && node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.forceCodeSigning=true",
     "desktop:smoke": "node scripts/desktop-smoke.mjs",
     "start:dev": "node scripts/windows-dev.mjs",
     "android:sync": "node scripts/android-command.mjs sync android",
-    "android:build": "node scripts/android-build.mjs"
+    "android:build": "node scripts/android-build.mjs",
+    "android:verify": "node scripts/android-verify.mjs"
   },
   "devDependencies": {
     "@playwright/cli": "0.1.22",
@@ -30,6 +32,7 @@
   "build": {
     "appId": "local.ratertracker.desktop",
     "productName": "Rater & Tracker",
+    "copyright": "Copyright © 2026 TuseCreation",
     "directories": {
       "output": "release",
       "buildResources": "assets"

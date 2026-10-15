@@ -598,3 +598,17 @@ GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14
 检查：`npm run check`55/55及`npm test`55/55通过，素材再生成一致，ICO含7尺寸、Android源图与邮件图标共用PNG；新版APK内512px图标已提取检查。Windows NSIS包203,225,129字节，SHA-256 `B6A793A2C1F0D2057292443D22365BE91A213EAB690D8ADDEE9A59874E0AD09B`；默认工作目录启动未生成报告，复制完整app目录到本机临时目录后隔离smoke通过：`packaged=true`、alpha.20、启动页品牌／背景正常且所有报告布尔项通过。Android release APK 98,130,449字节，SHA-256 `2F532363CB664A5DD8627C09FD9EDD33361F20FCC8DB56BA13F21D819B80C480`；`aapt`确认versionCode 5／alpha.5，v2签名验证通过，证书SHA-256与前版相同（`648b3a169d4b63da50312f44fc09241e8e796a39b781baa60e48a42719c60448`）。`git diff --check`通过。
 
 构建期间受限环境的Gradle缓存锁／系统临时目录和Windows目录执行限制已通过工作区缓存、临时目录及已记录的NSIS卸载器解析方案解决；NSIS依赖文件构建后恢复原样。未安装升级Windows版或在Android设备上验收；真实邮箱送达和云端邮件样式也未覆盖。提交`9c826438d2969539b1fc07594a2605887b56e247`已推送main；附注标签`dual/2026.10.15.5`解引用至同一提交。[GitHub双端预发布](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.5)已创建，`draft=false`／`prerelease=true`；Setup 203,225,129字节、APK 98,130,449字节、SHA清单220字节，GitHub三个附件的size及digest均与本地匹配。仓库PUBLIC，旧标签未动。
+
+## W054 · 2026-10-16 · 签名兼容、正式包验签与TuseCreation作者信息
+
+用户报告Windows SmartScreen、手机安装失败／没有签名，指定作者TuseCreation。接手main为d842ec4且干净；先读交接／日志／版本规范。仅修改main的双端作者／版本、Android Gradle与构建／验签脚本及对应文档；另一worktree不动。Windows升级alpha.21、Android升级alpha.6／code6，规则1.3／JSON1不变。
+
+核验原包：Windows alpha.20 NotSigned，本机两个个人证书库未发现代码签名证书，常用签名环境配置未设；Android alpha.5 v2签名有效，证书组织TuseCreation。Windows作者和版权已改为TuseCreation，EXE／Setup CompanyName回读一致；新增`dist:signed`并实际确认无证书时forceCodeSigning拒绝输出，普通预览包仍NotSigned，故SmartScreen尚未解决。受信任证书／云签名身份和用户手机具体错误信息已向用户询问，尚未收到；没有改系统防护或安装自签根证书，没有购买证书、修改项目许可或对外申请。官方依据与可行路径见[签名与安装排查](docs/应用签名与安装排查.md)。
+
+Android显式启用v1／v2／v3，原密钥／证书保持；公开指纹固定于`apps/android/signing-identity.json`。常规构建缺配置停止且不自动生成替代身份；直接Gradle的preReleaseBuild也依赖强制签名检查。新的`android:verify`调用真实apksigner／aapt，在复制正式APK之前核对三种签名、原证书、正式包名和当前版本，输出无凭证的校验JSON与SHA256。默认使用忽略的本地Gradle缓存和临时目录，并支持SDK／JDK既有环境设置。
+
+验证：工程55项通过；v1用API23限定的JAR验证单独核实，默认API24+核实v2／v3，minSDK仍24。实际构造的未签名APK、错误指纹、旧包不满足新策略、缺失私有配置四种负例被拒绝；直接Gradle缺配置在requireReleaseSigning按预期失败。新建Android17隔离AVD RaterSigningAcceptance／独立ADB5038／私有测试密钥，全程关闭网络、未登录账号；旧alpha.5全新安装成功，5→6覆盖、6同版重装、6全新安装均成功。虚构访客学习3星／11XP在覆盖和重装后保留，全新安装为空。真实设备画面已查看；这证明标准模拟器安装与升级成立，不能证明用户手机问题已消失。
+
+Windows预览包203,308,084字节，SHA-256 `36040d2cc41346eee3c768947ae5385564730ed6ec5071526ae765f9072f7265`；普通临时目录隔离smoke为packaged=true／alpha.21且报告布尔项全部通过。Android APK98,181,202字节，SHA-256 `45c7970027d6c572617acdc753fb5682c47433672c264a566624527e783b2d08`；三方案验证及原证书指纹`648b3a169d4b63da50312f44fc09241e8e796a39b781baa60e48a42719c60448`通过。两端包与报告仅在忽略目录。Windows安装升级、真实手机安装器和真实Windows受信任签名未覆盖；邮件样式仍保持W053未上线状态。
+
+失败及修正：首版验签把默认v1=false误判为缺签；检查到实际JAR签名后改为API23分项验证，首次被挡包未复制发布。初始模拟器因默认ADB密钥不可读未授权，改为本次独立用户目录／密钥／5038服务；AVD名的双CR换行和首次冷启动页面延迟导致验收断言失败，修正解析和等待后重跑通过。Windows沿用离线Electron与内置NSIS卸载器解析的临时兼容方式，finally恢复依赖文件。本轮待提交并推送main，发布新批次`dual/2026.10.16.1`附两包与SHA清单，之后记录远端实际回读。

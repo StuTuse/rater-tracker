@@ -4,7 +4,7 @@
 
 ## 当前已发布版本
 
-Windows桌面`0.1.0-alpha.20`，Android`0.1.0-alpha.5`／VERSION_CODE=5。当前双端安装包Release为[dual/2026.10.15.5](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.5)，本次交接文档源码Release为[dual/2026.10.15.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.6)。安装包Release含Windows Setup、Android APK及SHA-256清单；Windows安装程序未签名，Android包沿用既有签名。
+本轮Windows桌面`0.1.0-alpha.21`、Android`0.1.0-alpha.6`／VERSION_CODE=6，发布批次为`dual/2026.10.16.1`，实际发布结果见WORKLOG。Windows作者元数据为TuseCreation，但仍未签名，SmartScreen尚待受信任证书；Android沿用原证书并强制验签。上一批安装包为[dual/2026.10.15.5](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.5)。
 
 Windows alpha.17安装程序为203,249,318字节，SHA-256`7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140`。它由既有alpha.17验收生成，本次未重跑NSIS安装升级。Android alpha.2正式APK为98,111,149字节，SHA-256`74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711`；签名／版本及范围见[Android alpha.2验收](Android-alpha.2验收记录.md)。构建文件留在本地主目录`release/`，不进入源码Git。
 

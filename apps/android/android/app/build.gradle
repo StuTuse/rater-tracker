@@ -7,7 +7,19 @@ def localSigning = signingFile.exists() ? new groovy.json.JsonSlurper().parse(si
 
 android {
     buildFeatures { buildConfig true }
-    signingConfigs { if (localSigning) { localRelease { storeFile file(localSigning.file); storePassword localSigning.password; keyAlias localSigning.alias; keyPassword localSigning.password } } }
+    signingConfigs {
+        if (localSigning) {
+            localRelease {
+                storeFile file(localSigning.file)
+                storePassword localSigning.password
+                keyAlias localSigning.alias
+                keyPassword localSigning.password
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+            }
+        }
+    }
     namespace = "local.ratertracker.android"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
@@ -52,6 +64,18 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+// Direct Gradle release builds must not silently emit unsigned APKs either.
+tasks.register('requireReleaseSigning') {
+    doLast {
+        if (!localSigning || !localSigning.file || !file(localSigning.file).isFile() || !localSigning.alias || !localSigning.password) {
+            throw new GradleException('Release signing is required. Restore the existing private signing configuration; do not generate a replacement key.')
+        }
+    }
+}
+tasks.configureEach {
+    if (name == 'preReleaseBuild') dependsOn('requireReleaseSigning')
+}
 
 try {
     def servicesJSON = file('google-services.json')

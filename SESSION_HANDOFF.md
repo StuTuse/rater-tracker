@@ -1,12 +1,16 @@
-# 当前交接 · 2026-10-15
+# 当前交接 · 2026-10-16
 
 ## 现行状态
 
-Windows桌面当前为`0.1.0-alpha.20`，Android为`0.1.0-alpha.5`／`VERSION_CODE=5`；结算规则`1.3`、JSON格式`1`。本轮统一了启动页、Windows安装程序与Android的星叶高质量图标，完整检查及边界见W053。`npm run check`／`npm test`各55项通过；Windows Setup 203,225,129字节、SHA-256 `B6A793A2C1F0D2057292443D22365BE91A213EAB690D8ADDEE9A59874E0AD09B`，复制到普通临时目录运行的隔离smoke通过；Android alpha.5 APK 98,130,449字节、SHA-256 `2F532363CB664A5DD8627C09FD9EDD33361F20FCC8DB56BA13F21D819B80C480`，versionCode5及既有证书v2验证通过。Windows安装升级及Android设备未测。双端安装包、SHA清单和预发布已发布至[dual/2026.10.15.5](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.5)，远端size／digest和main／tag均回读匹配提交`9c82643`。
+Windows当前`0.1.0-alpha.21`，Android`0.1.0-alpha.6`／`VERSION_CODE=6`；规则1.3／JSON1。作者统一TuseCreation，Windows CompanyName／版权已核对，但本机无受信任代码签名身份，包仍NotSigned，SmartScreen未解决；`npm run dist:signed`已验证缺证书时拒绝构建。需要用户提供已有证书／云签名服务，或决定合适的外部签名／商店路径，不能以改作者字段或自签根证书冒充解决。
+
+Android增加原证书v1／v2／v3，并在复制正式包前核对签名、原证书指纹、包名和版本；缺配置停止且不自动生成替代密钥。原alpha.5的v2有效，且在新隔离模拟器也能安装，故手机失败根因尚未确认；新alpha.6已通过Android17隔离模拟器的全新安装、5→6覆盖、同版本重装及虚构访客3星／11XP保持。无真实账号／云写入。缺少用户手机机型／系统／具体文件与完整错误，不能扩大为真机问题已解决。完整检查与待办见W054和[签名与安装排查](docs/应用签名与安装排查.md)。
+
+本轮Windows Setup 203,308,084字节，SHA-256 `36040d2cc41346eee3c768947ae5385564730ed6ec5071526ae765f9072f7265`；Android APK 98,181,202字节，SHA-256 `45c7970027d6c572617acdc753fb5682c47433672c264a566624527e783b2d08`。55项工程业务、签名负例／直接Gradle缺配置拒绝、Windows普通临时目录打包smoke通过。安装升级Windows／实际手机／真实Windows签名未覆盖。本轮批次`dual/2026.10.16.1`待推送发布并回读。
 
 本轮邮件验证码样式草稿位于`cloud/email/register-sign-in.html`：淡黄色应用手账底纹、居中新版图标、软件名称、`TuseCreation`与大号验证码。CloudBase `ModifyProvider`后读回`TemplateConfig=null`，计费接口无套餐返回；官方套餐表指示邮件样式需要相应套餐。没有升级或声称线上已生效，见W053及`cloud/README.md`。
 
-本轮应用与附件批次`dual/2026.10.15.5`已发布；为将远端回读结果同步到本交接与日志，文档专用源码批次`dual/2026.10.15.6`随本次更新发布，不重建或重复上传应用包。仓库`StuTuse/rater-tracker`为PUBLIC。此前同步策略及公开状态详见W050—W052。
+上一轮图标应用与附件批次`dual/2026.10.15.5`、收尾源码`dual/2026.10.15.6`已发布；仓库`StuTuse/rater-tracker`为PUBLIC。此前同步策略及公开状态详见W050—W053。
 
 双端源码已集成到`main`并推送GitHub仓库（当时为PRIVATE，当前为PUBLIC）`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 
@@ -14,9 +18,9 @@ Windows桌面当前为`0.1.0-alpha.20`，Android为`0.1.0-alpha.5`／`VERSION_CO
 
 ## 当前工作区
 
-此前Windows开发快捷方式修复见W048；星级动画见W049。本轮只在main负责`assets/app.png`／`.ico`、图标生成脚本、Android drawable图标、邮箱模板草稿及发布文档，不修改另一worktree或同步业务。
+此前Windows开发快捷方式修复见W048；星级动画见W049。本轮只在main负责Android签名配置／构建与验签脚本、双端作者和版本元数据、发布文档；没有修改另一worktree、结算或同步业务。新建的RaterSigningAcceptance AVD、独立5038端口ADB、私有测试密钥与报告均在忽略目录；测试模拟器未登录账号。
 
-本目录为集成`main`。当前发布批次及仓库可见性以W053和本节后续远端回读为准。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
+本目录为集成`main`。当前发布批次及仓库可见性以W054和后续远端回读为准。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 
 此前全项目文档审核已更新README、版本规范、工作区／Android状态、数据契约、CloudBase、徽章清单、归档说明与交接；工作过程见W046，Release创建结果见W047及上述本次回读。保持原有标签与Release，不重复创建同名批次。
 
