@@ -4,6 +4,8 @@
 
 用户最新回复“没有证书，先准备免费开源签名接入方案”。本轮仅负责签名方案／申请草稿及入口、交接与发布文档；已准备[免费开源签名接入方案](docs/免费开源签名接入方案.md)和[SignPath申请草稿](docs/SignPath申请草稿.md)。未申请、添加LICENSE、安装GitHub App、设置签名令牌或启用工作流；Windows仍未签名。下一步先由用户决定开源许可证，并确认接受SignPath Foundation证书发布者（作者仍TuseCreation）；随后完善许可／隐私与人员MFA资料，服务方确认Electron主EXE与NSIS范围后再实现可信CI签名。具体边界见W056。应用版本和.1安装包不变，本次按源码专用批次`dual/2026.10.16.3`发布。
 
+方案提交2dc849b及附注tag已推送；[dual/2026.10.16.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.3)回读draft=false／prerelease=true／无二进制附件，远端main及tag一致，仓库PUBLIC。共享目录另一会话随后提交1a76ace并使用.4，已保留其内容；本签名回读随源码收尾批次`dual/2026.10.16.5`发布，现有安装包仍引用.1。
+
 Windows当前`0.1.0-alpha.21`，Android`0.1.0-alpha.6`／`VERSION_CODE=6`；规则1.3／JSON1。作者统一TuseCreation，Windows CompanyName／版权已核对，但本机无受信任代码签名身份，包仍NotSigned，SmartScreen未解决；`npm run dist:signed`已验证缺证书时拒绝构建。桌面当前开发验收快捷方式也指向未签名Electron，EXE未带Zone.Identifier，本轮未改快捷方式。需要用户提供已有证书／云签名服务，或决定合适的外部签名／商店路径，不能以改作者字段或自签根证书冒充解决。
 
 Android增加原证书v1／v2／v3，并在复制正式包前核对签名、原证书指纹、包名和版本；缺配置停止且不自动生成替代密钥。原alpha.5的v2有效，且在新隔离模拟器也能安装，故手机失败根因尚未确认；新alpha.6已通过Android17隔离模拟器的全新安装、5→6覆盖、同版本重装及虚构访客3星／11XP保持。无真实账号／云写入。缺少用户手机机型／系统／具体文件与完整错误，不能扩大为真机问题已解决。完整检查与待办见W054和[签名与安装排查](docs/应用签名与安装排查.md)。

@@ -6,7 +6,7 @@
 
 当前Windows桌面`0.1.0-alpha.21`、Android`0.1.0-alpha.6`／VERSION_CODE=6，安装包批次[dual/2026.10.16.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.16.1)已发布并回读附件；本次文档收尾源码为[dual/2026.10.16.2](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.16.2)。Windows作者元数据为TuseCreation，但仍未签名，SmartScreen尚待受信任证书；Android沿用原证书并强制验签。
 
-免费开源签名准备文档批次为`dual/2026.10.16.3`，方案／申请草稿见[接入方案](免费开源签名接入方案.md)；服务尚未接入，两端版本及.1安装包不变。发布实际状态以W056和远端回读为准。
+免费开源签名准备文档批次[dual/2026.10.16.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.3)已回读为非Draft prerelease，源码提交2dc849b，应用包不重建；回读记录随源码收尾批次`dual/2026.10.16.5`发布（.4由共享目录另一会话使用）。方案／申请草稿见[接入方案](免费开源签名接入方案.md)；服务尚未接入，两端版本及.1安装包不变。详情见W056。
 
 Windows alpha.17安装程序为203,249,318字节，SHA-256`7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140`。它由既有alpha.17验收生成，本次未重跑NSIS安装升级。Android alpha.2正式APK为98,111,149字节，SHA-256`74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711`；签名／版本及范围见[Android alpha.2验收](Android-alpha.2验收记录.md)。构建文件留在本地主目录`release/`，不进入源码Git。
 
