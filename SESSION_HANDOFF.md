@@ -2,11 +2,11 @@
 
 ## 现行状态
 
-Windows桌面当前为`0.1.0-alpha.20`，Android为`0.1.0-alpha.5`／`VERSION_CODE=5`；结算规则`1.3`、JSON格式`1`。本轮统一了启动页、Windows安装程序与Android的星叶高质量图标，完整检查及边界见W053。`npm run check`／`npm test`各55项通过；Windows Setup 203,225,129字节、SHA-256 `B6A793A2C1F0D2057292443D22365BE91A213EAB690D8ADDEE9A59874E0AD09B`，复制到普通临时目录运行的隔离smoke通过；Android alpha.5 APK 98,130,449字节、SHA-256 `2F532363CB664A5DD8627C09FD9EDD33361F20FCC8DB56BA13F21D819B80C480`，versionCode5及既有证书v2验证通过。Windows安装升级及Android设备未测。
+Windows桌面当前为`0.1.0-alpha.20`，Android为`0.1.0-alpha.5`／`VERSION_CODE=5`；结算规则`1.3`、JSON格式`1`。本轮统一了启动页、Windows安装程序与Android的星叶高质量图标，完整检查及边界见W053。`npm run check`／`npm test`各55项通过；Windows Setup 203,225,129字节、SHA-256 `B6A793A2C1F0D2057292443D22365BE91A213EAB690D8ADDEE9A59874E0AD09B`，复制到普通临时目录运行的隔离smoke通过；Android alpha.5 APK 98,130,449字节、SHA-256 `2F532363CB664A5DD8627C09FD9EDD33361F20FCC8DB56BA13F21D819B80C480`，versionCode5及既有证书v2验证通过。Windows安装升级及Android设备未测。双端安装包、SHA清单和预发布已发布至[dual/2026.10.15.5](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.5)，远端size／digest和main／tag均回读匹配提交`9c82643`。
 
 本轮邮件验证码样式草稿位于`cloud/email/register-sign-in.html`：淡黄色应用手账底纹、居中新版图标、软件名称、`TuseCreation`与大号验证码。CloudBase `ModifyProvider`后读回`TemplateConfig=null`，计费接口无套餐返回；官方套餐表指示邮件样式需要相应套餐。没有升级或声称线上已生效，见W053及`cloud/README.md`。
 
-本轮提交源码及双端附件待推送，发布批次为`dual/2026.10.15.5`；发布结果完成后在此更新远端tag／Release回读信息。仓库`StuTuse/rater-tracker`为PUBLIC。此前同步策略及公开状态详见W050—W052。
+本轮应用与附件批次`dual/2026.10.15.5`已发布；为将远端回读结果同步到本交接与日志，文档专用源码批次`dual/2026.10.15.6`随本次更新发布，不重建或重复上传应用包。仓库`StuTuse/rater-tracker`为PUBLIC。此前同步策略及公开状态详见W050—W052。
 
 双端源码已集成到`main`并推送GitHub仓库（当时为PRIVATE，当前为PUBLIC）`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 
