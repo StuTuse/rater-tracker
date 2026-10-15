@@ -160,7 +160,7 @@ CloudBase 部署、账号配置和验收见[cloud/README](cloud/README.md)。Win
 
 [交接](SESSION_HANDOFF.md) · [工作日志](WORKLOG.md) · [开发约定](AGENTS.md) · [正式方案 v1.25](最终方案.md) · [视觉与动效规范 v1.19](视觉与动效规范.md) · [徽章清单](徽章设计清单.md) · [版本管理规范](版本管理规范.md) · [VERSION](VERSION) · [CHANGELOG](CHANGELOG.md)。旧规划／候选仅作历史参考。
 
-当前双平台版本为Windows `0.1.0-alpha.19`与Android `0.1.0-alpha.4`／`VERSION_CODE=4`，规则1.3、JSON格式1。登录账号启动先后台读取云端并按修改时间自动保留较新快照；成功本机保存后同步，断网待网络恢复补传。主分支为`main`。GitHub仓库[StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)保持private；源码、文档、锁文件与源素材入库，安装包、个人数据、备份、私有配置及签名材料不入源码Git。
+当前双平台版本为Windows `0.1.0-alpha.19`与Android `0.1.0-alpha.4`／`VERSION_CODE=4`，规则1.3、JSON格式1。登录账号启动先后台读取云端并按修改时间自动保留较新快照；成功本机保存后同步，断网待网络恢复补传。主分支为`main`。GitHub仓库[StuTuse/rater-tracker](https://github.com/StuTuse/rater-tracker)按用户2026-10-15要求设为公开；源码、文档、锁文件与源素材入库，安装包、个人数据、备份、私有配置及签名材料不入源码Git。
 
 单仓库双应用工程结构见[双端工程与工作区说明](docs/双端工程与工作区隔离草案.md)，工作目录登记见[工作区隔离登记](docs/工作区隔离登记.md)。Android签名APK、真实邮箱注册、移动排版及按压反馈的模拟器检查见[Android验收记录](docs/Android验收记录.md)和[Android alpha.2验收](docs/Android-alpha.2验收记录.md)。
 

@@ -580,3 +580,11 @@ GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14
 修复提交07485af487b61981b4db9f4921f837dfbedfa658已推送main，附注标签dual/2026.10.15.1已推送并指向该提交。Release https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.15.1 已创建为prerelease且draft=false；回读仓库PRIVATE。Windows203260545字节、Android98112165字节，远端sha256 digest与W050及本地清单完全一致；221字节清单digest为08f62a5493b22cb439c7224a1d57932d4a08a8ecf07a81f10549ec6e7334f0d1，与本地相同。远端main及tag解引用匹配07485af；没有改旧标签或其他worktree。
 
 已关闭隔离Playwright会话和本机预览服务。收尾只更新交接、验收发布结果及版本规范当前基线，不改变应用版本／包／检查边界；按持续发布规则推送收尾源码并发布文档prerelease，引用上述安装包，不重建或重复上传。
+
+## W052 · 2026-10-15 · GitHub仓库按用户要求改为公开
+
+用户明确要求将`StuTuse/rater-tracker`从私有改为公开。变更前检查全部42个可达Git提交：常见访问令牌、密钥、密码、邮箱／手机号／身份证模式未命中；签名材料、数据库、备份和安装包风险文件名未命中。该扫描是已列模式检查，不能证明任意格式隐私信息绝对不存在；当前公开仓库会向任何人展示全部可达提交历史、源码、标签和Release。
+
+已通过GitHub CLI将可见性改为PUBLIC。GitHub元数据回读`isPrivate=false`／`visibility=PUBLIC`成功；无凭据的HTTPS `git ls-remote`可读取main，HEAD为`a7a0318994826e4924b6db82e6c1fe8f2b0bf4f6`。同步更新AGENTS、版本管理规范、README、交接、双平台Release流程及工作区登记；应用源码、平台版本与安装包不变。相称检查为历史模式扫描、文档差异及链接／格式检查；真实用户数据语义扫描未覆盖。
+
+文档修改为源代码专用dual prerelease；预计批次dual/2026.10.15.3，具体推送、标签、Release及公开状态回读结果在收尾记录中补全。
