@@ -2,11 +2,11 @@
 
 ## 现行状态
 
-Windows当前`0.1.0-alpha.21`，Android`0.1.0-alpha.6`／`VERSION_CODE=6`；规则1.3／JSON1。作者统一TuseCreation，Windows CompanyName／版权已核对，但本机无受信任代码签名身份，包仍NotSigned，SmartScreen未解决；`npm run dist:signed`已验证缺证书时拒绝构建。需要用户提供已有证书／云签名服务，或决定合适的外部签名／商店路径，不能以改作者字段或自签根证书冒充解决。
+Windows当前`0.1.0-alpha.21`，Android`0.1.0-alpha.6`／`VERSION_CODE=6`；规则1.3／JSON1。作者统一TuseCreation，Windows CompanyName／版权已核对，但本机无受信任代码签名身份，包仍NotSigned，SmartScreen未解决；`npm run dist:signed`已验证缺证书时拒绝构建。桌面当前开发验收快捷方式也指向未签名Electron，EXE未带Zone.Identifier，本轮未改快捷方式。需要用户提供已有证书／云签名服务，或决定合适的外部签名／商店路径，不能以改作者字段或自签根证书冒充解决。
 
 Android增加原证书v1／v2／v3，并在复制正式包前核对签名、原证书指纹、包名和版本；缺配置停止且不自动生成替代密钥。原alpha.5的v2有效，且在新隔离模拟器也能安装，故手机失败根因尚未确认；新alpha.6已通过Android17隔离模拟器的全新安装、5→6覆盖、同版本重装及虚构访客3星／11XP保持。无真实账号／云写入。缺少用户手机机型／系统／具体文件与完整错误，不能扩大为真机问题已解决。完整检查与待办见W054和[签名与安装排查](docs/应用签名与安装排查.md)。
 
-本轮Windows Setup 203,308,084字节，SHA-256 `36040d2cc41346eee3c768947ae5385564730ed6ec5071526ae765f9072f7265`；Android APK 98,181,202字节，SHA-256 `45c7970027d6c572617acdc753fb5682c47433672c264a566624527e783b2d08`。55项工程业务、签名负例／直接Gradle缺配置拒绝、Windows普通临时目录打包smoke通过。安装升级Windows／实际手机／真实Windows签名未覆盖。本轮批次`dual/2026.10.16.1`待推送发布并回读。
+本轮Windows Setup 203,308,084字节，SHA-256 `36040d2cc41346eee3c768947ae5385564730ed6ec5071526ae765f9072f7265`；Android APK 98,181,202字节，SHA-256 `45c7970027d6c572617acdc753fb5682c47433672c264a566624527e783b2d08`。55项工程业务、签名负例／直接Gradle缺配置拒绝、Windows普通临时目录打包smoke通过。安装升级Windows／实际手机／真实Windows签名未覆盖。[dual/2026.10.16.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.16.1)已发布，源码提交ae62e3a；main／tag及三个附件大小／digest回读一致，仓库PUBLIC。回读记录随文档专用批次`dual/2026.10.16.2`发布，应用包继续引用.1，不重建。
 
 本轮邮件验证码样式草稿位于`cloud/email/register-sign-in.html`：淡黄色应用手账底纹、居中新版图标、软件名称、`TuseCreation`与大号验证码。CloudBase `ModifyProvider`后读回`TemplateConfig=null`，计费接口无套餐返回；官方套餐表指示邮件样式需要相应套餐。没有升级或声称线上已生效，见W053及`cloud/README.md`。
 
@@ -18,7 +18,7 @@ Android增加原证书v1／v2／v3，并在复制正式包前核对签名、原�
 
 ## 当前工作区
 
-此前Windows开发快捷方式修复见W048；星级动画见W049。本轮只在main负责Android签名配置／构建与验签脚本、双端作者和版本元数据、发布文档；没有修改另一worktree、结算或同步业务。新建的RaterSigningAcceptance AVD、独立5038端口ADB、私有测试密钥与报告均在忽略目录；测试模拟器未登录账号。
+此前Windows开发快捷方式修复见W048；星级动画见W049。本轮只在main负责Android签名配置／构建与验签脚本、双端作者和版本元数据、发布文档；没有修改另一worktree、结算或同步业务。新建的RaterSigningAcceptance AVD、独立5038端口ADB、私有测试密钥与报告均在忽略目录；测试模拟器未登录账号，模拟器与专用ADB已关闭，临时Windows副本已清理。
 
 本目录为集成`main`。当前发布批次及仓库可见性以W054和后续远端回读为准。Windows与Android开发worktree的登记见[工作区隔离登记](docs/工作区隔离登记.md)；本会话无权覆盖其他worktree中的改动。
 
