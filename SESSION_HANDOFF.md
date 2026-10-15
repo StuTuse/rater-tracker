@@ -2,7 +2,7 @@
 
 ## 现行状态
 
-Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_CODE=4`；产品方案`v1.25`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。用户要求启动立即后台读取云端并保留修改时间较新一端。已改为pull先行，账号保存附modifiedAt；云端较新自动下载，本机较新自动上传，云版本变化重新核对。旧快照无时间按版本兼容；记录不合并、不重算奖励。55项检查、模拟账号真实页面3项、新Windows包普通临时目录隔离smoke、Android构建／原证书v2验证通过。Android设备现场、真实云账号和安装升级未覆盖；详见W050与[同步验收](docs/双端同步时间策略验收.md)。修复提交07485af已推送main；[dual/2026.10.15.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)已发布为prerelease，发布时仓库PRIVATE，附件大小／SHA-256及远端标签指向均回读一致，见W051。仓库于2026-10-15按用户明确要求改为PUBLIC，扫描42个可达提交未发现常见凭证／个人数据模式或风险文件名，远端可见性及匿名读取验证见W052。
+Windows 桌面当前为`0.1.0-alpha.19`，Android 为`0.1.0-alpha.4`／`VERSION_CODE=4`；产品方案`v1.25`、视觉规范`v1.19`、结算规则`1.3`、JSON格式`1`。用户要求启动立即后台读取云端并保留修改时间较新一端。已改为pull先行，账号保存附modifiedAt；云端较新自动下载，本机较新自动上传，云版本变化重新核对。旧快照无时间按版本兼容；记录不合并、不重算奖励。55项检查、模拟账号真实页面3项、新Windows包普通临时目录隔离smoke、Android构建／原证书v2验证通过。Android设备现场、真实云账号和安装升级未覆盖；详见W050与[同步验收](docs/双端同步时间策略验收.md)。修复提交07485af已推送main；[dual/2026.10.15.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.1)已发布为prerelease，发布时仓库PRIVATE，附件大小／SHA-256及远端标签指向均回读一致，见W051。仓库于2026-10-15按用户明确要求改为PUBLIC；[dual/2026.10.15.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.3)源码预发布已创建，扫描与公开状态验证见W052。
 
 双端源码已集成到`main`并推送GitHub仓库（当时为PRIVATE，当前为PUBLIC）`StuTuse/rater-tracker`。首个双平台Release为[`dual/2026.10.14.1`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.14.1)，含Windows alpha.17安装包、Android alpha.2签名APK和SHA-256清单；远端附件校验已完成。Windows包未签名，本轮未验证Windows安装／升级；不要把Android模拟器验收扩大为实体手机、其他系统或性能结论。
 

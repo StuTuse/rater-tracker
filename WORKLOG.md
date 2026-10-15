@@ -587,4 +587,4 @@ GitHub发布结果：提交`68becbe`已推送main，附注标签`dual/2026.10.14
 
 已通过GitHub CLI将可见性改为PUBLIC。GitHub元数据回读`isPrivate=false`／`visibility=PUBLIC`成功；无凭据的HTTPS `git ls-remote`可读取main，HEAD为`a7a0318994826e4924b6db82e6c1fe8f2b0bf4f6`。同步更新AGENTS、版本管理规范、README、交接、双平台Release流程及工作区登记；应用源码、平台版本与安装包不变。相称检查为历史模式扫描、文档差异及链接／格式检查；真实用户数据语义扫描未覆盖。
 
-文档修改为源代码专用dual prerelease；预计批次dual/2026.10.15.3，具体推送、标签、Release及公开状态回读结果在收尾记录中补全。
+文档修改作为源代码专用双平台prerelease发布。提交`eb5a330c31738ebf0140a550997c3f50cb94c5db`已推送`main`；附注标签`dual/2026.10.15.3`解引用至该提交，Release已创建为`draft=false`／`prerelease=true`，说明列明Windows alpha.19与Android alpha.4，未重复上传安装包。GitHub回读`visibility=PUBLIC`／`isPrivate=false`；无凭据HTTPS读取的远端`main`与标签均指向`eb5a330`。Release链接：[dual/2026.10.15.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.15.3)。
