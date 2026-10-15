@@ -8,6 +8,8 @@
 
 下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.16.1)并选择`Rater-Tracker-0.1.0-alpha.21-Setup.exe`。双击安装，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。当前Windows预览包未签名，SmartScreen仍需受信任签名身份解决；Android签名APK也在同一Release附件中，详见[签名与安装排查](docs/应用签名与安装排查.md)。
 
+已按用户要求准备[免费开源签名接入方案](docs/免费开源签名接入方案.md)与[SignPath申请草稿](docs/SignPath申请草稿.md)。尚未申请或启用；需先决定开源许可证，确认Foundation证书发布者及服务方审核条件。现有安装包保持原状。
+
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
 3. 为独立成果新建任务，在详情里记录推进、阶段和最终交付；归档、恢复、隐藏、延期、撤销和删除各自处理。
