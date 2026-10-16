@@ -8,7 +8,7 @@
 
 下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.16.1)并选择`Rater-Tracker-0.1.0-alpha.21-Setup.exe`。双击安装，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。当前Windows预览包未签名，SmartScreen仍需受信任签名身份解决；Android签名APK也在同一Release附件中，详见[签名与安装排查](docs/应用签名与安装排查.md)。
 
-已按用户要求准备[免费开源签名接入方案](docs/免费开源签名接入方案.md)与[SignPath申请草稿](docs/SignPath申请草稿.md)。尚未申请或启用；需先决定开源许可证，确认Foundation证书发布者及服务方审核条件。现有安装包保持原状。
+自有贡献采用[MIT许可](LICENSE)，第三方保留[各自许可](docs/THIRD_PARTY_NOTICES.md)。用户已接受SignPath Foundation证书发布者，作者仍TuseCreation。见[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy／隐私说明](docs/PRIVACY.md)、[接入方案](docs/免费开源签名接入方案.md)和[申请资料](docs/SignPath申请草稿.md)。服务尚未申请／获批，现有安装包保持原状。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
 2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
@@ -47,6 +47,8 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 ```
 
 首次工程安装／打包需要联网下载开发依赖、Electron 与 NSIS；安装好的应用离线运行。脚本直接由 Node 启动工具入口，适配本工作区路径中的空格和 `&`。
+
+GitHub Actions提供仅主分支手动触发的[Windows unsigned signing sample](.github/workflows/windows-signing-sample.yml)，以GitHub托管Windows runner构建未签名申请样包、校验摘要和来源报告；不接触签名凭证、不自动发布Release。通过Actions页Run workflow或`gh workflow run windows-signing-sample.yml --repo StuTuse/rater-tracker --ref main`发起；实际运行结果见WORKLOG。它不代表正式签名已接入。
 
 若重复打包等待下载，先确认 node_modules/electron/dist/version 为 44.7.0，可使用本机正式运行时：`node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist`。本轮最终安装包采用此命令；仍需先通过 npm run check。
 

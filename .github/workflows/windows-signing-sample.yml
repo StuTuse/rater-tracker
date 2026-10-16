@@ -1,0 +1,77 @@
+name: Windows unsigned signing sample
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-signing-sample
+  cancel-in-progress: false
+
+jobs:
+  sample:
+    if: github.repository == 'StuTuse/rater-tracker' && github.ref == 'refs/heads/main'
+    runs-on: windows-2025
+    timeout-minutes: 30
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout fixed source commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check and build unsigned evaluation sample
+        run: npm run dist -- --config.directories.output=output/signpath-sample
+      - name: Record sample origin and signatures
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (Get-Content -LiteralPath VERSION -Raw).Trim()
+          $sampleRoot = Join-Path $PWD 'output/signpath-sample'
+          $installer = Join-Path $sampleRoot "Rater-Tracker-$version-Setup.exe"
+          $application = Join-Path $sampleRoot 'win-unpacked/Rater & Tracker.exe'
+          $files = @($installer, $application)
+          $records = foreach ($file in $files) {
+            $signature = Get-AuthenticodeSignature -LiteralPath $file
+            if ($signature.Status -ne 'NotSigned') { throw "Expected an unsigned evaluation sample: $file" }
+            $item = Get-Item -LiteralPath $file
+            if ($item.VersionInfo.CompanyName -ne 'TuseCreation') { throw 'Unexpected company metadata' }
+            [ordered]@{
+              file = [IO.Path]::GetRelativePath($sampleRoot, $file)
+              bytes = $item.Length
+              sha256 = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+              signatureStatus = [string]$signature.Status
+              productName = $item.VersionInfo.ProductName
+              productVersion = $item.VersionInfo.ProductVersion
+              companyName = $item.VersionInfo.CompanyName
+            }
+          }
+          [ordered]@{
+            purpose = 'UNSIGNED evaluation sample; not a signed release'
+            sourceCommit = $env:GITHUB_SHA
+            runId = $env:GITHUB_RUN_ID
+            runUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            windowsVersion = $version
+            files = @($records)
+          } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $sampleRoot 'sample-origin.json') -Encoding utf8
+          Copy-Item -LiteralPath LICENSE -Destination (Join-Path $sampleRoot 'SOURCE-LICENSE.txt')
+      - name: Upload evaluation installer and origin report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unsigned-windows-signing-sample-${{ github.run_id }}
+          path: |
+            output/signpath-sample/*-Setup.exe
+            output/signpath-sample/sample-origin.json
+            output/signpath-sample/SOURCE-LICENSE.txt
+          if-no-files-found: error
+          retention-days: 14

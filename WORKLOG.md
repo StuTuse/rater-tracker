@@ -638,3 +638,15 @@ GitHub普通受限网络访问本机代理被拒绝，按已授权范围提升�
 用户明确授权清除目前云端除管理员外的所有账号。本轮只负责云端账号管理及本条记录，不修改应用、同步快照表或其他工作区。删除前完整列表为5个账号（limit=100、offset=0、total=5），administrator为internalUser且说明为“内置超级管理员”，其余4个为externalUser。角色查询接口不支持当前PostgreSQL环境，改以账号返回的内置管理员类型、名称和说明核对保留对象。
 
 通过已登录CloudBase CLI在既定上海环境删除4个明确UID，返回SuccessCount=4、FailedCount=0；随后重新列举，total=1，仅保留ACTIVE的administrator。没有执行数据库快照／回执删除，也未触碰本地应用数据，不将账号删除描述为关联业务数据擦除。账号UID、邮箱、凭证未写入本条公开记录。应用版本和安装包不变；本次仅发布操作记录源码，引用dual/2026.10.16.1双端安装包。
+
+## W057 · 2026-10-16 · MIT许可落实与签名申请前置资料
+
+用户对MIT与Foundation证书发布者两项回复“接受”，并选择亲自在SignPath表单填写姓名／邮箱；MFA问题尚未回复。接手main=8b5c066且干净；读取交接、日志、项目约定和签名方案。本轮负责根LICENSE、申请／许可／隐私／签名政策文档及手动Windows样包工作流，不改应用代码、平台版本或另一worktree。
+
+按授权添加Copyright (c) 2026 TuseCreation的标准MIT LICENSE；第三方许可保持。新增Code signing policy、按实际账号／存储／同步实现编写的隐私说明、直接组件初步许可清单；如实注明安装披露／完整通知审计／私密联系入口和自助云数据删除仍未完成。更新README、AGENTS、版本规范、方案、申请草稿、签名排查与交接，后续不重复询问已接受的许可和证书主体。
+
+浏览器实际打开SignPath嵌入表单，确认必填姓名／邮箱、项目信誉和构建系统等字段，以及服务条件／个人资料处理同意项；只预填公开项目名、仓库、主页、简介，未填姓名邮箱、勾选同意、发送申请或订阅营销。最初AX setValue使React表单重复文本，已用可见DOM定位的fill修正并回读逐项一致；首次浏览器初始化超时后第二次成功。
+
+新增windows-signing-sample.yml：仅主分支手动触发、GitHub托管Windows2025、固定Action提交、只读contents、无凭证／签名／发布步骤；从锁文件安装，工程检查后构建未签名Setup，核对主EXE和Setup的NotSigned与TuseCreation，产出哈希／来源报告／源码LICENSE附件。样包CI不等于生产签名，不覆盖已发布alpha.21安装包。已核对官方Action tag实际SHA、解析YAML和内嵌PowerShell、检查74处本地链接、git diff --check及双端版本保持；准备推送后实际运行CI，结果后续追加。
+
+正式签名仍待服务资格／范围审核与账户配置；没有安装GitHub App、创建SignPath账户、配置签名令牌、改证书或重签Android。用户业务数据、凭证、姓名邮箱未入库。后续由用户完成个人字段及服务条款／资料处理同意，先如实确认前置条件再提交，不能用本次许可变更声称SmartScreen已解决。

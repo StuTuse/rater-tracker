@@ -2,7 +2,9 @@
 
 ## 现行状态
 
-用户最新回复“没有证书，先准备免费开源签名接入方案”。本轮仅负责签名方案／申请草稿及入口、交接与发布文档；已准备[免费开源签名接入方案](docs/免费开源签名接入方案.md)和[SignPath申请草稿](docs/SignPath申请草稿.md)。未申请、添加LICENSE、安装GitHub App、设置签名令牌或启用工作流；Windows仍未签名。下一步先由用户决定开源许可证，并确认接受SignPath Foundation证书发布者（作者仍TuseCreation）；随后完善许可／隐私与人员MFA资料，服务方确认Electron主EXE与NSIS范围后再实现可信CI签名。具体边界见W056。应用版本和.1安装包不变，本次按源码专用批次`dual/2026.10.16.3`发布。
+用户已回复“接受”，同意MIT许可与SignPath Foundation证书发布者，作者仍TuseCreation；随后选择亲自填写申请表的姓名和邮箱。不要重复询问这两项许可／身份决定，也不从本机历史资料推断姓名邮箱。新增根LICENSE、[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy](docs/PRIVACY.md)和[第三方许可初步清单](docs/THIRD_PARTY_NOTICES.md)，更新[接入方案](docs/免费开源签名接入方案.md)与[申请资料](docs/SignPath申请草稿.md)。本轮负责上述文档及手动[Windows未签名样包工作流](.github/workflows/windows-signing-sample.yml)，不改应用代码／版本或其他worktree。样包CI实际运行结果见W057，不等于正式签名流水线。
+
+SignPath申请表已在浏览器打开并预填部分公开项目资料；用户自行处理姓名、邮箱及服务同意／提交。尚未发送申请、安装GitHub App或设置签名令牌；Windows仍未签名。MFA问题未获回复；完整许可审计、安装披露／选项和Electron／NSIS签名范围需继续完成，不能把源码隐私文件视为安装器合规验收。Windowsalpha.21／Androidalpha.6及.1Release包保持；本轮发布源码／工程准备批次，不替换二进制。
 
 方案提交2dc849b及附注tag已推送；[dual/2026.10.16.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.3)回读draft=false／prerelease=true／无二进制附件，远端main及tag一致，仓库PUBLIC。共享目录另一会话随后提交1a76ace并使用.4，已保留其内容；本签名回读随源码收尾批次`dual/2026.10.16.5`发布，现有安装包仍引用.1。
 
