@@ -4,6 +4,8 @@
 
 用户已明确同意为当前GitHub CLI追加workflow权限，并启用／运行已审阅的未签名申请样包CI。本轮负责将模板恢复为`.github/workflows/windows-signing-sample.yml`及对应文档／交接，不改应用版本、现有Release包或其他worktree。授权和CI实际结果见W058；SignPath协议／个人资料及提交仍由用户处理，本授权不包含SignPath令牌或生产签名。
 
+GitHub权限回读已包含workflow，账号StuTuse；两次CI成功。最终[38844270607](https://github.com/StuTuse/rater-tracker/actions/runs/38844270607)构建fd8e6e9，55/55、NSIS、NotSigned／TuseCreation和附件上传通过；新增独立小报告，完整ZIP摘要／来源／MIT许可核对通过。详情见[样包CI验收](docs/Windows签名申请样包CI验收.md)，附件至2026-10-30有效。完整大包本地下载取消且残留清理，未独立本地复算EXE或安装验收；不扩大检查结论。本轮源码批次dual/2026.10.16.8，应用包仍引用.1。
+
 用户已接受MIT许可与SignPath Foundation证书发布者，作者仍TuseCreation；姓名和邮箱由用户亲自在申请表填写，不从本机历史资料推断。已有根LICENSE、[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy](docs/PRIVACY.md)和[第三方许可初步清单](docs/THIRD_PARTY_NOTICES.md)，以及[接入方案](docs/免费开源签名接入方案.md)与[申请资料](docs/SignPath申请草稿.md)。当前[Windows未签名样包工作流](.github/workflows/windows-signing-sample.yml)只生成评估样包，不是正式签名流水线。GitHub CLI已按本次用户同意完成授权，scope回读包含workflow，账号StuTuse；CI实际结果见W058。
 
 SignPath申请表已在浏览器打开并预填部分公开项目资料；用户自行处理姓名、邮箱及服务同意／提交。尚未发送申请、安装GitHub App或设置签名令牌；Windows仍未签名。MFA问题未获回复；完整许可审计、安装披露／选项和Electron／NSIS签名范围需继续完成，不能把源码隐私文件视为安装器合规验收。Windowsalpha.21／Androidalpha.6及.1Release包保持；本轮发布源码／工程准备批次，不替换二进制。

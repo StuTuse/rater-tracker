@@ -50,6 +50,8 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 
 已启用[Windows unsigned signing sample](.github/workflows/windows-signing-sample.yml)：仅主分支手动触发，以GitHub托管Windows runner构建未签名申请样包、摘要和来源报告，不接触签名凭证、不自动发布Release。[首次CI](https://github.com/StuTuse/rater-tracker/actions/runs/38843223021)已成功，55项工程业务检查通过；样包保存在该运行的artifact中，有效期至2026-10-30。可在Actions页手动发起，或执行`gh workflow run windows-signing-sample.yml --repo StuTuse/rater-tracker --ref main`。作者／签名及核验范围见W058；该流程不代表正式签名已接入。
 
+[最终CI与附件](https://github.com/StuTuse/rater-tracker/actions/runs/38844270607)已包含独立的小型校验报告，完整下载后的ZIP摘要、来源／作者／未签名状态及MIT许可核对通过；详细记录见[样包CI验收](docs/Windows签名申请样包CI验收.md)。现有双端Release安装包不替换。
+
 若重复打包等待下载，先确认 node_modules/electron/dist/version 为 44.7.0，可使用本机正式运行时：`node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist`。本轮最终安装包采用此命令；仍需先通过 npm run check。
 
 检查打包应用与安装流程：

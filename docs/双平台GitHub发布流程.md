@@ -10,6 +10,8 @@
 
 用户接受MIT／Foundation证书身份后的[dual/2026.10.16.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.6)已回读为非Draft prerelease，源码0c19bb5，GitHub识别MIT。工作流因当前凭据缺少workflow权限未启用，只提供静态模板；签名服务尚未申请。回读随.16.7收尾源码发布，两端包继续引用.1，版本不变，详见W057及[Code signing policy](CODE_SIGNING_POLICY.md)。
 
+上述workflow权限限制已在W058按用户明确授权解决，手动样包CI两次成功；[最终运行](https://github.com/StuTuse/rater-tracker/actions/runs/38844270607)含大包和独立校验报告。源码／工程批次dual/2026.10.16.8不替换双端Release安装包，CI样包不是正式签名交付，详见[验收记录](Windows签名申请样包CI验收.md)。
+
 Windows alpha.17安装程序为203,249,318字节，SHA-256`7BAD8D524600EE15B4495142601A7D94A9A9E66C3C02860D8364FFA27AE24140`。它由既有alpha.17验收生成，本次未重跑NSIS安装升级。Android alpha.2正式APK为98,111,149字节，SHA-256`74CC4B5D0D8E87249900A91A8F78527DDA28DD877A1B720DCCB9200C25725711`；签名／版本及范围见[Android alpha.2验收](Android-alpha.2验收记录.md)。构建文件留在本地主目录`release/`，不进入源码Git。
 
 ## 后续每次改动
