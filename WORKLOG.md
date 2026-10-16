@@ -658,3 +658,11 @@ CI启用受阻：本地提交8e7df65后推送被GitHub明确拒绝，当前OAuth
 浏览器补填隐私说明URL后超时，重新只读页面确认该URL已填、基础公开资料保持；用户同时自行填写个人字段。本会话没有操作个人字段或服务同意、没有点击Submit。下载URL／信誉资料的后续补填和截图／页面保留调用连续超时，不能声称它们完成；所需公开链接和说明已保存在申请资料／Release，需在表单按实际状态补齐。未提交申请、无审批结果，CI权限、MFA和其他申请前置项继续保持未完成。
 
 最后单独重新绑定原申请tab并执行markHandoff成功，保留用户已填写状态供后续继续；不刷新或清空页面。截图仍未成功，无截图验收结论。
+
+## W058 · 2026-10-16 · GitHub workflow权限授权与未签名样包CI
+
+用户明确回复“同意”，授权为当前GitHub CLI补充workflow权限，以启用并运行已审阅样包流程。接手main=4a92a27且干净；读取交接、最近日志、模板与发布规范。本轮负责工作流从静态模板恢复、相关说明与交接，不改变应用代码／版本、既有双端安装包、Android签名或其他worktree。
+
+通过gh auth refresh --hostname github.com --scopes workflow发起GitHub官方设备授权，用户在页面完成确认；CLI返回Authentication complete，随后仅回读非秘密字段确认账号StuTuse、active=true、scopes为gist/read:org/repo/workflow。未把访问令牌、设备授权码或本机凭据写入源码／日志。仓库PUBLIC，远端main仍4a92a27。
+
+将已审阅模板移入.github/workflows/windows-signing-sample.yml；仅主分支手动触发、GitHub托管Windows2025、固定Actions提交、contents只读，不使用签名令牌或自动发布Release。更新AGENTS记录本次权限授权、README命令、签名政策／申请资料与交接；SignPath协议及个人资料填写／提交仍由用户处理，本轮不操作。推送后将实际执行CI并记录结果；该样包仍应NotSigned，不是SmartScreen已解决或生产签名已接入。

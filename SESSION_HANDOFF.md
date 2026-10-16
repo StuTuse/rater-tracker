@@ -2,11 +2,13 @@
 
 ## 现行状态
 
-用户已回复“接受”，同意MIT许可与SignPath Foundation证书发布者，作者仍TuseCreation；随后选择亲自填写申请表的姓名和邮箱。不要重复询问这两项许可／身份决定，也不从本机历史资料推断姓名邮箱。新增根LICENSE、[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy](docs/PRIVACY.md)和[第三方许可初步清单](docs/THIRD_PARTY_NOTICES.md)，更新[接入方案](docs/免费开源签名接入方案.md)与[申请资料](docs/SignPath申请草稿.md)。本轮负责上述文档及手动[Windows未签名样包模板](docs/signing/windows-signing-sample.yml.example)，不改应用代码／版本或其他worktree。GitHub拒绝启用工作流的推送（当前凭据无workflow权限），CI未运行，模板仅保留docs中；后续取得权限后再启用，不等于正式签名流水线。
+用户已明确同意为当前GitHub CLI追加workflow权限，并启用／运行已审阅的未签名申请样包CI。本轮负责将模板恢复为`.github/workflows/windows-signing-sample.yml`及对应文档／交接，不改应用版本、现有Release包或其他worktree。授权和CI实际结果见W058；SignPath协议／个人资料及提交仍由用户处理，本授权不包含SignPath令牌或生产签名。
+
+用户已接受MIT许可与SignPath Foundation证书发布者，作者仍TuseCreation；姓名和邮箱由用户亲自在申请表填写，不从本机历史资料推断。已有根LICENSE、[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy](docs/PRIVACY.md)和[第三方许可初步清单](docs/THIRD_PARTY_NOTICES.md)，以及[接入方案](docs/免费开源签名接入方案.md)与[申请资料](docs/SignPath申请草稿.md)。当前[Windows未签名样包工作流](.github/workflows/windows-signing-sample.yml)只生成评估样包，不是正式签名流水线。GitHub CLI已按本次用户同意完成授权，scope回读包含workflow，账号StuTuse；CI实际结果见W058。
 
 SignPath申请表已在浏览器打开并预填部分公开项目资料；用户自行处理姓名、邮箱及服务同意／提交。尚未发送申请、安装GitHub App或设置签名令牌；Windows仍未签名。MFA问题未获回复；完整许可审计、安装披露／选项和Electron／NSIS签名范围需继续完成，不能把源码隐私文件视为安装器合规验收。Windowsalpha.21／Androidalpha.6及.1Release包保持；本轮发布源码／工程准备批次，不替换二进制。
 
-源码main已推送0c19bb5，GitHub识别MIT，LICENSE blob与本地一致；[dual/2026.10.16.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.6)为非Draft prerelease、无新二进制，tag／main核对一致。回读随源码收尾批次.16.7发布。当前GitHub凭据没有workflow scope，样包模板未启用、CI未运行；不要宣称可信CI样包已具备。浏览器仅确认基础资料及隐私URL，随后补填／截图连续超时；用户个人字段保持自行操作，不公开记录，未点击提交。
+MIT准备源码0c19bb5及[dual/2026.10.16.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.6)已回读，GitHub识别MIT；回读随.16.7源码发布。W057当时的缺workflow权限限制已在W058按用户授权补齐，不再重复询问该授权。浏览器只确认基础资料及隐私URL，随后补填／截图连续超时；用户个人字段保持自行操作，不公开记录，未点击提交。
 
 方案提交2dc849b及附注tag已推送；[dual/2026.10.16.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.3)回读draft=false／prerelease=true／无二进制附件，远端main及tag一致，仓库PUBLIC。共享目录另一会话随后提交1a76ace并使用.4，已保留其内容；本签名回读随源码收尾批次`dual/2026.10.16.5`发布，现有安装包仍引用.1。
 
