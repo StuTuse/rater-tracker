@@ -650,3 +650,5 @@ GitHub普通受限网络访问本机代理被拒绝，按已授权范围提升�
 新增windows-signing-sample.yml：仅主分支手动触发、GitHub托管Windows2025、固定Action提交、只读contents、无凭证／签名／发布步骤；从锁文件安装，工程检查后构建未签名Setup，核对主EXE和Setup的NotSigned与TuseCreation，产出哈希／来源报告／源码LICENSE附件。样包CI不等于生产签名，不覆盖已发布alpha.21安装包。已核对官方Action tag实际SHA、解析YAML和内嵌PowerShell、检查74处本地链接、git diff --check及双端版本保持；准备推送后实际运行CI，结果后续追加。
 
 正式签名仍待服务资格／范围审核与账户配置；没有安装GitHub App、创建SignPath账户、配置签名令牌、改证书或重签Android。用户业务数据、凭证、姓名邮箱未入库。后续由用户完成个人字段及服务条款／资料处理同意，先如实确认前置条件再提交，不能用本次许可变更声称SmartScreen已解决。
+
+CI启用受阻：本地提交8e7df65后推送被GitHub明确拒绝，当前OAuth凭据没有workflow scope；命令在拒绝后停止，未触发CI。保留本地提交历史，不扩大账号权限；将工作流移为docs/signing/windows-signing-sample.yml.example的静态模板，并修正文档实际状态，再尝试只发布许可／资料／模板的最终源码树。YAML及PowerShell已通过语法检查，不能替代GitHub实际构建；不存在成功CI样包或签名服务调用。

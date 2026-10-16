@@ -48,7 +48,7 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 
 首次工程安装／打包需要联网下载开发依赖、Electron 与 NSIS；安装好的应用离线运行。脚本直接由 Node 启动工具入口，适配本工作区路径中的空格和 `&`。
 
-GitHub Actions提供仅主分支手动触发的[Windows unsigned signing sample](.github/workflows/windows-signing-sample.yml)，以GitHub托管Windows runner构建未签名申请样包、校验摘要和来源报告；不接触签名凭证、不自动发布Release。通过Actions页Run workflow或`gh workflow run windows-signing-sample.yml --repo StuTuse/rater-tracker --ref main`发起；实际运行结果见WORKLOG。它不代表正式签名已接入。
+已准备[Windows unsigned signing sample模板](docs/signing/windows-signing-sample.yml.example)：设计为仅主分支手动触发，以GitHub托管Windows runner构建未签名申请样包、摘要和来源报告，不接触签名凭证、不自动发布Release。当前GitHub凭据缺少workflow权限，启用推送被拒绝，因此模板保留在docs中，尚未运行。取得所需权限并将模板移入`.github/workflows/windows-signing-sample.yml`后，才可在Actions页手动发起。它不代表正式签名已接入。
 
 若重复打包等待下载，先确认 node_modules/electron/dist/version 为 44.7.0，可使用本机正式运行时：`node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist`。本轮最终安装包采用此命令；仍需先通过 npm run check。
 

@@ -24,7 +24,7 @@ Rater & Tracker is a personal daily-rating and task-growth application. It provi
 
 The project and downloadable preview releases are public on GitHub. Original project contributions are available under the MIT license, with third-party components retaining their respective licenses. The application author and branding are TuseCreation. The maintainer accepts the proposed SignPath Foundation certificate identity. Eligibility review has not been completed.
 
-A manual Windows sample workflow has been added for GitHub-hosted runners; its actual execution status must be checked before submitting the application. Production signing is not implemented. We plan to verify build origin through the supported GitHub integration and require manual approval. The existing published preview was built locally and must not be represented as a verified CI artifact.
+A manual Windows sample workflow template has been prepared for GitHub-hosted runners. It is inactive because the current GitHub credential lacks workflow permission; no CI build has run. Production signing is not implemented. We plan to verify build origin through the supported GitHub integration and require manual approval. The existing published preview was built locally and must not be represented as a verified CI artifact.
 
 Our intended signing scope includes the branded application executable, generated NSIS uninstaller, and final installer. The application executable is derived from the upstream Electron runtime with project resources and metadata applied. We need your review of the allowed signing scope and applicable upstream-source requirements before implementation. We do not propose re-signing all third-party executables or libraries under the project's identity.
 
