@@ -2,6 +2,8 @@
 
 ## 现行状态
 
+最新状态（W059）：2026-10-16 SignPath Foundation申请已实际提交，页面回执为“Form submitted / Thank you, we'll be in touch soon.”，成功页截图已目视核对并保留浏览器tab。用户授权填写品牌拆分姓名、确认GitHub 2FA已开启，并在最终操作时明确确认提交和条款；邮箱由用户填写，验证码由用户完成。申请类别Productivity／GitHub Actions，使用.16.8下载页与最终CI运行38844270607。当前等待所填邮箱的审核／开户通知，无证书／令牌／GitHub App或生产签名，不重复提交。下列W057／W058的“未提交／姓名自行填写／MFA未回复”均为历史状态，以本段为准。本轮只负责申请操作、申请资料、日志及交接，双端版本和安装包不变；源码记录批次dual/2026.10.16.9。
+
 用户已明确同意为当前GitHub CLI追加workflow权限，并启用／运行已审阅的未签名申请样包CI。本轮负责将模板恢复为`.github/workflows/windows-signing-sample.yml`及对应文档／交接，不改应用版本、现有Release包或其他worktree。授权和CI实际结果见W058；SignPath协议／个人资料及提交仍由用户处理，本授权不包含SignPath令牌或生产签名。
 
 GitHub权限回读已包含workflow，账号StuTuse；两次CI成功。最终[38844270607](https://github.com/StuTuse/rater-tracker/actions/runs/38844270607)构建fd8e6e9，55/55、NSIS、NotSigned／TuseCreation和附件上传通过；新增独立小报告，完整ZIP摘要／来源／MIT许可核对通过。详情见[样包CI验收](docs/Windows签名申请样包CI验收.md)，附件至2026-10-30有效。完整大包本地下载取消且残留清理，未独立本地复算EXE或安装验收；不扩大检查结论。本轮源码批次dual/2026.10.16.8，应用包仍引用.1。

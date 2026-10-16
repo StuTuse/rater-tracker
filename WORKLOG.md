@@ -676,3 +676,11 @@ CI启用受阻：本地提交8e7df65后推送被GitHub明确拒绝，当前OAuth
 新增Windows签名申请样包CI验收，更新申请资料可按实际填写GitHub Actions和真实run链接，完善README／交接／发布流程。双端版本及.16.1正式预览附件保持，未做Windows安装／升级／smoke、Android或SignPath服务验收，SmartScreen未解决。工程源码及完整收尾以dual/2026.10.16.8发布，沿用原双端安装包／SHA清单，不把评估样包当作签名Release。
 
 收尾81处本地文档链接、git diff --check、工作流仅手动main／contents只读／无秘密引用及双端版本保持检查通过；发布前远端main=fd8e6e9、.16.8标签未占用，.16.7为最近非Draft prerelease。只暂存本次明确负责文档，不改旧标签或二进制。
+
+## W059 · 2026-10-16 · SignPath Foundation申请实际提交
+
+接手main=78ac358且工作区干净，读取交接、日志及相关规范。本轮仅负责申请操作、申请资料、交接和本条记录。用户要求继续申请，授权将账户姓名按TuseCreation品牌拆分填写，并确认GitHub已启用2FA；邮箱及既有同意项由用户填写，不提取或公开邮箱。补齐实际表单的姓名、下载页、诚实信誉说明、Productivity／GitHub Actions／AI / LLM tools；公司及维护者类型可选项留空，未编造法人、用户规模或完整合规结论。
+
+在最终提交前说明姓名／邮箱／项目资料发送至SignPath及行为准则／个人资料条款，用户明确回复“确认提交申请”。点击Submit后触发红绿灯验证码，由用户完成并回复；随后只读回读页面明确显示“Form submitted / Thank you, we'll be in touch soon.”，成功页截图目视核对，tab作为结果保留。申请下载页为dual/2026.10.16.8，信誉引用最终CI运行38844270607和55项通过；明确Electron／NSIS签名范围及安装隐私提示待审。
+
+实际完成的是申请提交，尚无审核批准、证书、SignPath账户MFA配置、GitHub App或签名令牌；Windows仍未签名，SmartScreen未解决。第三方许可／素材核查、安装披露和服务方范围审核继续待办，不重复申请；下一步等待用户所填邮箱的审核／开户通知。双端Windowsalpha.21／Androidalpha.6及既有.16.1包不变，仅更新文档，不重跑应用测试或构建；按源码批次dual/2026.10.16.9发布并链接原包。

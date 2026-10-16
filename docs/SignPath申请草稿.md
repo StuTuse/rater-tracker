@@ -1,6 +1,6 @@
 # SignPath Foundation申请草稿 · 2026-10-16
 
-本文件是待完善申请资料，**未发送**。不得直接将下列未决项填写成已满足；联系信息不写入公开仓库。配套步骤见[免费开源签名接入方案](免费开源签名接入方案.md)。
+申请已于2026-10-16通过官网提交，页面明确显示“Form submitted / Thank you, we'll be in touch soon.”；当前等待服务方审核，尚无获批或证书。下文保留申请资料及未决项，不能将未决项描述为已满足；联系邮箱不写入公开仓库。配套步骤见[免费开源签名接入方案](免费开源签名接入方案.md)。
 
 ## 可用的公开项目信息
 
@@ -35,9 +35,9 @@ Account sign-in enables automatic synchronization of account data snapshots with
 ## 提交前未决项
 
 - MIT及Foundation证书主体已由用户接受，不再重复询问；仍需完成最终分发包的第三方通知／素材权利核查。
-- 申请人联系方式、维护／评审／批准角色与双方MFA状态由本人确认。
+- 用户已确认GitHub账号启用2FA；SignPath账户MFA及维护／评审／批准角色仍待开户后配置。
 - 源码隐私说明和签名政策已准备；首次CI样包成功，真实运行与artifact见上文及W058。安装披露／选项和服务方Electron／NSIS范围审核仍需完成。
-- 已通过浏览器看到[实际入口](https://signpath.org/apply)的嵌入表单；用户选择亲自填写姓名和邮箱，表单尚未提交。
+- 已通过[实际入口](https://signpath.org/apply)提交；用户填写邮箱并授权使用品牌拆分姓名，最终确认条款及提交，图片验证码由用户完成。
 
 ## 表单填写依据（已读取实际页面）
 
@@ -45,4 +45,4 @@ Account sign-in enables automatic synchronization of account data snapshots with
 
 Reputation应如实说明项目为早期预览，提供仓库和Release记录；当前没有已核实的广泛使用／媒体报道证据，不能编造。Build System现可填写GitHub Actions，并提供上面的真实成功运行链接；这不代表已经通过SignPath来源验证或生产签名。Category和Maintainer Type以实际下拉选项选择，不虚构选项值。
 
-姓名、邮箱、服务条款同意和提交由用户处理。申请入口已预填部分公开项目信息；源码中的政策不表示SignPath已经为项目背书。
+实际提交分类为Productivity、构建系统GitHub Actions、发现来源AI / LLM tools；下载页为dual/2026.10.16.8，信誉说明如实写明早期个人项目、55项测试通过的CI运行38844270607及签名范围／安装隐私提示待审。用户最终确认后点击Submit，完成验证码后已回读成功页面。源码政策及申请提交不表示SignPath已为项目背书；无需重复申请，下一步等待所填邮箱收到审核／开户通知。
