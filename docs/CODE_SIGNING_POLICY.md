@@ -19,7 +19,7 @@ If accepted and enabled, the program attribution will be: “Free code signing p
 - Restrict signing to the files and metadata approved by the service. Third-party binaries retain their upstream identities; Electron-derived executable eligibility must be reviewed by SignPath.
 - Verify the installed app, generated uninstaller and final installer, including approved certificate identity, trust and timestamp, before publishing final checksums. Stop publication on missing, invalid or unexpected signatures.
 
-The manual [Windows signing sample workflow](../.github/workflows/windows-signing-sample.yml) is designed for **unsigned evaluation samples only**. It has no signing token, signing service integration or release publication step. The maintainer has authorized the GitHub CLI workflow permission needed to enable it. Actual authorization, publication and CI results are recorded in WORKLOG W058; the presence of this file is not proof of a successful CI build. This is not a production signing workflow.
+The manual [Windows signing sample workflow](../.github/workflows/windows-signing-sample.yml) builds **unsigned evaluation samples only**. It has no signing token, signing service integration or release publication step. The maintainer authorized the GitHub CLI workflow permission needed to enable it. The [first run](https://github.com/StuTuse/rater-tracker/actions/runs/38843223021) succeeded from source commit `6f4096a8e31f757bdc251464f067108b3c5c9999`, including 55 project tests and the unsigned evaluation installer build. Its artifact expires on 2026-10-30. This is not production signing or SignPath approval; detailed checks are recorded in WORKLOG W058.
 
 ## Privacy and distribution
 

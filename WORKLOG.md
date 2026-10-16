@@ -666,3 +666,7 @@ CI启用受阻：本地提交8e7df65后推送被GitHub明确拒绝，当前OAuth
 通过gh auth refresh --hostname github.com --scopes workflow发起GitHub官方设备授权，用户在页面完成确认；CLI返回Authentication complete，随后仅回读非秘密字段确认账号StuTuse、active=true、scopes为gist/read:org/repo/workflow。未把访问令牌、设备授权码或本机凭据写入源码／日志。仓库PUBLIC，远端main仍4a92a27。
 
 将已审阅模板移入.github/workflows/windows-signing-sample.yml；仅主分支手动触发、GitHub托管Windows2025、固定Actions提交、contents只读，不使用签名令牌或自动发布Release。更新AGENTS记录本次权限授权、README命令、签名政策／申请资料与交接；SignPath协议及个人资料填写／提交仍由用户处理，本轮不操作。推送后将实际执行CI并记录结果；该样包仍应NotSigned，不是SmartScreen已解决或生产签名已接入。
+
+首次源码6f4096a8e31f757bdc251464f067108b3c5c9999已推送，实际运行38843223021全部success；日志确认55项／55通过／0失败、electron-builder26.15.3及Windows NSIS构建，作者／未签名检查和artifact上传成功。附件12021991383，203255654字节，GitHub ZIP digest为d5837ed46e0006ff9da29bf2dfa552e4976f35f18be3fa5acfe7e231d131faf3，有效期至2026-10-30；此digest是服务元数据，不是本地完整ZIP复算。
+
+本地gh大包下载长时间无结果，取消后改用GitHub API官方附件重定向，存储返回HTTP200但下载约数MiB后速度仍慢，停止本会话的下载；未执行／安装该包。未把不完整ZIP当作通过。为便于以后核验，工作流增加独立小型sample-origin.json／源码LICENSE附件，并在CI日志输出公开来源／摘要；YAML及PowerShell检查通过，准备推送并实际重跑验证该调整。API凭据只在内存中发给GitHub API，不转发到附件存储或写入文件／日志。

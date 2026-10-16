@@ -65,6 +65,16 @@ jobs:
             files = @($records)
           } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $sampleRoot 'sample-origin.json') -Encoding utf8
           Copy-Item -LiteralPath LICENSE -Destination (Join-Path $sampleRoot 'SOURCE-LICENSE.txt')
+          Get-Content -LiteralPath (Join-Path $sampleRoot 'sample-origin.json') -Raw
+      - name: Upload small verification report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-signing-report-${{ github.run_id }}
+          path: |
+            output/signpath-sample/sample-origin.json
+            output/signpath-sample/SOURCE-LICENSE.txt
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload evaluation installer and origin report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
