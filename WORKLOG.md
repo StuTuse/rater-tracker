@@ -652,3 +652,9 @@ GitHub普通受限网络访问本机代理被拒绝，按已授权范围提升�
 正式签名仍待服务资格／范围审核与账户配置；没有安装GitHub App、创建SignPath账户、配置签名令牌、改证书或重签Android。用户业务数据、凭证、姓名邮箱未入库。后续由用户完成个人字段及服务条款／资料处理同意，先如实确认前置条件再提交，不能用本次许可变更声称SmartScreen已解决。
 
 CI启用受阻：本地提交8e7df65后推送被GitHub明确拒绝，当前OAuth凭据没有workflow scope；命令在拒绝后停止，未触发CI。保留本地提交历史，不扩大账号权限；将工作流移为docs/signing/windows-signing-sample.yml.example的静态模板，并修正文档实际状态，再尝试只发布许可／资料／模板的最终源码树。YAML及PowerShell已通过语法检查，不能替代GitHub实际构建；不存在成功CI样包或签名服务调用。
+
+发布实际结果：后续提交`0c19bb57015ba1abd1103589b8109c6eb43c9d00`以静态模板最终树推送main成功，未改写8e7df65或既有历史。远端LICENSE blob为`441a7c3f76eafb6fba7afb5907e745470c040892`，与本地一致；GitHub稍后识别licenseInfo=MIT（初次扫描接口404属未完成识别，不据此声称已识别）。PUBLIC保持，附注tag`dual/2026.10.16.6`解引用到0c19bb5；[源码Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.6)回读draft=false／prerelease=true／assets=[]，说明链接.16.1双端安装包及SHA清单。回读记录随源码收尾批次dual/2026.10.16.7发布，不重建包。
+
+浏览器补填隐私说明URL后超时，重新只读页面确认该URL已填、基础公开资料保持；用户同时自行填写个人字段。本会话没有操作个人字段或服务同意、没有点击Submit。下载URL／信誉资料的后续补填和截图／页面保留调用连续超时，不能声称它们完成；所需公开链接和说明已保存在申请资料／Release，需在表单按实际状态补齐。未提交申请、无审批结果，CI权限、MFA和其他申请前置项继续保持未完成。
+
+最后单独重新绑定原申请tab并执行markHandoff成功，保留用户已填写状态供后续继续；不刷新或清空页面。截图仍未成功，无截图验收结论。

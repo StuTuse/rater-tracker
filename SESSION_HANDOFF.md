@@ -6,6 +6,8 @@
 
 SignPath申请表已在浏览器打开并预填部分公开项目资料；用户自行处理姓名、邮箱及服务同意／提交。尚未发送申请、安装GitHub App或设置签名令牌；Windows仍未签名。MFA问题未获回复；完整许可审计、安装披露／选项和Electron／NSIS签名范围需继续完成，不能把源码隐私文件视为安装器合规验收。Windowsalpha.21／Androidalpha.6及.1Release包保持；本轮发布源码／工程准备批次，不替换二进制。
 
+源码main已推送0c19bb5，GitHub识别MIT，LICENSE blob与本地一致；[dual/2026.10.16.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.6)为非Draft prerelease、无新二进制，tag／main核对一致。回读随源码收尾批次.16.7发布。当前GitHub凭据没有workflow scope，样包模板未启用、CI未运行；不要宣称可信CI样包已具备。浏览器仅确认基础资料及隐私URL，随后补填／截图连续超时；用户个人字段保持自行操作，不公开记录，未点击提交。
+
 方案提交2dc849b及附注tag已推送；[dual/2026.10.16.3](https://github.com/StuTuse/rater-tracker/releases/tag/dual/2026.10.16.3)回读draft=false／prerelease=true／无二进制附件，远端main及tag一致，仓库PUBLIC。共享目录另一会话随后提交1a76ace并使用.4，已保留其内容；本签名回读随源码收尾批次`dual/2026.10.16.5`发布，现有安装包仍引用.1。
 
 Windows当前`0.1.0-alpha.21`，Android`0.1.0-alpha.6`／`VERSION_CODE=6`；规则1.3／JSON1。作者统一TuseCreation，Windows CompanyName／版权已核对，但本机无受信任代码签名身份，包仍NotSigned，SmartScreen未解决；`npm run dist:signed`已验证缺证书时拒绝构建。桌面当前开发验收快捷方式也指向未签名Electron，EXE未带Zone.Identifier，本轮未改快捷方式。需要用户提供已有证书／云签名服务，或决定合适的外部签名／商店路径，不能以改作者字段或自签根证书冒充解决。
