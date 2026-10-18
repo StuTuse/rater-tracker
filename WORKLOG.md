@@ -3,6 +3,10 @@
 
 日期统一使用香港时间。本文记录实际完成事项；历史讨论只按可核实阶段归纳，不补造具体时间、代码提交或检查结果。
 
+## W067 · 2026-10-18 · 1.0.0发布状态与交接同步
+
+同步本地／公开仓库当前状态：双端1.0.0安装包及摘要位于应用prerelease `dual/2026.10.18.6`；发布结果交接文档位于源代码批次`dual/2026.10.18.7`。本轮只修正SESSION_HANDOFF对已发布应用包、纯源码批次和验收边界的检索入口；不改应用、版本、数据、签名或安装产物。工作区已逐文件检查，`git diff --check`通过。
+
 ## W066 · 2026-10-18 · 1.0.0 发布回读与交接收尾
 
 1.0.0双平台prerelease `dual/2026.10.18.6`已正式发布并逐项回读：远端main/tag一致、非Draft、仓库PUBLIC；Windows EXE、Android APK和SHA256SUMS均显示uploaded，两个安装包的GitHub SHA-256 digest与本地构建清单一致。实际发布结果及链接补记于W065与SESSION_HANDOFF。此批只更新发布状态和交接，不变更应用功能或重建安装包；双端应用均保持1.0.0。桌面首启专项、Android离线AVD和真实账号／通知等验收边界照实保留。
@@ -27,7 +31,7 @@
 - Windows／Android应用入口均为1.0.0；Android VERSION_CODE=7、沿用原证书。Windows未签名。
 - 写记录、任务、历史／周报、提醒、账号续期、首启引导与更新检测已经实现；历史阶段的开发预览仍保留为旧记录。
 - `npm test` 69项、`npm run check` 56项通过。Windows首启专项与布局截图通过；真实邮件／云同步、通知送达、Android最终首启实测和完整旧Electron回归仍有明确未覆盖项，见W065。
-- 本地及GitHub `main` 为 `ad57fa6`；双端1.0.0预览版已发布于 `dual/2026.10.18.6`，EXE/APK/SHA校验单及远端digest一致；仓库PUBLIC。安装产物仅在ignored release目录，不进Git。
+- 本地及GitHub `main` 保持同步；双端1.0.0预览版已发布于 `dual/2026.10.18.6`，发布回读文档在 `dual/2026.10.18.7`；EXE/APK/SHA校验单及远端digest一致，仓库PUBLIC。安装产物仅在ignored release目录，不进Git。
 
 ## W001 · 方案讨论与机制形成 · 历史汇总
 

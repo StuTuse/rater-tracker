@@ -1,6 +1,12 @@
 # 当前交接 · 2026-10-18
 
-## 最新工作 · W065 · 1.0.0 双端实现与发布验收
+## 最新工作 · W067 · 1.0.0 发布状态同步
+
+双端1.0.0安装包在公开prerelease [`dual/2026.10.18.6`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.6)，附带EXE、APK与SHA256SUMS，远端digest和本地清单一致。其后的发布回读文档已在纯源码批次 [`dual/2026.10.18.7`](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.7) 发布，没有更改或重建应用。集成main和本地工作区同步；历史实现与验收边界见W065／W066。
+
+**仍未覆盖：** 真实邮箱／云端账号服务、真实旧用户现场迁移、Android真机通知／后台策略、Android最终APK恢复出厂首启、Windows覆盖安装，以及旧桌面完整回归脚本（在过期控件选择器处停止）。Windows包未签名。旧用户需手动覆盖升级到1.0.0后才可使用版本提醒。
+
+## W065 · 1.0.0 双端实现与验收
 
 用户确认方案后要求直接实现首个正式版本 1.0.0。当前 `main` 工作区负责完整双端产品集成：共享`packages/core`、`packages/data`、`packages/ui`，Windows Electron，Android 原生桥接。五轮方案已由生产实现替代预览，不修改另一工作区、用户实际账号／数据或签名身份。
 
@@ -10,7 +16,7 @@
 
 **当前不能宣称的覆盖：** 无真实邮箱／云端账号服务验收，无真实设备通知送达或电池／后台策略覆盖，无真实旧用户数据现场迁移；Android最终包仅完成Gradle／签名检查，模拟器恢复出厂后保持offline，未重验最终首启弹窗；旧截图只证明同版移动布局，不代表此次包首启通过。完整旧桌面回归脚本在旧任务控件选择器处失败，首启已使用专项隔离smoke验证；Windows未签名；旧安装版必须先手动覆盖升级一次才能收到后续更新提示。
 
-**发布已完成并回读：** GitHub PUBLIC `main=ad57fa6f2b7396294ca61f5109552ccf98fbb76b`；附注tag `dual/2026.10.18.6`指向该提交；公开prerelease非Draft，链接为[dual/2026.10.18.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.6)。Windows与Android安装包及SHA清单均已上传；两个平台资产的GitHub SHA-256 digest与本地清单一致。源码提交、tag和文件对象均逐项核对，未强推或更改旧历史。发布资产／版本细节见W065。
+**发布已完成并回读：** GitHub PUBLIC；双端应用的附注tag `dual/2026.10.18.6`、main来源及EXE／APK／校验清单已核验，资产摘要与本地SHA一致。该应用发行页为[dual/2026.10.18.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.6)；之后仅同步发布记录的源码批次为[dual/2026.10.18.7](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.7)，不重建双端安装包。提交、树、tag对象逐项核验，未强推或改写既有历史。详见W066／W067。
 
 本次本地历史由`35d22e4`（双端1.0.0实现）及`ad57fa6`（平台更新清单）组成，远端main及tag均与本地HEAD一致。构建产物／校验单只在忽略的release目录，不进Git。Git传输不可达时，使用GitHub API创建与本地原SHA完全匹配的树／提交对象，并在远端基线仍为预期父提交时执行非强制引用快进；Release起初仍是draft，确认全部三个资产后已发布并核对最终tag URL。
 
