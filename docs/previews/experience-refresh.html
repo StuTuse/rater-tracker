@@ -1,0 +1,191 @@
+<div id="rt-experience-preview">
+  <div class="viz-carousel" aria-label="Rater & Tracker 界面方案" data-previous-label="上一方案" data-next-label="下一方案">
+    <section data-variant="平板侧栏" aria-label="平板左侧导航方案"><div class="rt-stage"><div class="rt-app" data-device="tablet" aria-label="平板界面"></div></div></section>
+    <section data-variant="手机侧栏" aria-label="手机窄侧栏方案" hidden><div class="rt-stage"><div class="rt-app" data-device="phone-rail" aria-label="手机侧栏界面"></div></div></section>
+    <section data-variant="手机顶栏" aria-label="手机顶部导航方案" hidden><div class="rt-stage"><div class="rt-app" data-device="phone-top" aria-label="手机顶部导航界面"></div></div></section>
+  </div>
+  <style>
+    #rt-experience-preview{color-scheme:light dark}
+    #rt-experience-preview *{box-sizing:border-box}
+    #rt-experience-preview .rt-stage{height:820px;display:flex;justify-content:center;align-items:flex-start;padding:8px 0 20px}
+    #rt-experience-preview .rt-app{--rt-bg:light-dark(#faf8f0,#24251f);--rt-card:light-dark(#fffef8,#30312a);--rt-ink:light-dark(#414a38,#eeeeda);--rt-muted:light-dark(#70745f,#b9bba3);--rt-line:light-dark(#e5dfcb,#545440);--rt-gold:light-dark(#ebc75c,#d4b349);--rt-soft:light-dark(#f7ebbb,#51492d);--rt-green:light-dark(#71845a,#b0bf91);--rt-shadow:light-dark(#665d2310,#00000020);--rt-veil:light-dark(#353c2f40,#00000090);font:14px/1.55 'Segoe UI','Microsoft YaHei',sans-serif;color:var(--rt-ink);background:var(--rt-bg);width:100%;max-width:980px;height:790px;border:1px solid var(--rt-line);border-radius:22px;overflow:hidden;display:grid;grid-template-columns:108px minmax(0,1fr);position:relative;--rt-gap:14px;--rt-radius:16px;isolation:isolate}
+    #rt-experience-preview .rt-app button,#rt-experience-preview .rt-app input,#rt-experience-preview .rt-app textarea{font:inherit;color:inherit}
+    #rt-experience-preview .rt-app button{border:0;background:transparent;min-height:44px;padding:8px 12px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation;transition:background .18s,transform .24s}
+    #rt-experience-preview .rt-app button:active{transform:scale(.97)}
+    #rt-experience-preview .rt-app button:focus-visible,#rt-experience-preview .rt-app input:focus-visible,#rt-experience-preview .rt-app textarea:focus-visible{outline:2px solid var(--rt-gold);outline-offset:3px}
+    #rt-experience-preview .rt-app button:hover{background:var(--rt-soft)}
+    #rt-experience-preview .rt-app h1,#rt-experience-preview .rt-app h2,#rt-experience-preview .rt-app h3,#rt-experience-preview .rt-app p{margin:0}
+    #rt-experience-preview .rt-app h1{font-size:24px;font-weight:500;letter-spacing:-.4px}
+    #rt-experience-preview .rt-app h2{font-size:16px;font-weight:500}
+    #rt-experience-preview .rt-app h3{font-size:14px;font-weight:500}
+    #rt-experience-preview .rt-app small{font-size:12px;color:var(--rt-muted)}
+    #rt-experience-preview .rt-rail{padding:22px 10px 14px;border-right:1px solid var(--rt-line);background:var(--rt-card);display:flex;flex-direction:column;align-items:center;gap:24px}
+    #rt-experience-preview .rt-brand{width:42px;height:42px;display:grid;place-items:center;background:var(--rt-gold);color:light-dark(#54461e,#322b12);border-radius:15px 17px 13px 18px;rotate:-5deg;font-size:24px}
+    #rt-experience-preview .rt-nav{display:flex;flex-direction:column;width:100%;gap:9px}
+    #rt-experience-preview .rt-nav button{justify-content:flex-start;width:100%;white-space:nowrap;color:var(--rt-muted)}
+    #rt-experience-preview .rt-nav button[aria-current=page]{background:var(--rt-soft);color:var(--rt-ink)}
+    #rt-experience-preview .rt-nav svg{width:20px;height:20px}
+    #rt-experience-preview .rt-rail .rt-account{margin-top:auto;width:100%;border:1px solid var(--rt-line)}
+    #rt-experience-preview .rt-main{padding:18px 24px 28px;overflow-y:auto;overscroll-behavior:none;scrollbar-width:thin;scrollbar-color:var(--rt-line) transparent}
+    #rt-experience-preview .rt-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;min-height:44px}
+    #rt-experience-preview .rt-top strong{font-weight:500;letter-spacing:.1px}
+    #rt-experience-preview .rt-status{font-size:12px;color:var(--rt-green);display:flex;align-items:center;gap:6px}
+    #rt-experience-preview .rt-status:before{content:'';width:6px;height:6px;background:var(--rt-green);border-radius:50%}
+    #rt-experience-preview .rt-growth{display:flex;align-items:center;gap:14px;border:1px solid var(--rt-line);border-radius:var(--rt-radius);background:var(--rt-card);padding:12px 16px;margin-bottom:20px}
+    #rt-experience-preview .rt-level{height:48px;width:48px;flex:none;border-radius:16px 18px 14px 18px;background:var(--rt-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:500}
+    #rt-experience-preview .rt-level small{font-size:11px}
+    #rt-experience-preview .rt-growth-body{min-width:0;flex:1}
+    #rt-experience-preview .rt-growth-labels{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--rt-muted)}
+    #rt-experience-preview .rt-meter{height:8px;background:var(--rt-soft);border-radius:8px;overflow:hidden;margin:7px 0}
+    #rt-experience-preview .rt-meter span{display:block;height:100%;width:46%;background:var(--rt-gold);border-radius:inherit}
+    #rt-experience-preview .rt-page-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+    #rt-experience-preview .rt-date{font-size:12px;color:var(--rt-muted)}
+    #rt-experience-preview .rt-card{border:1px solid var(--rt-line);border-radius:var(--rt-radius);padding:14px 16px;background:var(--rt-card);box-shadow:0 3px 12px var(--rt-shadow);min-width:0}
+    #rt-experience-preview .rt-overall{max-width:520px;margin:0 auto var(--rt-gap)}
+    #rt-experience-preview .rt-card-head{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+    #rt-experience-preview .rt-card-head svg{color:var(--rt-muted);width:20px;height:20px;flex:none}
+    #rt-experience-preview .rt-card-head small{margin-left:auto;white-space:nowrap}
+    #rt-experience-preview .rt-scoreline{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+    #rt-experience-preview .rt-stars{display:flex;min-width:0;flex:none}
+    #rt-experience-preview .rt-stars button{padding:0;width:44px;height:44px;font-size:28px;color:var(--rt-line);border-radius:8px;transition:color .18s,background .18s}
+    #rt-experience-preview .rt-stars button[aria-pressed=true]{color:var(--rt-gold)}
+    #rt-experience-preview .rt-app .rt-zero{min-width:44px;padding:3px 7px;color:var(--rt-muted);font-size:12px}
+    #rt-experience-preview .rt-zero[aria-pressed=true]{background:var(--rt-soft)}
+    #rt-experience-preview .rt-value{font-size:12px;color:var(--rt-muted);margin-left:auto}
+    #rt-experience-preview .rt-overall .rt-card-head{justify-content:center}
+    #rt-experience-preview .rt-overall .rt-card-head small{margin-left:0}
+    #rt-experience-preview .rt-overall .rt-scoreline{justify-content:center}
+    #rt-experience-preview .rt-overall .rt-value{margin-left:0}
+    #rt-experience-preview .rt-note{width:100%;resize:vertical;min-height:54px;max-height:140px;padding:10px 12px;margin-top:8px;border:1px solid var(--rt-line);border-radius:10px;background:var(--rt-bg);font-size:13px!important;line-height:1.65}
+    #rt-experience-preview .rt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--rt-gap)}
+    #rt-experience-preview .rt-details{margin-top:5px}
+    #rt-experience-preview .rt-details summary{min-height:36px;display:flex;align-items:center;color:var(--rt-muted);font-size:12px;list-style:none;cursor:default}
+    #rt-experience-preview .rt-details summary:after{content:'＋';margin-left:auto}
+    #rt-experience-preview .rt-details[open] summary:after{content:'−'}
+    #rt-experience-preview .rt-tasks{margin-top:18px}
+    #rt-experience-preview .rt-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+    #rt-experience-preview .rt-section-head button{font-size:12px;color:var(--rt-muted)}
+    #rt-experience-preview .rt-task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--rt-line)}
+    #rt-experience-preview .rt-task:last-child{border-bottom:0}
+    #rt-experience-preview .rt-task>svg{color:var(--rt-muted);width:18px;height:18px;flex:none}
+    #rt-experience-preview .rt-task small{margin-left:auto;white-space:nowrap}
+    #rt-experience-preview .rt-task button{font-size:12px;color:var(--rt-green);padding-inline:8px}
+    #rt-experience-preview .rt-toast{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--rt-ink);color:var(--rt-bg);font-size:12px;border-radius:10px;padding:10px 14px;z-index:5;white-space:nowrap;pointer-events:none}
+    #rt-experience-preview .rt-chart{width:100%;display:block;margin-top:16px}
+    #rt-experience-preview .rt-chart text{font-size:12px;fill:var(--rt-muted)}
+    #rt-experience-preview .rt-chart .rt-chart-grid{stroke:var(--rt-line);stroke-width:1;fill:none}
+    #rt-experience-preview .rt-chart .rt-line-overall{stroke:var(--rt-gold);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    #rt-experience-preview .rt-chart .rt-line-study{stroke:var(--rt-green);stroke-width:2;fill:none;stroke-dasharray:5 5}
+    #rt-experience-preview .rt-chart circle{fill:var(--rt-gold)}
+    #rt-experience-preview .rt-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--rt-muted)}
+    #rt-experience-preview .rt-legend b{font-weight:400}
+    #rt-experience-preview .rt-legend b:before{content:'';display:inline-block;width:18px;height:3px;background:var(--rt-gold);vertical-align:middle;margin-right:6px}
+    #rt-experience-preview .rt-legend b:last-child:before{background:var(--rt-green)}
+    #rt-experience-preview .rt-history-note{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+    #rt-experience-preview .rt-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--rt-line)}
+    #rt-experience-preview .rt-setting:last-child{border:0}
+    #rt-experience-preview .rt-setting div{display:flex;flex-direction:column;gap:4px}
+    #rt-experience-preview .rt-app .rt-primary{background:var(--rt-gold);color:light-dark(#4b401d,#2a2513)}
+    #rt-experience-preview .rt-shade{position:absolute;inset:0;background:var(--rt-veil);z-index:4;display:flex;align-items:center;justify-content:center;padding:18px}
+    #rt-experience-preview .rt-dialog{width:360px;max-width:100%;max-height:100%;overflow:auto;background:var(--rt-card);border:1px solid var(--rt-line);border-radius:22px;padding:22px;box-shadow:0 16px 50px var(--rt-shadow)}
+    #rt-experience-preview .rt-dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    #rt-experience-preview .rt-dialog label{display:flex;flex-direction:column;gap:6px;margin:14px 0;font-size:13px}
+    #rt-experience-preview .rt-dialog input{min-height:44px;min-width:0;border:1px solid var(--rt-line);border-radius:10px;padding:10px;background:var(--rt-bg)}
+    #rt-experience-preview .rt-dialog .rt-primary{width:100%;margin:8px 0}
+    #rt-experience-preview .rt-dialog p{font-size:13px;color:var(--rt-muted);line-height:1.8}
+    #rt-experience-preview .rt-dialog-footer{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+    #rt-experience-preview .rt-dialog-footer button{font-size:12px}
+    #rt-experience-preview .rt-app[data-device^=phone]{max-width:390px;grid-template-columns:54px minmax(0,1fr);border-radius:28px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-rail{padding:17px 4px 14px;gap:25px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-brand{width:34px;height:34px;font-size:21px;border-radius:12px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-nav{gap:10px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-nav button{padding:6px 0;gap:2px;min-height:48px;flex-direction:column;font-size:11px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-nav svg{width:18px;height:18px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-account{padding:0;font-size:11px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-main{padding:14px 12px 24px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-top{margin-bottom:12px;min-height:32px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-top strong{font-size:12px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-status{font-size:11px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-growth{padding:10px;gap:10px;margin-bottom:16px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-level{width:36px;height:42px;border-radius:12px;font-size:13px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-growth-labels{font-size:11px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-grid{grid-template-columns:1fr;gap:10px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-card{padding:8px 12px;position:relative}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-card-head{margin-bottom:0;gap:5px;min-height:44px;padding-right:86px;flex-wrap:wrap;justify-content:flex-start;align-content:center}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-grid .rt-card-head svg{display:none}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-grid .rt-card-head small{margin-left:3px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-card-head h2{font-size:15px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-scoreline{gap:2px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-value{font-size:11px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-value{display:none}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-zero{position:absolute;right:50px;top:8px;min-height:44px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-overall .rt-zero{right:7px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-overall .rt-card-head{padding-right:32px;justify-content:center}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-overall .rt-card-head small{margin:0}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-scoreline{justify-content:center;flex-wrap:nowrap}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-details{margin-top:0}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-details summary{position:absolute;right:6px;top:8px;width:44px;height:44px;min-height:44px;font-size:0;justify-content:center}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-details summary:after{font-size:18px;margin:0}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-stars button{width:44px;font-size:27px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-date{font-size:11px}
+    #rt-experience-preview .rt-app[data-device^=phone] h1{font-size:21px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-page-head{gap:6px;margin-bottom:12px}
+    #rt-experience-preview .rt-app[data-device^=phone] .rt-card-head small{font-size:11px}
+    #rt-experience-preview .rt-app[data-device=phone-top]{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-rail{padding:10px 12px;gap:10px;border-right:0;border-bottom:1px solid var(--rt-line);flex-direction:row;flex-wrap:wrap}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-brand{width:30px;height:30px;font-size:19px}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-account{margin:0 0 0 auto;width:auto;min-height:36px;padding:0 10px}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-nav{order:3;flex-direction:row;gap:2px}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-nav button{flex:1;min-width:0;min-height:44px;padding:3px 0;flex-direction:row;font-size:12px}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-nav svg{display:none}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-main{padding-top:10px}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-card-head{margin-bottom:0}
+    #rt-experience-preview .rt-app[data-device=phone-top] .rt-overall{max-width:100%}
+    @media(max-width:680px){#rt-experience-preview .rt-app[data-device=tablet]{grid-template-columns:54px minmax(0,1fr)}#rt-experience-preview .rt-app[data-device=tablet] .rt-rail{padding-inline:4px}#rt-experience-preview .rt-app[data-device=tablet] .rt-nav button{flex-direction:column;font-size:11px;padding:5px 0;gap:2px}#rt-experience-preview .rt-app[data-device=tablet] .rt-grid{grid-template-columns:1fr}#rt-experience-preview .rt-app[data-device=tablet] .rt-main{padding:14px 12px}#rt-experience-preview .rt-app[data-device=tablet] .rt-brand{width:34px;height:34px}#rt-experience-preview .rt-app[data-device=tablet] .rt-account{padding:0;font-size:11px}}
+    @media(prefers-reduced-motion:reduce){#rt-experience-preview .rt-app *{transition:none!important;animation:none!important}}
+  </style>
+  <script>
+  (()=>{
+    const root=document.getElementById('rt-experience-preview');
+    const dims=[['study','学习','book-open',3],['work','作品','pencil-line',4],['health','健康','heart',2],['life','生活','sprout',3]];
+    const nav=[['today','今日','sun'],['tasks','任务','list-checks'],['history','历史','chart-no-axes-combined'],['rewards','奖励','award'],['settings','设置','settings']];
+    const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const saved=window.openai?.widgetState?.modelContent?.preview;
+    const validScore=n=>n===null||(Number.isInteger(n)&&n>=0&&n<=5);
+    const models=[];
+    function remember(model){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{preview:{overall:model.scores.overall,note:model.note}},privateContent:null}).catch(()=>{});}
+    function scoreCard(model,key,label,ico,overall=false){
+      const n=model.scores[key];
+      return `<section class="rt-card ${overall?'rt-overall':''}" data-rating="${key}" aria-label="${label}"><div class="rt-card-head"><i data-lucide="${ico}" aria-hidden="true"></i><h2>${label}</h2><small>${overall?'总体自评':`${5+2*n} XP`}</small></div><div class="rt-scoreline"><button class="rt-zero" data-zero="${key}" aria-label="${label}零星" aria-pressed="${n===0}">0 星</button><div class="rt-stars" role="group" aria-label="${label}星级">${Array.from({length:5},(_,i)=>`<button data-score="${key}" data-value="${i+1}" aria-label="${label}${i+1}星" aria-pressed="${n!==null&&i<n}">★</button>`).join('')}</div><span class="rt-value">${n===null?'未评分':`${n} / 5`}</span></div>${overall?`<textarea class="rt-note" aria-label="今日小结" placeholder="记下今天的一件小事…" maxlength="4000">${esc(model.note)}</textarea>`:`<details class="rt-details"><summary>原因与依据</summary><textarea class="rt-note" aria-label="${label}原因与依据" placeholder="简单记两句…"></textarea></details>`}</section>`;
+    }
+    function today(model){return `<div class="rt-page-head"><h1>今日记录</h1><span class="rt-date">10 月 18 日 · 周日</span></div>${scoreCard(model,'overall','今日评分','notebook-pen',true)}<div class="rt-grid">${dims.map(([key,label,ico])=>scoreCard(model,key,label,ico)).join('')}</div><section class="rt-tasks"><div class="rt-section-head"><h2>今日任务</h2><button data-page="tasks">查看全部 →</button></div><div class="rt-task"><i data-lucide="circle" aria-hidden="true"></i><span>完成短片初剪</span><small>今天到期</small><button data-progress>记录</button></div><div class="rt-task"><i data-lucide="circle" aria-hidden="true"></i><span>阅读与笔记</span><small>进行中</small></div></section>`;}
+    function history(model){const end=model.scores.overall===null?'':`<path class="rt-line-overall" d="M250 84 L300 ${184-model.scores.overall*32}"/><circle cx="300" cy="${184-model.scores.overall*32}" r="4"/>`;return `<div class="rt-page-head"><h1>历史记录</h1><span class="rt-date">最近 7 天</span></div><section class="rt-card"><div class="rt-section-head"><h2>评分趋势</h2><small>星级 · 0—5</small></div><div class="rt-legend"><b>今日总体评分</b><b>学习</b></div><svg class="rt-chart" viewBox="0 0 340 220" role="img" aria-label="示例趋势：今日总体评分独立成线，10月15日未记录并留空"><path class="rt-chart-grid" d="M30 24H316 M30 104H316 M30 184H316"/><text x="8" y="28">5</text><text x="8" y="108">2.5</text><text x="8" y="188">0</text><path class="rt-line-study" d="M30 120 L75 88 L120 120 L165 56 L210 88 L255 56 L300 ${184-model.scores.study*32}"/><path class="rt-line-overall" d="M30 88 L75 56 L120 88 M210 120 L250 84"/>${end}<text x="30" y="211">10/12</text><text x="145" y="211">10/15</text><text x="270" y="211">10/18</text></svg></section><section class="rt-card rt-history-note"><small>10 月 18 日 · 今日小结</small><p>${esc(model.note||'还没有写下今天的小结')}</p><small>总体评分 ${model.scores.overall===null?'未记录':`${model.scores.overall} 星`} · 四项评分 ${model.scores.study+model.scores.work+model.scores.health+model.scores.life} 星</small></section>`;}
+    function settings(){return `<div class="rt-page-head"><h1>设置</h1></div><section class="rt-card"><div class="rt-setting"><div><h3>账号与同步</h3><small>登录后同步成长记录</small></div><button data-dialog="login">登录</button></div><div class="rt-setting"><div><h3>数据备份</h3><small>完整 JSON 记录</small></div><button data-demo="正式版继续保留完整备份">导出</button></div><div class="rt-setting"><div><h3>软件更新</h3><small>启动后在后台检查</small></div><button data-dialog="update">预览提示</button></div><div class="rt-setting"><div><h3>动画反馈</h3><small>连续位移，轻盈落定</small></div><button data-demo="跟随系统减少动态偏好">完整</button></div></section>`;}
+    function pageContent(model){if(model.page==='today')return today(model);if(model.page==='history')return history(model);if(model.page==='settings')return settings();if(model.page==='tasks')return `<div class="rt-page-head"><h1>任务</h1><button class="rt-primary" data-progress>＋ 新建</button></div><section class="rt-card"><h2>完成短片初剪</h2><div class="rt-task"><span>进行中</span><small>今天到期</small><button data-progress>记录推进</button></div></section>`;return `<div class="rt-page-head"><h1>奖励中心</h1></div><section class="rt-card"><h2>我的成长</h2><div class="rt-setting"><span>等级</span><span>Lv.8</span></div><div class="rt-setting"><span>今日四项评分经验</span><span>${xp(model)} XP</span></div><div class="rt-setting"><span>徽章</span><span>六个系列 · 48 枚</span></div></section>`;}
+    const xp=model=>dims.reduce((sum,[key])=>sum+(model.scores[key]===null?0:5+2*model.scores[key]),0);
+    function icons(el){globalThis.lucide?.createIcons({root:el,attrs:{width:18,height:18,'stroke-width':1.6}});}
+    function paint(model){model.el.innerHTML=`<aside class="rt-rail"><div class="rt-brand" aria-label="Rater & Tracker">✦</div><nav class="rt-nav" aria-label="主导航">${nav.map(([key,label,ico])=>`<button data-page="${key}" ${model.page===key?'aria-current="page"':''}><i data-lucide="${ico}" aria-hidden="true"></i><span>${label}</span></button>`).join('')}</nav><button class="rt-account" data-dialog="login" aria-label="打开登录界面">登录</button></aside><main class="rt-main"><header class="rt-top"><strong>Rater & Tracker</strong><span class="rt-status">示例预览</span></header><section class="rt-growth" aria-label="示例等级经验"><div class="rt-level"><small>Lv.</small>8</div><div class="rt-growth-body"><div class="rt-growth-labels"><span>成长进度</span><span>30 / 65 XP</span></div><div class="rt-meter"><span></span></div><div class="rt-growth-labels"><span>距离 Lv.9 还需 35 XP</span><span data-day-xp>今日 ${xp(model)} XP</span></div></div></section><div class="rt-page">${pageContent(model)}</div></main>`;icons(model.el);}
+    function toast(model,message){model.el.querySelector('.rt-toast')?.remove();const t=document.createElement('div');t.className='rt-toast';t.setAttribute('role','status');t.textContent=message;model.el.append(t);clearTimeout(model.toastTimer);model.toastTimer=setTimeout(()=>t.remove(),2400);}
+    function dialog(model,kind){model.el.querySelector('.rt-shade')?.remove();const shade=document.createElement('div');shade.className='rt-shade';shade.innerHTML=`<section class="rt-dialog" role="dialog" aria-modal="true" aria-label="${kind==='update'?'更新提示预览':kind==='progress'?'记录推进预览':'首次登录引导预览'}"><div class="rt-dialog-head"><h2>${kind==='update'?'发现新版本':kind==='progress'?'记录推进':'欢迎使用'}</h2><button data-close aria-label="关闭">×</button></div>${kind==='update'?'<p>当前版本还有最新版本</p><p>新版本可下载后安装，现有记录会保留。</p><button class="rt-primary" data-demo="此处为更新交互预览，不下载文件">下载最新版本</button><div class="rt-dialog-footer"><button data-close>稍后再说</button></div>':kind==='progress'?'<label>本次成果<textarea class="rt-note" aria-label="本次成果" placeholder="记录这次完成的内容"></textarea></label><button class="rt-primary" data-fake-save>保存推进</button>':'<p>登录账号，让成长记录在设备之间同步。</p><label>账号<input autocomplete="off" aria-label="示例账号" placeholder="输入账号"></label><label>密码<input type="password" autocomplete="off" aria-label="示例密码" placeholder="仅供预览，请勿填写真实密码"></label><button class="rt-primary" data-demo="这是登录引导预览，不连接账号">登录</button><div class="rt-dialog-footer"><button data-demo="注册入口预览">注册账号</button><button data-close>暂不登录，直接使用</button></div>'}</section>`;model.el.append(shade);model.previousFocus=document.activeElement;shade.querySelector('[data-close]').focus();}
+    function closeDialog(model){model.el.querySelector('.rt-shade')?.remove();model.previousFocus?.focus();}
+    root.querySelectorAll('.rt-app').forEach(el=>{
+      const model={el,page:'today',scores:{overall:validScore(saved?.overall)?saved.overall:4,...Object.fromEntries(dims.map(([key,,,n])=>[key,n]))},note:typeof saved?.note==='string'?saved.note.slice(0,4000):'完成了短片初剪，也给自己留了一点休息时间。',toastTimer:null};models.push(model);paint(model);
+      el.addEventListener('click',event=>{
+        const b=event.target.closest('button');if(!b||!el.contains(b))return;
+        if(b.dataset.page){model.page=b.dataset.page;paint(model);return;}
+        const key=b.dataset.score??b.dataset.zero;
+        if(key){model.scores[key]=b.dataset.zero?0:Number(b.dataset.value);const card=b.closest('[data-rating]');card.querySelectorAll('[data-score]').forEach(star=>star.setAttribute('aria-pressed',Number(star.dataset.value)<=model.scores[key]));card.querySelector('[data-zero]').setAttribute('aria-pressed',model.scores[key]===0);card.querySelector('.rt-value').textContent=`${model.scores[key]} / 5`;if(key!=='overall')card.querySelector('.rt-card-head small').textContent=`${5+2*model.scores[key]} XP`;el.querySelector('[data-day-xp]').textContent=`今日 ${xp(model)} XP`;if(!matchMedia('(prefers-reduced-motion:reduce)').matches)b.animate([{transform:'scale(1)'},{transform:'scale(1.16)',offset:.4},{transform:'scale(1)'}],{duration:360,easing:'cubic-bezier(.22,.8,.25,1)'});toast(model,key==='overall'?'总体评分已记录 · 经验不变':'评分反馈预览');remember(model);return;}
+        if(b.dataset.dialog){dialog(model,b.dataset.dialog);return;}
+        if(b.hasAttribute('data-progress')){dialog(model,'progress');return;}
+        if(b.hasAttribute('data-close')){closeDialog(model);return;}
+        if(b.hasAttribute('data-fake-save')){closeDialog(model);toast(model,'推进反馈预览');return;}
+        if(b.dataset.demo)toast(model,b.dataset.demo);
+      });
+      el.addEventListener('input',event=>{if(event.target.matches('.rt-overall textarea')){model.note=event.target.value;remember(model);}});
+      el.addEventListener('keydown',event=>{const shade=el.querySelector('.rt-shade');if(!shade)return;if(event.key==='Escape'){event.preventDefault();closeDialog(model);}if(event.key==='Tab'){const focusable=[...shade.querySelectorAll('button,input,textarea')],first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+      if(globalThis.Tweak){const design={gap:14,radius:16};const tweak=new Tweak({container:el,onChange:()=>{el.style.setProperty('--rt-gap',design.gap+'px');el.style.setProperty('--rt-radius',design.radius+'px');}});tweak.addSlider(design,'gap',{label:'组件间距',min:8,max:22,unit:'px'});tweak.addSlider(design,'radius',{label:'卡片圆角',min:10,max:22,unit:'px'});}
+    });
+    window.addEventListener('openai:set_globals',event=>{const next=event.detail?.globals?.widgetState?.modelContent?.preview;if(!next)return;models.forEach(model=>{if(validScore(next.overall))model.scores.overall=next.overall;if(typeof next.note==='string')model.note=next.note.slice(0,4000);paint(model);});});
+  })();
+  </script>
+</div>
