@@ -5,11 +5,6 @@ const time = value => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const hasRecords = state => Boolean(state && (state.ledger?.length || Object.keys(state.tasks??{}).length || Object.keys(state.ratings??{}).length || Object.keys(state.dailyNotes??{}).length || Object.keys(state.ratingNotes??{}).length || Object.keys(state.dailyReviews??{}).length));
-export function canInheritGuestSnapshot({ cloudVersion, cloudState, local, guest }) {
-  return cloudVersion===0&&!cloudState&&local?.revision===0&&hasRecords(guest);
-}
-
 export class SyncEngine {
   constructor(store, remote, onChange = () => {}) { this.store = store; this.remote = remote; this.onChange = onChange; this.running = null; this.rerun = false; }
   run() {

@@ -1,6 +1,0 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {compareVersions,validateUpdateManifest,checkUpdate} from '../packages/ui/updater.js';
-test('version comparison handles stable releases and prerelease ordering',()=>{assert.equal(compareVersions('0.1.0-alpha.21','1.0.0'),-1);assert.equal(compareVersions('1.0.0','1.0.0-beta.2'),1);assert.equal(compareVersions('1.2.3','1.2.3'),0);});
-test('manifest accepts only links from the project release page',()=>{assert.ok(validateUpdateManifest({windows:{version:'1.0.0',url:'https://github.com/StuTuse/rater-tracker/releases/latest/download/a.exe'}},'windows'));assert.equal(validateUpdateManifest({android:{version:'2.0.0',url:'https://evil.test/x'}},'android'),null);});
-test('update checks return only a newer validated platform package',async()=>{const fetcher=async()=>({ok:true,json:async()=>({android:{version:'1.0.0',url:'https://github.com/StuTuse/rater-tracker/releases/latest/download/a.apk'},windows:{version:'0.1.0',url:'https://github.com/StuTuse/rater-tracker/releases/latest/download/a.exe'}})});assert.equal((await checkUpdate('android','0.1.0-alpha.6',fetcher)).version,'1.0.0');assert.equal((await checkUpdate('windows','0.1.0-alpha.21',fetcher)).version,'0.1.0');assert.equal(await checkUpdate('windows','1.0.0',fetcher),null);});

@@ -1,18 +1,12 @@
 package local.ratertracker.android;
 import android.app.Activity;
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.content.Intent;
-import android.os.Build;
-import android.net.Uri;
-import android.provider.Settings;
 import android.net.Uri;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.AtomicFile;
 import android.util.Base64;
 import androidx.activity.result.ActivityResult;
-import androidx.core.content.ContextCompat;
 import com.getcapacitor.*;
 import com.getcapacitor.annotation.*;
 import java.io.*;
@@ -20,11 +14,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.CodingErrorAction;
 import java.security.KeyStore;
-import org.json.JSONArray;
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 
-@CapacitorPlugin(name="RaterPlatform", permissions={@Permission(alias="notifications", strings={Manifest.permission.POST_NOTIFICATIONS})})
+@CapacitorPlugin(name="RaterPlatform")
 public class RaterPlatformPlugin extends Plugin {
  private boolean foreground=true;
  private static final int LIMIT=64*1024*1024;
@@ -75,25 +68,9 @@ public class RaterPlatformPlugin extends Plugin {
   call.resolve(r);
  }
  @PluginMethod public void sessionClear(PluginCall call){file().delete();call.resolve();}
- @PluginMethod public void configureReminders(PluginCall call){
-  try{
-   android.content.SharedPreferences p=getContext().getSharedPreferences(ReminderReceiver.PREFS,Activity.MODE_PRIVATE);
-   boolean enabled=call.getBoolean("enabled",false);JSArray copies=call.getArray("copies",new JSArray());
-   p.edit().putBoolean("enabled",enabled).putBoolean("daily",call.getBoolean("daily",true)).putBoolean("followup",call.getBoolean("followup",true)).putBoolean("weekly",call.getBoolean("weekly",true)).putString("copies",copies.toString()).putString("todayUpdate",call.getString("todayUpdate","")).apply();
-   if(!enabled){ReminderReceiver.cancel(getContext());JSObject result=new JSObject();result.put("granted",true);call.resolve(result);return;}
-   if(Build.VERSION.SDK_INT>=33&&ContextCompat.checkSelfPermission(getContext(),Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){requestPermissionForAlias("notifications",call,"notificationPermissionResult");return;}
-   boolean exact=scheduleReminders(true);JSObject result=new JSObject();result.put("granted",true);result.put("exactAlarm",exact);call.resolve(result);
-  }catch(Exception e){call.reject("提醒设置没有保存，请重试");}
- }
- @PermissionCallback private void notificationPermissionResult(PluginCall call){if(call==null)return;boolean granted=Build.VERSION.SDK_INT<33||ContextCompat.checkSelfPermission(getContext(),Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED;boolean exact=granted&&scheduleReminders(true);try{JSObject result=new JSObject();result.put("granted",granted);result.put("exactAlarm",exact);call.resolve(result);}catch(Exception e){call.reject("无法读取通知权限状态");}}
- private boolean scheduleReminders(boolean askOnce){boolean exact=ReminderReceiver.schedule(getContext());if(Build.VERSION.SDK_INT>=31&&!exact&&askOnce){android.content.SharedPreferences p=getContext().getSharedPreferences(ReminderReceiver.PREFS,Activity.MODE_PRIVATE);if(!p.getBoolean("askedExact",false)){p.edit().putBoolean("askedExact",true).apply();try{getActivity().startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getContext().getPackageName())));}catch(Exception ignored){}}}return exact;}
- @PluginMethod public void reminderActivity(PluginCall call){String date=call.getString("date","");if(date.matches("\\d{4}-\\d{2}-\\d{2}"))getContext().getSharedPreferences(ReminderReceiver.PREFS,Activity.MODE_PRIVATE).edit().putString("todayUpdate",date).apply();call.resolve();}
- @PluginMethod public void pendingRoute(PluginCall call){android.content.SharedPreferences p=getContext().getSharedPreferences(ReminderReceiver.PREFS,Activity.MODE_PRIVATE);String route=p.getString("pendingRoute","");JSObject result=new JSObject();result.put("route",route);result.put("weeklyStart",p.getString("pendingWeek",""));p.edit().remove("pendingRoute").remove("pendingWeek").apply();call.resolve(result);}
- @PluginMethod public void openExternal(PluginCall call){try{Uri uri=Uri.parse(call.getString("url",""));if(!"https".equals(uri.getScheme())||!"github.com".equals(uri.getHost())||uri.getPath()==null||!uri.getPath().startsWith("/StuTuse/rater-tracker/releases"))throw new IllegalArgumentException();Intent intent=new Intent(Intent.ACTION_VIEW,uri);intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);getContext().startActivity(intent);call.resolve();}catch(Exception e){call.reject("无法打开项目官方发布页");}}
  @PluginMethod public void quit(PluginCall call){getActivity().runOnUiThread(()->getActivity().moveTaskToBack(true));call.resolve();}
  public void insets(int top,int bottom){float d=getContext().getResources().getDisplayMetrics().density;JSObject r=new JSObject();r.put("safeTop",top/d);r.put("safeBottom",bottom/d);notifyListeners("insets",r,true);}
  public void back(){notifyListeners("back",new JSObject());}
  public void inactive(){foreground=false;notifyListeners("inactive",new JSObject(),true);}
  public void active(){foreground=true;notifyListeners("active",new JSObject());}
- public void notificationOpened(){android.content.SharedPreferences p=getContext().getSharedPreferences(ReminderReceiver.PREFS,Activity.MODE_PRIVATE);JSObject r=new JSObject();r.put("route",p.getString("pendingRoute",""));r.put("weeklyStart",p.getString("pendingWeek",""));notifyListeners("notification",r,true);}
 }

@@ -19,7 +19,6 @@ export function updateDOM(parent, markup, { preserveInputs = true, starChanged =
       return;
     }
     const wasLit = old.classList.contains('lit'), isStar = old.classList.contains('star-button');
-    const editorHeight = preserveInputs && old.matches('textarea.rating-note') && document.activeElement === old ? old.style.height : '';
     const preview = isStar ? ['preview-lit', 'preview-dim'].filter(c => old.classList.contains(c)) : [];
     const preserveOpen = preserveInputs && old.tagName === 'DETAILS';
     for (const attr of [...old.attributes]) {
@@ -30,16 +29,13 @@ export function updateDOM(parent, markup, { preserveInputs = true, starChanged =
       if (preserveOpen && attr.name === 'open') continue;
       if (old.getAttribute(attr.name) !== attr.value) old.setAttribute(attr.name, attr.value);
     }
-    if (editorHeight) old.style.height = editorHeight;
     if (preview.length) old.classList.add(...preview);
     if (old.tagName === 'TEXTAREA') {
       if (!preserveInputs || document.activeElement !== old && !old.closest('#references-form, #modal')) {
         if (old.value !== next.value) old.value = next.value;
       }
     } else {
-      // The chart renderer patches its SVG after the surrounding page update.
-      // Preserve that subtree between the two passes instead of flashing it empty.
-      if (!old.hasAttribute('data-render-owned')) children(old, next);
+      children(old, next);
       if (old.tagName === 'INPUT' && old.type !== 'checkbox' && (!preserveInputs || document.activeElement !== old && !old.closest('#modal'))) {
         if (old.value !== next.value) old.value = next.value;
       }

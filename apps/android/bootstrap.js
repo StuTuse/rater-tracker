@@ -11,31 +11,12 @@ window.raterNative={
  sessionRead:async()=>{const r=await Native.sessionRead();return r.contents?JSON.parse(r.contents):null;},
  sessionWrite:data=>Native.sessionWrite({contents:JSON.stringify(data)}),
  sessionClear:()=>Native.sessionClear(),
- configureReminders:config=>Native.configureReminders(config),
- reminderActivity:date=>Native.reminderActivity({date}),
- pendingRoute:()=>Native.pendingRoute(),
- openExternal:options=>Native.openExternal(options),
- onNotificationOpen:callback=>Native.addListener('notification',callback),
  openData:async()=>{},
  quit:()=>Native.quit()
 };
 function safeArea(v){if(typeof v.active==='boolean')window.raterNative.active=v.active;document.documentElement.style.setProperty('--native-safe-top',(v.safeTop??24)+'px');document.documentElement.style.setProperty('--native-safe-bottom',(v.safeBottom??24)+'px');}
 safeArea(await nativeInfo().catch(()=>({})));Native.addListener('insets',safeArea);
-let viewportFrame;
-function viewport(){
- const visible=visualViewport;
- document.documentElement.style.setProperty('--visual-height',visible.height+'px');
- document.documentElement.classList.toggle('keyboard-open',visible.height<innerHeight-100);
- cancelAnimationFrame(viewportFrame);
- viewportFrame=requestAnimationFrame(()=>{
-  const field=document.activeElement;
-  if(!field?.matches('input,textarea')||!field.getClientRects().length)return;
-  const rect=field.getBoundingClientRect(),top=visible.offsetTop+12,bottom=visible.offsetTop+visible.height-16;
-  if(rect.top>=top&&rect.bottom<=bottom)return;
-  if(field.closest('dialog'))field.scrollIntoView({block:'nearest',behavior:'instant'});
-  else window.scrollBy({top:rect.height>bottom-top||rect.top<top?rect.top-top:rect.bottom-bottom,behavior:'instant'});
- });
-}
+function viewport(){document.documentElement.style.setProperty('--visual-height',visualViewport.height+'px');document.documentElement.classList.toggle('keyboard-open',visualViewport.height<innerHeight-100);}
 visualViewport?.addEventListener('resize',viewport);viewport();
 Native.addListener('back',()=>window.dispatchEvent(new Event('rater-back')));
 Native.addListener('inactive',()=>{window.raterNative.active=false;window.dispatchEvent(new Event('rater-pause'));});

@@ -7,10 +7,9 @@ import { androidTools, verifyAndroidRelease } from './android-verify.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),project=path.join(root,'apps/android'),native=path.join(project,'android');
 const tools=androidTools(root),java=tools.javaHome;
 const temp=process.env.RATER_ANDROID_TMP??path.join(root,'runtime-data/android-tmp');
-const androidUserHome=process.env.RATER_ANDROID_USER_HOME??path.join(root,'runtime-data/android-user-home');
-mkdirSync(temp,{recursive:true});mkdirSync(androidUserHome,{recursive:true});
+mkdirSync(temp,{recursive:true});
 const buildEnv={...process.env,JAVA_HOME:java,ANDROID_HOME:tools.sdk,ANDROID_SDK_ROOT:tools.sdk,
- ANDROID_USER_HOME:androidUserHome,GRADLE_USER_HOME:process.env.GRADLE_USER_HOME??path.join(root,'runtime-data/android-gradle-home'),TEMP:temp,TMP:temp};
+ GRADLE_USER_HOME:process.env.GRADLE_USER_HOME??path.join(root,'runtime-data/android-gradle-home'),TEMP:temp,TMP:temp};
 function run(exe,args,cwd=project){const r=spawnSync(exe,args,{cwd,stdio:'inherit',windowsHide:true,env:buildEnv});if(r.status!==0)throw Error('构建步骤失败: '+exe);}
 const git=spawnSync('git',['rev-parse','--path-format=absolute','--git-common-dir'],{cwd:root,encoding:'utf8'});const primaryRoot=git.status===0?path.dirname(git.stdout.trim()):root;
 const signing=process.env.RATER_ANDROID_SIGNING_DIR?path.resolve(process.env.RATER_ANDROID_SIGNING_DIR):path.join(primaryRoot,'runtime-data/android-signing');mkdirSync(signing,{recursive:true});

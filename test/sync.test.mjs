@@ -3,15 +3,8 @@ import assert from 'node:assert/strict';
 import { indexedDB } from 'fake-indexeddb';
 import { openStore } from '../src/storage.js';
 import { createState, transact, totalUnits } from '../src/core.js';
-import { SyncEngine, canInheritGuestSnapshot } from '../src/sync.js';
+import { SyncEngine } from '../src/sync.js';
 globalThis.indexedDB = indexedDB;
-test('guest inheritance is offered only for a truly empty account and cloud',()=>{
- const empty=createState(),guest=rating(createState());
- assert.equal(canInheritGuestSnapshot({cloudVersion:0,cloudState:null,local:empty,guest}),true);
- assert.equal(canInheritGuestSnapshot({cloudVersion:1,cloudState:null,local:empty,guest}),false);
- assert.equal(canInheritGuestSnapshot({cloudVersion:0,cloudState:{},local:empty,guest}),false);
- assert.equal(canInheritGuestSnapshot({cloudVersion:0,cloudState:null,local:{...empty,revision:1},guest}),false);
-});
 const rating = (state, stars = 3) => transact(state, { id: crypto.randomUUID(), type: 'rate', dimension: 'study', date: '2026-10-13', stars }, '2026-10-13T10:00:00+08:00');
 
 test('guest and two accounts never share records or pending uploads', async () => {
@@ -199,12 +192,10 @@ test('download cannot overwrite newer input; explicit restore does not grant rew
 test('clearing one local account is revision guarded and preserves guest and other accounts', async () => {
   const a = await openStore('clear-target'), other = await openStore('clear-other'), guest = await openStore();
   await a.write(rating(await a.read()), 0); await other.write(rating(await other.read(), 5), 0);
-  await a.writeAux('text-drafts',{keep:'no'});await other.writeAux('text-drafts',{keep:'yes'});
   const guestBefore = await guest.read(), otherBefore = await other.read();
   await a.beginPush(); await a.markConflict(2);
   await assert.rejects(a.clearAccount(0)); assert.equal(totalUnits(await a.read()), 11e6);
   await a.clearAccount((await a.read()).revision);
-  assert.equal(await a.readAux('text-drafts'),null);assert.deepEqual(await other.readAux('text-drafts'),{keep:'yes'});
   assert.equal(totalUnits(await a.read()), 0);
   const cleared = await a.readSync(); assert.equal(cleared.meta.dirty, false); assert.equal(cleared.meta.inFlight, null); assert.equal(cleared.meta.conflict, null);
   assert.deepEqual(await guest.read(), guestBefore); assert.deepEqual(await other.read(), otherBefore);
