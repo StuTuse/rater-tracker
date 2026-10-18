@@ -37,8 +37,8 @@ export function createPageMotion(getRoot, motion) {
     root.dataset.entering = scope;
     groups.forEach((element, index) => {
       // Individual translate composes with existing hover/press transform effects.
-      const frames = mode === 'full' ? [{ opacity:0, translate:'0 12px' }, { opacity:1, translate:'0 0' }] : [{ opacity:0 }, { opacity:1 }];
-      const animation = element.animate(frames, { duration:mode === 'full' ? 380 : 160, delay:mode === 'full' ? Math.min(index * 22, 132) : 0, easing:'cubic-bezier(.22,.8,.25,1)', fill:'backwards' });
+      const frames = mode === 'full' ? [{ translate:'0 8px' }, { translate:'0 0' }] : [{ translate:'0 2px' }, { translate:'0 0' }];
+      const animation = element.animate(frames, { duration:mode === 'full' ? 280 : 140, delay:0, easing:'cubic-bezier(.22,.8,.25,1)' });
       animation.id = 'page-enter'; animations.add(animation);
       const finish = () => {
         animations.delete(animation);

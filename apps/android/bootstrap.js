@@ -11,6 +11,11 @@ window.raterNative={
  sessionRead:async()=>{const r=await Native.sessionRead();return r.contents?JSON.parse(r.contents):null;},
  sessionWrite:data=>Native.sessionWrite({contents:JSON.stringify(data)}),
  sessionClear:()=>Native.sessionClear(),
+ configureReminders:config=>Native.configureReminders(config),
+ reminderActivity:date=>Native.reminderActivity({date}),
+ pendingRoute:()=>Native.pendingRoute(),
+ openExternal:options=>Native.openExternal(options),
+ onNotificationOpen:callback=>Native.addListener('notification',callback),
  openData:async()=>{},
  quit:()=>Native.quit()
 };

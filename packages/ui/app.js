@@ -1,7 +1,7 @@
 import { DIMENSIONS, LABELS, TIERS, SCALE, xp, hongKong, addDays, daysBetween, taskPlan, transact, totalUnits, levelAt, stats, nextCoefficient, progressDays, allocatedProgress, estimate } from './core.js';
 import { openStore, ConflictError, validateState, backupText, parseBackup } from './storage.js';
-import { currentAccount, loginAccount, logoutAccount, registerAccount, verifyRegistration, cancelRegistration, cloudSync } from './account.js';
-import { SyncEngine } from './sync.js';
+import { currentAccount, loginAccount, logoutAccount, registerAccount, verifyRegistration, cancelRegistration, cloudSync, touchAccount } from './account.js';
+import { SyncEngine, canInheritGuestSnapshot } from './sync.js';
 import { icon } from './icons.js';
 import { BADGES } from './badges.js';
 import { ART, badgeArt } from './art.js';
@@ -12,6 +12,10 @@ import { growthStage, paintStage, stageUpgradeFrames } from './growth-stages.js'
 import { chooseLaunchLine, BadgeNoticeQueue } from './notices.js';
 import { createPageMotion } from './page-motion.js';
 import { finishStartup } from './startup.js';
+import { buildWeeklyReport, mondayFor, previousWeek } from '../core/weekly-report.js';
+import { trendPanel, drawTrends, weeklyArchive, getWeeklyReport } from './history.js';
+import { readReminders, applyReminders } from './reminders.js';
+import { checkUpdate, compareVersions } from './updater.js';
 
 const platform = window.desktop ?? window.raterNative;
 const appVisible=()=>!document.hidden&&window.raterNative?.active!==false;
@@ -36,10 +40,10 @@ function refreshAccountIdentity() {
   if ($('#modal').dataset.kind === 'account' && $('#sync-status')) $('#sync-status').textContent = syncStatus;
 }
 function openAccountDialog(mode) {
-  accountMode = account ? 'profile' : mode ?? 'login';
+  accountMode = account?.needsLogin ? mode ?? 'login' : account ? 'profile' : mode ?? 'login';
   let contents;
   if (account) {
-    contents = `${modalHead('', '账号中心')}<div class="account-profile"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><div><strong>${escape(account.name)}</strong><span>密码 · ••••••••</span></div></div><p id="sync-status" class="account-sync-status" role="status">${escape(syncStatus)}</p><div class="account-tools">${button('sync-now', '立即同步', 'check', '', 'primary')}${button('sync-adopt', '复制未登录记录', '', '', 'secondary')}${button('sync-download', '备份本机并使用云端', '', '', 'secondary')}${button('account-logout', '退出账号', '', '', 'text-button')}</div><p class="field-hint">启动后后台核对云端，并按最后修改时间保留较新快照；断网时继续保存到本机。密码仅显示掩码。</p>`;
+    contents = `${modalHead('', '账号中心')}<div class="account-profile"><span class="account-avatar" aria-hidden="true">${icon('account')}</span><div><strong>${escape(account.name)}</strong><span>密码 · ••••••••</span></div></div><p id="sync-status" class="account-sync-status" role="status">${escape(syncStatus)}</p><div class="account-tools">${account.needsLogin?button('account-login-tab','重新登录','','','primary'):button('sync-now', '立即同步', 'check', '', 'primary')}${!account.needsLogin?button('sync-adopt', '复制未登录记录', '', '', 'secondary'):''}${!account.needsLogin?button('sync-download', '备份本机并使用云端', '', '', 'secondary'):''}${button('account-logout', '退出账号', '', '', 'text-button')}</div><p class="field-hint">登录凭证会安全续期；连续30天未使用时需要重新登录。本机记录始终保留。</p>`;
   } else {
     const registering = accountMode === 'register', verifying = accountMode === 'verify';
     const tabs = `<div class="segmented account-tabs" role="group" aria-label="账号操作">${button('account-login-tab', '登录', '', `aria-pressed="${!registering && !verifying}"`, !registering && !verifying ? 'selected' : '')}${button('account-register-tab', '注册账号', '', `aria-pressed="${registering || verifying}"`, registering || verifying ? 'selected' : '')}</div>`;
@@ -53,17 +57,21 @@ function openAccountDialog(mode) {
   if (!account) $('#modal .account-pane:not([hidden]) input')?.focus({ preventScroll: true });
 }
 async function openAccount(next) {
+  await flushTextDrafts();
   await syncEngine?.running;
   await queue;
   syncEngine = null;
   resetBadgeNotices();
   store.close(); account = next;
   store = await openStore(next?.id); state = validateState(await store.read());
+  if(state.businessUpdates?.[today()])platform?.reminderActivity?.(today()).catch?.(()=>{});
   localStorage.setItem('rater-active-account', JSON.stringify(next));
-  drafts.clear(); stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog(); refreshAccountIdentity();$('#save-status').textContent=next?'正在同步':'已保存到本机';
+  drafts.clear();editingNotes.clear();for(const[key,value]of Object.entries(await store.readAux('text-drafts')??{}))if(typeof value==='string')drafts.set(key,value);stopGrowthFeedback(); applyMotion(); growthStatic(); renderContent(false); refreshTaskDialog(); refreshAccountIdentity();$('#save-status').textContent=next?'正在同步':'已保存到本机';
   if (next) {
     const activeStore = store;
-    syncEngine = new SyncEngine(store, data=>cloudSync({...data,accountId:next.id}), async (status, message) => {
+    if(next.needsLogin){syncStatus='连续30天未使用，请重新登录；本机记录已保留';$('#save-status').textContent=syncStatus;refreshAccountIdentity();return;}
+    let cloudHadState=false,cloudVersion=0,guestInherited=false;
+    syncEngine = new SyncEngine(store, async data=>{const result=await cloudSync({...data,accountId:next.id});if(data.type==='pull'){cloudHadState=Boolean(result.state);cloudVersion=result.version;}return result;}, async (status, message) => {
       if (store !== activeStore) return;
       syncStatus = ({ synced: '已同步', pending: '已保存到本机，待同步', conflict: '两端数据有冲突，请先备份并选择云端版本', offline: '已保存到本机，同步暂未完成' })[status];
       if (message) syncStatus += `：${message}`;
@@ -71,8 +79,12 @@ async function openAccount(next) {
       await queue;
       if (store !== activeStore) return;
       const latest = validateState(await store.read());
-      if (latest.revision !== state.revision) { resetBadgeNotices(); state = latest; applyMotion(); growthStatic(); renderContent(); refreshTaskDialog(); }
+      if (latest.revision !== state.revision) { resetBadgeNotices(); state = latest;if(state.businessUpdates?.[today()])platform?.reminderActivity?.(today()).catch?.(()=>{});applyMotion(); growthStatic(); renderContent(); refreshTaskDialog(); }
       else if (page === 'settings') renderContent();
+      if(status==='synced'&&!guestInherited&&!cloudHadState&&cloudVersion===0&&latest.revision===0){
+        const guest=await openStore();const source=validateState(await guest.read());guest.close();
+        if(canInheritGuestSnapshot({cloudVersion,cloudState:cloudHadState?true:null,local:latest,guest:source})&&store===activeStore){guestInherited=true;const current=validateState(await activeStore.read()),inherited=structuredClone(source);inherited.revision=current.revision+1;inherited.modifiedAt=new Date().toISOString();await activeStore.write(inherited,current.revision);state=validateState(await activeStore.read());syncStatus='已继承本机记录，正在同步';$('#save-status').textContent=syncStatus;renderContent(false);refreshTaskDialog();toast('已将原有本机记录复制到账号并开始同步；未登录记录仍保留。');syncEngine.run();}
+      }
       $('#save-status').textContent = syncStatus;
     });
     syncStatus = '正在同步'; syncEngine.run();
@@ -81,6 +93,10 @@ async function openAccount(next) {
 const button = (action, label, name = '', extra = '', cls = '') => `<button type="button" class="${cls}" data-action="${action}" ${extra}>${name ? icon(name) : ''}${label}</button>`;
 let store, state, desktopInfo, page = 'today', chosenDate = today(), month = today().slice(0, 7), taskFilter = 'active', taskQuery = '', badgeFilter = 'all', trendRange = 7, rewardTab = 'badges';
 let queue = Promise.resolve(), animationToken = 0, numberFrame, celebrationTimer;
+let historyTab='days', weeklyStart=previousWeek(new Date().toISOString()).start, weeklyDay=weeklyStart;
+const hiddenTrendSeries=new Set();
+const chartObserver=new ResizeObserver(()=>drawTrends($('#content'),state,[...hiddenTrendSeries],historyTab==='reports'?weeklyDay:chosenDate));
+async function cacheWeeklyReport() { const active=store,report=getWeeklyReport(state,weeklyStart,account?.id??'guest'),key='weekly/'+weeklyStart;try{const old=await active.readAux(key);if(old?.report?.fingerprint!==report.fingerprint)await active.writeAux(key,{revision:(old?.revision??0)+1,report,previous:old?.report??null});}catch{ /* Derived reports remain reconstructible from the saved original records. */ } }
 const modalUI = createModalController($('#modal'), motionMode, kind => {
   if (kind === 'account') {
     $('#modal').querySelectorAll('input[type="password"], #account-verify input').forEach(input => { input.value = ''; });
@@ -99,7 +115,21 @@ const validTasks = () => Object.values(state.tasks).filter(t => !t.deleted);
 const earned = s => BADGES.filter(b => seriesCount(stats(s))[b.series] >= b.threshold);
 const dateLabel = date => new Date(`${date}T00:00:00+08:00`).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Hong_Kong' });
 const due = task => { const d = daysBetween(today(), task.deadline); return d < 0 ? `逾期 ${-d} 天` : d === 0 ? '今天到期' : d <= 3 ? `${d} 天内到期` : `${task.deadline.slice(5).replace('-', '/')} 截止`; };
-const taskStatus = task => task.completion?.active ? '已完成' : task.archived ? '已归档' : task.progress.some(p => p.active) ? '进行中' : '待开始';
+const taskStatus = task => task.completion?.active ? '已完成' : task.archived ? '已归档' : ['long','extended'].includes((task.frozen??taskPlan(task)).tier) || task.progress.some(p => p.active) ? '正在进行' : '待开始';
+const editingNotes = new Set(), noteTimers = new Map(), composingNotes = new Set();
+let draftWrites = Promise.resolve();
+const recordNote = (date,d) => d==='journal' ? state.dailyNotes?.[date]?.note??state.dailyReviews?.[date]?.note??state.dailyReviews?.[date]?.summary??'' : state.ratings[date]?.[d]?.note??state.ratingNotes?.[date]?.[d]?.note??'';
+function persistDrafts() { const active=store, values=Object.fromEntries(drafts);draftWrites=draftWrites.catch(()=>{}).then(()=>active.writeAux('text-drafts',values));return draftWrites; }
+function captureText(field) { const key=`${field.dataset.date}/${field.dataset.dimension}`;drafts.set(key,field.value);persistDrafts().catch(()=>{$('#save-status').textContent='草稿暂存失败，请保持页面并重试';});field.style.height='auto';field.style.height=Math.max(80,field.scrollHeight+2)+'px';return key; }
+async function commitText(key) {
+  clearTimeout(noteTimers.get(key));noteTimers.delete(key);if(composingNotes.has(key)||!drafts.has(key))return false;
+  const date=key.slice(0,10), dimension=key.slice(11), note=drafts.get(key), active=store;
+  const success=await save({type:dimension==='journal'?'journal':'note',date,dimension,note},'记录已保存',active);
+  if(success&&store===active&&drafts.get(key)===note){drafts.delete(key);await persistDrafts().catch(()=>{});}
+  if(success&&store===active)renderContent();return success;
+}
+async function flushTextDrafts() { for(const key of [...drafts.keys()])await commitText(key);await draftWrites.catch(()=>{}); }
+function journalCard(date,readonly=false) { const note=drafts.get(`${date}/journal`)??recordNote(date,'journal');return `<section class="panel daily-journal" data-ui-key="journal:${date}"><h2>每日小结</h2>${readonly?`<p class="record-text">${escape(note||'这一天没有写小结。')}</p>`:`<textarea id="daily-journal" class="rating-note journal-note" data-date="${date}" data-dimension="journal" maxlength="4000" rows="2" placeholder="选填，记下今天想留下的一件小事…" aria-label="每日小结">${escape(note)}</textarea><small class="field-hint">自动保存</small>`}</section>`; }
 
 function toast(message, error = false) {
   $('#feedback').innerHTML = `<div class="toast ${error ? 'error' : ''}">${icon(error ? 'info' : 'check')}<span>${escape(message)}</span></div>`;
@@ -189,23 +219,26 @@ function feedback(before, after, reason) {
   } else $('#growth').classList.remove('xp-changing');
 }
 
-function save(action, reason) {
+function save(action, reason, boundStore = store) {
   const prepared = { ...action, id: action.id ?? uid() };
   queue = queue.then(async () => {
     const before = state;
     try {
+      if(store!==boundStore)throw new Error('账号已切换，旧记录没有写入新账号');
       const next = transact(state, prepared);
-      if (next === state) return;
+      if (next === state) return true;
       await store.write(next, before.revision);
-      state = next; applyMotion(); renderContent(true, true); refreshTaskDialog(); feedback(before, state, reason);
+      state = next; applyMotion(); renderContent(true, !['note','journal'].includes(prepared.type)); refreshTaskDialog(); if(!['note','journal'].includes(prepared.type))feedback(before, state, reason);
       $('#save-status').textContent = '已保存到本机';
+      if(state.businessUpdates?.[today()]&&['rate','createTask','progress','complete'].includes(prepared.type))platform?.reminderActivity?.(today()).catch?.(()=>{});
       if (syncEngine) { syncStatus = '已保存到本机，待同步'; syncEngine.run(); }
+      return true;
     } catch (error) {
       if (error instanceof ConflictError) { resetBadgeNotices(); state = validateState(await store.read()); renderContent(); growthStatic(); }
       $('#save-status').textContent = '本次未保存'; toast(error.message, true);
       throw error;
     }
-  }).catch(() => {});
+  }).catch(() => false);
   return queue;
 }
 
@@ -222,15 +255,15 @@ function shell() {
 }
 function header(kicker, title, description, right = '') { return `<div class="page-header"><div><h1>${title}</h1>${description ? `<p class="subtitle">${description}</p>` : ''}</div>${right}</div>`; }
 function datePicker() { return `<div class="date-switch">${button('previous-date', '‹', '', 'aria-label="前一天"')}<input aria-label="评分日期" type="date" id="rating-date" value="${chosenDate}" max="${today()}">${button('next-date', '›', '', `aria-label="后一天" ${chosenDate === today() ? 'disabled' : ''}`)}</div>`; }
-function ratingCards(date) {
+function ratingCards(date, readonly = false) {
   const day = state.ratings[date] ?? {};
   return `<div class="ratings-grid">${DIMENSIONS.map((d, i) => {
     const r = day[d], amount = r ? state.ledger.filter(e => e.owner === `${date}/${d}` && e.active).reduce((sum, e) => sum + e.actual, 0) : 0;
-    const note = drafts.get(`${date}/${d}`) ?? r?.note ?? '';
-    return `<article data-ui-key="rating:${date}/${d}" class="rating-card ${r ? 'rated' : ''}" style="--order:${i}"><div class="card-top"><div class="category-icon ${d}">${icon(d)}</div><div><h2>${LABELS[d]}</h2></div><span class="rating-state">${r ? `${r.stars} 星` : '未评分'}</span></div>
+    const note = drafts.get(`${date}/${d}`) ?? recordNote(date,d), key=`${date}/${d}`,editing=editingNotes.has(key);
+    if(readonly)return `<article class="rating-card history-rating" data-ui-key="review:${key}"><div class="card-top"><div class="category-icon ${d}">${icon(d)}</div><h2>${LABELS[d]}</h2><span>${r?r.stars+' 星':'—'}</span></div><p class="record-text">${escape(note||'没有填写依据')}</p></article>`;
+    return `<article data-ui-key="rating:${date}/${d}" class="rating-card ${r ? 'rated' : ''}" style="--order:${i}"><div class="card-top"><div class="category-icon ${d}">${icon(d)}</div><div><h2>${LABELS[d]}</h2></div>${button('write-note','', 'pencil',`data-dimension="${d}" data-date="${date}" aria-label="写${LABELS[d]}记录" aria-expanded="${editing}" aria-controls="note-${date}-${d}"`,'write-note icon-button')}</div>
       <div class="rating-control" role="group" aria-label="${LABELS[d]}评分"><button class="zero ${r?.stars === 0 ? 'active' : ''}" type="button" data-action="rate" data-dimension="${d}" data-stars="0" aria-pressed="${r?.stars === 0}">0 星</button><div class="stars">${[1, 2, 3, 4, 5].map(star => `<button type="button" data-action="rate" data-dimension="${d}" data-stars="${star}" class="star-button ${r && r.stars >= star ? 'lit' : ''}" aria-label="${LABELS[d]} ${star} 星" aria-pressed="${r?.stars === star}">${icon('star')}</button>`).join('')}</div></div>
-      <div class="rating-meta"><span>${r ? `${icon('check')}已记录 · ${fmt(xp(amount))} XP` : '未记录'}</span>${r ? button('clear-rating', '清空', '', `data-dimension="${d}"`, 'text-button') : '<span class="normal-xp">5–15 XP</span>'}</div>
-      <details ${note ? 'open' : ''}><summary>${icon('work')}原因与依据 <span>选填</span></summary><textarea rows="2" class="rating-note" data-dimension="${d}" data-date="${date}" placeholder="备注（选填）" ${r ? '' : 'disabled'} aria-label="${LABELS[d]}原因与依据">${escape(note)}</textarea><small class="field-hint">自动保存 · <button type="button" class="text-button reference" data-action="reference" data-dimension="${d}">查看评分参照</button></small></details></article>`;
+      <p class="record-text rating-reason" ${note&&!editing?'':'hidden'}>${escape(note)}</p><div class="reason-editor" ${editing?'':'hidden'}><textarea id="note-${date}-${d}" rows="2" maxlength="4000" class="rating-note" data-dimension="${d}" data-date="${date}" placeholder="写下今天的记录或评分依据…" aria-label="${LABELS[d]}原因与依据">${escape(note)}</textarea><small class="field-hint">自动保存 · ${button('reference','评分参照','','data-dimension="'+d+'"','text-button')}${r?button('clear-rating','清空星级','','data-dimension="'+d+'"','text-button'):''}</small></div></article>`;
   }).join('')}</div>`;
 }
 function empty(title, description, action = '', art = 'task') { return `<div class="empty"><div class="empty-art"><img src="${ART[art]}" alt="" width="140" height="140"></div><h3>${title}</h3><p>${description}</p>${action}</div>`; }
@@ -239,15 +272,15 @@ function taskCard(t, compact = false) {
   const done = t.stages.filter(s => s.done).length;
   const consumed = allocatedProgress(state, t), amount = state.ledger.filter(e => e.owner === t.id && e.active).reduce((a, e) => a + e.actual, 0);
   const caution = !t.completion?.active && !t.archived && daysBetween(today(), t.deadline) <= 3;
-  return `<article data-ui-key="task:${t.id}" class="task-card ${compact ? 'compact' : ''}"><div class="task-heading"><div class="task-marker ${t.completion?.active ? 'done' : ''}">${icon(t.completion?.active ? 'check' : 'flag')}</div><div class="task-title"><button type="button" class="title-button" data-action="task-detail" data-task="${t.id}">${escape(t.title)}</button><div class="task-tags"><span>${tier.name}</span>${t.dimension ? `<span>${LABELS[t.dimension]}</span>` : ''}<span class="${caution ? 'due' : ''}">${t.completion?.active ? `${t.completion.date} 完成` : due(t)}</span></div></div><span class="status ${t.completion?.active ? 'green' : ''}">${taskStatus(t)}</span></div>
-    ${!compact && t.goal ? `<p class="task-goal">${escape(t.goal)}</p>` : ''}<div class="task-progress"><div class="thin-bar"><i style="width:${Math.min(100, consumed / (p.e * .5) * 100)}%"></i></div><small>推进额度 ${fmt(xp(consumed))} / ${fmt(xp(p.e * .5))} XP ${t.stages.length ? ` · 阶段 ${done}/${t.stages.length}` : ''}</small></div>
+  return `<article data-ui-key="task:${t.id}" data-action="task-detail" data-task="${t.id}" class="task-card ${compact ? 'compact' : ''}"><div class="task-heading"><div class="task-marker ${t.completion?.active ? 'done' : ''}">${icon(t.completion?.active ? 'check' : 'flag')}</div><div class="task-title"><button type="button" class="title-button" data-action="task-detail" data-task="${t.id}">${escape(t.title)}</button><div class="task-tags"><span>${tier.name}</span>${t.dimension ? `<span>${LABELS[t.dimension]}</span>` : ''}<span class="${caution ? 'due' : ''}">${t.completion?.active ? `${t.completion.date} 完成` : due(t)}</span></div></div><span class="status ${t.completion?.active ? 'green' : ''}">${taskStatus(t)}</span></div>
+    ${!compact && t.goal ? `<p class="task-goal">${escape(t.goal)}</p>` : ''}<div class="task-progress">${t.stages.length?`<div class="thin-bar"><i style="width:${done/t.stages.length*100}%"></i></div><small>阶段 ${done} / ${t.stages.length}</small>`:`<small>有效推进 ${t.progress.filter(p=>p.active).length} 次</small>`}</div>
     <div class="task-foot"><span>已得 <b>${fmt(xp(amount))}</b> XP</span><div>${!t.completion?.active && !t.archived ? `${button('quick-progress', '推进', 'path', `data-task="${t.id}"`, 'secondary small')}${button('quick-complete', '完成', 'check', `data-task="${t.id}"`, 'primary small')}` : button('task-detail', '查看记录', 'arrow', `data-task="${t.id}"`, 'text-button')}</div></div></article>`;
 }
 function todayPage() {
   const day = state.ratings[chosenDate] ?? {}, count = DIMENSIONS.filter(d => day[d]).length;
   const tasks = validTasks().filter(t => !t.archived && !t.hidden && !t.completion?.active).sort((a, b) => a.deadline.localeCompare(b.deadline));
   const s = stats(state);
-  return header(chosenDate === today() ? 'TODAY / 今日手记' : 'DAILY JOURNAL / 每日手记', chosenDate === today() ? '今日评分' : dateLabel(chosenDate), `${dateLabel(chosenDate)} · ${count === 4 ? '四项已全部记录' : `已记录 ${count} / 4 项`}`, datePicker()) + `<div class="today-layout"><section><div class="section-title"><h2>每日评分</h2><span>${count === 4 ? `${icon('check')}今日记录完成` : '空白 ≠ 0 星'}</span></div>${ratingCards(chosenDate)}<div class="gentle-note">${icon('info')}0 星计入记录，未评分不计入。${chosenDate !== today() ? '<br>历史增量按补记时间折扣；原有经验保持。' : ''}</div></section><aside class="today-tasks"><div class="section-title"><h2>待办任务</h2>${button('new-task', '新建', 'plus', '', 'text-button')}</div><div class="task-stack">${tasks.slice(0, 4).map(t => taskCard(t, true)).join('') || empty('暂无任务', '', button('new-task', '新建任务', 'plus', '', 'secondary'))}</div>${tasks.length > 4 ? button('navigate', `查看全部 ${tasks.length} 项任务`, 'arrow', 'data-page="tasks"', 'text-button all-tasks') : ''}<div class="small-reflection"><span class="eyebrow">累计记录</span><div><strong>${s.recorded}</strong><span>记录天数</span><strong>${s.tasks}</strong><span>完成成果</span></div><p>${s.completeDays} 天完整评分 · ${s.stars} 颗有效星星</p></div></aside></div>`;
+  return header(chosenDate === today() ? 'TODAY / 今日手记' : 'DAILY JOURNAL / 每日手记', chosenDate === today() ? '今日记录' : dateLabel(chosenDate), `${dateLabel(chosenDate)} · ${count === 4 ? '四项已全部记录' : `已记录 ${count} / 4 项`}`, datePicker()) + `<div class="today-layout"><section><div class="section-title"><h2>每日评分</h2><span>${count === 4 ? `${icon('check')}今日记录完成` : '空白 ≠ 0 星'}</span></div>${ratingCards(chosenDate)}${journalCard(chosenDate)}<div class="gentle-note">${icon('info')}0 星计入记录，未评分不计入。${chosenDate !== today() ? '<br>历史增量按补记时间折扣；原有经验保持。' : ''}</div></section><aside class="today-tasks"><div class="section-title"><h2>当前任务</h2>${button('new-task', '新建', 'plus', '', 'text-button')}</div><div class="task-stack">${tasks.slice(0, 4).map(t => taskCard(t, true)).join('') || empty('暂无任务', '', button('new-task', '新建任务', 'plus', '', 'secondary'))}</div>${tasks.length > 4 ? button('navigate', `查看全部 ${tasks.length} 项任务`, 'arrow', 'data-page="tasks"', 'text-button all-tasks') : ''}<div class="small-reflection"><span class="eyebrow">累计记录</span><div><strong>${s.recorded}</strong><span>记录天数</span><strong>${s.tasks}</strong><span>完成成果</span></div><p>${s.completeDays} 天完整评分 · ${s.stars} 颗有效星星</p></div></aside></div>`;
 }
 function tasksPage() {
   const list = validTasks().filter(t => taskFilter === 'all' || taskFilter === 'active' && !t.completion?.active && !t.archived || taskFilter === 'completed' && t.completion?.active && !t.hidden || taskFilter === 'archived' && t.archived || taskFilter === 'hidden' && t.hidden).filter(t => `${t.title} ${t.goal}`.toLowerCase().includes(taskQuery.toLowerCase())).sort((a, b) => a.deadline.localeCompare(b.deadline));
@@ -282,7 +315,8 @@ function trend() {
 }
 function historyPage() {
   const events = state.ledger.filter(e => e.date === chosenDate && !e.owner.includes('/')).sort((a, b) => b.sequence - a.sequence);
-  return header('MEMORIES / 历史与回顾', '历史记录', '', datePicker()) + `<div class="history-overview">${calendar()}${trend()}</div><div class="section-title"><h2>${chosenDate} · 每日评分</h2><span>直接选择星数即可补记或更正</span></div>${ratingCards(chosenDate)}<section class="panel history-events"><div class="section-title"><h2>当天任务事件</h2><span>${events.length} 笔结算</span></div>${events.length ? ledgerTable(events) : '<p class="muted">这一天没有任务事件。</p>'}</section>`;
+  const tasks=validTasks().flatMap(t=>[...t.progress.filter(p=>p.active&&p.date===chosenDate).map(p=>({title:t.title,note:p.note})),...(t.completion?.active&&t.completion.date===chosenDate?[{title:t.title,note:t.completion.note}]:[])]);
+  return header('MEMORIES / 历史与回顾', '历史记录', '',historyTab==='days'?datePicker():'')+`<div class="history-tabs segmented">${button('history-tab','日历回看','','data-tab="days"',historyTab==='days'?'selected':'')}${button('history-tab','周报归档','','data-tab="reports"',historyTab==='reports'?'selected':'')}</div>`+(historyTab==='reports'?weeklyArchive(state,weeklyStart,weeklyDay,account?.id??'guest',[...hiddenTrendSeries]):`${trendPanel(addDays(chosenDate,1-trendRange),chosenDate,{hidden:[...hiddenTrendSeries]})}<div class="history-recall">${calendar()}<section class="day-recall"><h2>${dateLabel(chosenDate)}</h2><div class="day-mini-scores">${DIMENSIONS.map(d=>`<span>${LABELS[d]}<b>${state.ratings[chosenDate]?.[d]?.stars??'—'}${state.ratings[chosenDate]?.[d]?'星':''}</b></span>`).join('')}</div>${journalCard(chosenDate,true)}<h3>任务进展</h3>${tasks.map(t=>`<p class="record-text">${escape(t.title)}：${escape(t.note)}</p>`).join('')||'<p class="muted">当天没有推进或完成记录</p>'}</section></div><div class="section-title"><h2>${chosenDate} · 评分与依据</h2>${button('edit-day','更正记录','','','text-button')}</div>${ratingCards(chosenDate,true)}<details class="panel history-events"><summary>当天任务结算 · ${events.length}笔</summary>${events.length?ledgerTable(events):'<p class="muted">这一天没有任务结算。</p>'}</details>`);
 }
 function ledgerTable(entries) {
   return `<div class="table-scroll"><table><thead><tr><th>事件 / 来源</th><th>实际日期</th><th>正常额度</th><th>折扣</th><th>实际入账</th><th>状态</th></tr></thead><tbody>${entries.map(e => `<tr><td><strong>${escape(e.kind)}</strong><small>${escape(e.owner.includes('/') ? `${e.date} ${LABELS[e.owner.split('/')[1]]}` : state.tasks[e.owner]?.title ?? e.owner)}</small></td><td>${e.date}<small>录入 ${hongKong(e.recordedAt).date}</small></td><td>${fmt(xp(e.normal))}</td><td>${(e.factor.numerator / e.factor.denominator * 100).toFixed(1)}%<small>${e.factor.delay ? `延迟 ${e.factor.delay} 天` : '及时'}</small></td><td class="${e.active ? '' : 'cancelled'}">${fmt(xp(e.actual))} XP</td><td>${e.active ? '<span class="green-text">有效</span>' : '<span class="muted">已撤回</span>'}</td></tr>`).join('')}</tbody></table></div>`;
@@ -318,9 +352,11 @@ function rewardsPage() {
   return header('GROWTH / 奖励中心', '奖励中心', '') + `<div class="summary-grid"><div><span>收集的徽章</span><strong>${obtained.length}<small> / 48</small></strong></div><div><span>有效星数</span><strong>${s.stars.toLocaleString()}</strong></div><div><span>完成的成果</span><strong>${s.tasks}</strong></div><div><span>完整记录天数</span><strong>${s.completeDays}</strong></div></div><div class="section-title"><h2>下一份成果的完成系数</h2><span>各量级独立 · 以实际结算为准</span></div>${coefficientCards()}<div class="toolbar reward-tabs"><div class="segmented">${[['badges', '徽章收藏'], ['ledger', '经验明细'], ['review', '周期回顾'], ['rules', '奖励规则']].map(([id, label]) => button('reward-tab', label, '', `data-tab="${id}"`, rewardTab === id ? 'selected' : '')).join('')}</div></div>${rewardTab === 'badges' ? `<div class="badge-filters">${[['all', '全部'], ...Object.entries(seriesNames)].map(([id, label]) => button('badge-filter', label, '', `data-series="${id}"`, badgeFilter === id ? 'chip selected' : 'chip')).join('')}</div>${badgeCards()}` : rewardTab === 'ledger' ? `<section class="panel"><p class="field-hint">共 ${state.ledger.length} 笔 · 显示最近 200 笔；完整历史随 JSON 备份保留。</p>${state.ledger.length ? ledgerTable([...state.ledger].reverse().slice(0, 200)) : empty('暂无经验明细', '保存评分或记录任务后，在这里查看明细。', '', 'ledger')}</section>` : rewardTab === 'rules' ? rules() : periodReview()}`;
 }
 function settingsPage() {
-  return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${window.raterNative ? "记录保存在本机。可通过完整 JSON 备份迁移到另一台设备。" : escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">${window.raterNative ? "更新保留数据；卸载前请导出完整备份。" : "更新保留数据。"}应用关闭后不发送提醒。</p></section></div></div>`;
+  const reminders=readReminders();
+  return header('YOUR SPACE / 设置', '设置', '') + `<div class="settings-layout"><section class="panel"><h2>${icon('study')}评分参照</h2><p class="subtitle">自定义各项评分标准。</p><form id="references-form">${DIMENSIONS.map(d => `<label class="field">${LABELS[d]}<textarea name="${d}" rows="3" maxlength="4000">${escape(state.settings.references[d])}</textarea></label>`).join('')}<button class="primary" type="submit">${icon('check')}保存评分参照</button></form></section><div><section class="panel"><h2>${icon('sun')}提醒通知</h2><label class="reminder-toggle"><span><b>每日记录提醒</b><small>10:00 提醒；11:00 仅在今天还没有评分或任务记录时补发</small></span><input id="reminder-enabled" type="checkbox" ${reminders.enabled?'checked':''}></label><div class="reminder-options" ${reminders.enabled?'':'hidden'}><label><span>每日10点提醒</span><input id="reminder-daily" type="checkbox" ${reminders.daily?'checked':''}></label><label><span>11点无记录时补发</span><input id="reminder-followup" type="checkbox" ${reminders.followup?'checked':''}></label><label><span>周一10点合并周报通知</span><input id="reminder-weekly" type="checkbox" ${reminders.weekly?'checked':''}></label></div><p id="reminder-status" class="field-hint">Android将在系统允许后台时按计划发送；Windows应用运行期间发送。通知权限在开启时申请。</p></section><section class="panel"><h2>${icon('sun')}动效与反馈</h2><label class="field">动效强度<select id="motion-setting"><option value="full" ${state.settings.motion === 'full' ? 'selected' : ''}>完整 · 金色成长反馈</option><option value="gentle" ${state.settings.motion === 'gentle' ? 'selected' : ''}>柔和 · 轻量过渡</option><option value="off" ${state.settings.motion === 'off' ? 'selected' : ''}>关闭 · 保留数值反馈</option></select></label><p class="field-hint">系统开启减少动态时，自动使用柔和动效。</p></section><section class="panel backup-panel"><h2>${icon('backup')}完整备份与恢复</h2><p>备份包括评分批次、任务、冻结参数、结算与取消历史及设置。恢复会完整替换当前数据。</p><div class="backup-actions">${button('export', '导出 JSON 备份', 'backup', '', 'primary')}${button('import', '从备份恢复', 'restore', '', 'secondary')}</div><p class="field-hint">最近导出：${state.settings.lastExport ? new Date(state.settings.lastExport).toLocaleString('zh-CN', { timeZone: 'Asia/Hong_Kong' }) : '还没有导出过'}${!state.settings.lastExport || daysBetween(hongKong(state.settings.lastExport).date, today()) >= 7 ? '<br><span class="amber-text">建议每周备份。</span>' : ''}</p></section><section class="panel data-panel"><h2>${icon('archive')}本机数据</h2><p class="data-path">${window.raterNative ? "记录保存在本机。可通过完整 JSON 备份迁移到另一台设备。" : escape(desktopInfo.dataDirectory)}</p>${window.desktop ? button('open-data', '打开数据目录', 'arrow', '', 'text-button') : ''}<dl><dt>产品版本</dt><dd>${escape(desktopInfo.version)}</dd><dt>规则 / 备份格式</dt><dd>v1.3 / 1</dd><dt>已保存事务</dt><dd>${state.revision}</dd><dt>有效评分天数 / 任务</dt><dd>${stats(state).recorded} / ${validTasks().length}</dd></dl><p class="field-hint">更新会保留数据；卸载前请导出完整备份。</p></section></div></div>`;
 }
 function renderContent(preserveInputs = true, animateChanges = false, entrance = '') {
+  document.documentElement.dataset.page=page;
   if (entrance) pageMotion.cancel();
   const referenceDraft = preserveInputs && $('#references-form') ? Object.fromEntries(new FormData($('#references-form'))) : null;
   const focus = document.activeElement;
@@ -333,6 +369,7 @@ function renderContent(preserveInputs = true, animateChanges = false, entrance =
   }
   updateDOM(content, ({ today: todayPage, tasks: tasksPage, history: historyPage, rewards: rewardsPage, settings: settingsPage })[page](), { preserveInputs, starChanged: animateChanges ? animateStar : () => {} });
   enhanceControls(content);
+  chartObserver.disconnect();content.querySelectorAll('.trend-chart').forEach(el=>chartObserver.observe(el));drawTrends(content,state,[...hiddenTrendSeries],historyTab==='reports'?weeklyDay:chosenDate);if(page==='history'&&historyTab==='reports')cacheWeeklyReport();
   if (!animateChanges) {
     const star = content.querySelector('.star-button .icon');
     if (star) getComputedStyle(star).fill;
@@ -458,6 +495,11 @@ function detailContents(t) {
     <div class="detail-actions">${completed ? `${button('undo-complete', '撤销完成', 'history', `data-task="${t.id}"`, 'secondary')}${button(t.hidden ? 'restore-task' : 'hide-task', t.hidden ? '取消隐藏' : '隐藏已完成', 'archive', `data-task="${t.id}"`, 'secondary')}` : button(t.archived ? 'restore-task' : 'archive-task', t.archived ? '恢复任务' : '放弃并归档', 'archive', `data-task="${t.id}"`, 'secondary')}${button('delete-task', '删除整个任务', 'delete', `data-task="${t.id}"`, 'danger-text')}</div>`;
 }
 function taskDetail(id) { const task = state.tasks[id]; if (!task || task.deleted) return; openModal(detailContents(task), 'task'); $('#modal').dataset.task = id; }
+function quickTask(id,kind) {
+  const t=state.tasks[id];if(!t||t.deleted||t.archived||t.completion?.active)return;
+  const logs=t.progress.filter(p=>p.active).slice(-2).reverse();
+  openModal(`${modalHead('',kind==='progress'?'记录推进':'完成任务')}<h3 class="quick-task-title">${escape(t.title)}</h3><p class="quick-task-type">${TIERS.find(x=>x.id===(t.frozen??taskPlan(t)).tier).name}${t.dimension?' · '+LABELS[t.dimension]:''}</p>${logs.length?`<div class="quick-recent"><h3>最近推进</h3>${logs.map(p=>`<p><time>${p.date.slice(5)}</time> ${escape(p.note)}</p>`).join('')}</div>`:''}<form id="quick-task-form" data-task="${id}" data-kind="${kind}"><label class="field">成果说明<textarea name="note" required maxlength="4000" rows="3" placeholder="${kind==='progress'?'这次推进完成了什么？':'记录这份最终成果…'}"></textarea></label><small class="field-hint">${dateLabel(today())} · 保存时自动使用当前日期</small><div class="modal-actions">${button('close-modal','取消','','','secondary')}<button type="submit" class="primary">${kind==='progress'?'保存推进':'完成并保存'}</button></div></form>`,'quick-task');
+}
 function refreshTaskDialog() {
   const modal = $('#modal'); if (!modal.open || modal.dataset.kind !== 'task') return;
   closeControlLayer({ immediate: true });
@@ -503,6 +545,8 @@ document.addEventListener('click', async event => {
   const b = event.target.closest('[data-action]'); if (!b || b.disabled || accountBusy) return;
   const action = b.dataset.action, taskId = b.dataset.task;
   try {
+    if(action==='write-note') {const key=`${b.dataset.date}/${b.dataset.dimension}`;editingNotes.add(key);const card=b.closest('.rating-card'),editor=card.querySelector('.reason-editor'),field=editor.querySelector('textarea');editor.hidden=false;card.querySelector('.rating-reason').hidden=true;b.setAttribute('aria-expanded','true');field.focus({preventScroll:true});field.setSelectionRange(field.value.length,field.value.length);field.style.height='auto';field.style.height=Math.max(80,field.scrollHeight+2)+'px';field.scrollIntoView({block:'nearest'});return;}
+    if(['navigate','previous-date','next-date','calendar-date','account-open','account-logout'].includes(action))await flushTextDrafts();
     if (action === 'account-open') { openAccountDialog(); return; }
     if (action === 'account-login-tab') { openAccountDialog('login'); return; }
     if (action === 'account-register-tab') { openAccountDialog(registrationChallenge ? 'verify' : 'register'); return; }
@@ -554,6 +598,10 @@ document.addEventListener('click', async event => {
       }, '备份并复制'); return;
     }
     switch (action) {
+      case 'history-tab': historyTab=b.dataset.tab;renderContent();break;
+      case 'weekly-day': weeklyDay=b.dataset.date;renderContent();$('#content .weekly-original')?.scrollIntoView({block:'nearest'});break;
+      case 'trend-series': hiddenTrendSeries.has(b.dataset.dimension)?hiddenTrendSeries.delete(b.dataset.dimension):hiddenTrendSeries.add(b.dataset.dimension);renderContent();break;
+      case 'edit-day': page='today';renderContent();break;
       case 'navigate': { const changed = page !== b.dataset.page; page = b.dataset.page; renderContent(true, false, changed ? 'page' : ''); if(changed && window.raterNative)window.scrollTo(0,0); break; }
       case 'rate': await save({ type: 'rate', dimension: b.dataset.dimension, stars: Number(b.dataset.stars), date: chosenDate, ...(drafts.has(`${chosenDate}/${b.dataset.dimension}`) ? { note: drafts.get(`${chosenDate}/${b.dataset.dimension}`) } : {}) }, '评分已保存'); break;
       case 'clear-rating': confirmAction(`清空${LABELS[b.dataset.dimension]}评分？`, '这会撤回该项全部实际经验和星数，之后重新补记按新的录入时间结算。', () => { drafts.delete(`${chosenDate}/${b.dataset.dimension}`); save({ type: 'rate', dimension: b.dataset.dimension, stars: null, date: chosenDate }, '评分已清空'); }, '清空评分', true); break;
@@ -567,10 +615,11 @@ document.addEventListener('click', async event => {
       case 'trend-range': { const changed = trendRange !== Number(b.dataset.range); trendRange = Number(b.dataset.range); renderContent(true, false, changed ? 'trend' : ''); break; }
       case 'reward-tab': { const changed = rewardTab !== b.dataset.tab; rewardTab = b.dataset.tab; renderContent(true, false, changed ? 'rewards' : ''); break; }
       case 'badge-filter': { const changed = badgeFilter !== b.dataset.series; badgeFilter = b.dataset.series; renderContent(true, false, changed ? 'badges' : ''); break; }
+      case 'update-download': if(window.desktop)await window.desktop.openExternal(b.dataset.url);else await window.raterNative?.openExternal?.({url:b.dataset.url});closeModal();break;
       case 'new-task': newTask(); break;
       case 'task-detail': taskDetail(taskId); break;
-      case 'quick-progress': taskDetail(taskId); $('#progress-form')?.scrollIntoView({ block: 'center' }); $('#progress-form [name="note"]')?.focus(); break;
-      case 'quick-complete': taskDetail(taskId); $('#complete-form')?.scrollIntoView({ block: 'center' }); $('#complete-form [name="date"]')?.focus(); break;
+      case 'quick-progress': quickTask(taskId,'progress'); break;
+      case 'quick-complete': quickTask(taskId,'complete'); break;
       case 'close-modal': closeModal(); break;
       case 'award-prev': awardPage = (awardPage - 1 + badgeNotices.current.length) % badgeNotices.current.length; showBadgeNotice(); break;
       case 'award-next': awardPage = (awardPage + 1) % badgeNotices.current.length; showBadgeNotice(); break;
@@ -590,17 +639,25 @@ document.addEventListener('click', async event => {
 });
 document.addEventListener('input', event => {
   const el = event.target;
-  if (el.classList.contains('rating-note')) drafts.set(`${el.dataset.date}/${el.dataset.dimension}`, el.value);
+  if (el.classList.contains('rating-note')) {const key=captureText(el);clearTimeout(noteTimers.get(key));if(!event.isComposing&&!composingNotes.has(key))noteTimers.set(key,setTimeout(()=>commitText(key),500));}
   if (el.id === 'task-search') { taskQuery = el.value; renderContent(); }
   if (el.closest('#task-form')) updatePlanPreview();
 });
 document.addEventListener('focusout', event => {
   const el = event.target;
-  if (el.classList.contains('rating-note') && state.ratings[el.dataset.date]?.[el.dataset.dimension] && el.value !== state.ratings[el.dataset.date][el.dataset.dimension].note) save({ type: 'note', date: el.dataset.date, dimension: el.dataset.dimension, note: el.value }, '原因已保存');
+  if (el.classList.contains('rating-note')) {const key=captureText(el);if(!composingNotes.has(key)){editingNotes.delete(key);commitText(key);}}
 });
+document.addEventListener('compositionstart',event=>{if(event.target.classList.contains('rating-note'))composingNotes.add(`${event.target.dataset.date}/${event.target.dataset.dimension}`);});
+document.addEventListener('compositionend',event=>{if(event.target.classList.contains('rating-note')){const key=captureText(event.target);composingNotes.delete(key);noteTimers.set(key,setTimeout(()=>commitText(key),500));}});
 document.addEventListener('change', event => {
   const el = event.target;
+  if(el.id?.startsWith('reminder-')){
+    const prefs={enabled:$('#reminder-enabled')?.checked??false,daily:$('#reminder-daily')?.checked??true,followup:$('#reminder-followup')?.checked??true,weekly:$('#reminder-weekly')?.checked??true};
+    const box=$('#content .reminder-options');if(box)box.hidden=!prefs.enabled;
+    applyReminders(platform,prefs,state.businessUpdates?.[today()]??'').then(result=>{const label=$('#reminder-status');if(label)label.textContent=prefs.enabled?(result?.granted===false?'通知权限未开启，请在系统设置中允许通知。':result?.exactAlarm===false?'提醒已保存。若精确提醒权限未开启，系统可能延后投递。':'提醒已保存。'): '提醒已关闭。';}).catch(error=>{const label=$('#reminder-status');if(label)label.textContent=`设置未生效：${error.message}`;});return;
+  }
   if (el.id === 'rating-date') { if (el.value && el.value <= today()) { chosenDate = el.value; month = chosenDate.slice(0, 7); renderContent(); } }
+  if(el.id==='weekly-picker'){weeklyStart=el.value;weeklyDay=weeklyStart;renderContent();}
   if (el.id === 'motion-setting') save({ type: 'settings', motion: el.value }, '动效偏好已保存');
   if (el.dataset.stage) save({ type: 'stage', taskId: el.dataset.task, stageId: el.dataset.stage, done: el.checked }, '阶段已更新');
 });
@@ -627,6 +684,7 @@ document.addEventListener('submit', async event => {
     return;
   }
   event.preventDefault(); const form = event.target, values = Object.fromEntries(new FormData(form));
+  if(form.id==='quick-task-form') {const submit=form.querySelector('[type="submit"]');if(submit.disabled)return;submit.disabled=true;const success=await save({type:form.dataset.kind,taskId:form.dataset.task,note:values.note},form.dataset.kind==='progress'?'推进已保存':'成果已完成');if(success)closeModal();else submit.disabled=false;return;}
   if (form.id === 'task-form') {
     const id = uid();
     await save({ ...values, type: 'createTask', id }, '任务已创建');
@@ -644,20 +702,38 @@ matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => 
 document.addEventListener('visibilitychange', () => { if (state) { if (!appVisible()) { pageMotion.cancel(); growthStatic(); } else flowState(); } });
 window.raterReload = async () => { resetBadgeNotices(); state = validateState(await store.read()); growthStatic(); renderContent(); };
 window.raterReady = (async () => {
+  let promptLoginOnStartup = false;
   try {
     store = await openStore(); state = validateState(await store.read());
+    for(const[key,value]of Object.entries(await store.readAux('text-drafts')??{}))if(typeof value==='string')drafts.set(key,value);
     desktopInfo = platform ? await platform.info() : { version: '0.1.0-alpha.19', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
+    const touch=()=>{if(account?.id)touchAccount().catch(()=>{});};
+    let lastTouch=0;const activity=()=>{if(Date.now()-lastTouch<60000)return;lastTouch=Date.now();touch();};
+    for(const eventName of ['pointerdown','keydown','visibilitychange'])document.addEventListener(eventName,activity,{passive:true});
+    window.addEventListener('focus',activity);
     try {
       const remembered = JSON.parse(localStorage.getItem('rater-active-account') ?? 'null');
-      const active = await currentAccount().catch(() => remembered);
+      const active = await currentAccount().catch(() => null) ?? (remembered?.id ? { ...remembered, needsLogin:true } : null);
       if (active?.id) await openAccount(active);
+      else if(localStorage.getItem('rater-onboarding-seen')!=='1') promptLoginOnStartup = true;
     } catch (error) { syncStatus = `账号恢复未完成：${error.message}`; }
+    if(readReminders().enabled)applyReminders(platform,readReminders(),state.businessUpdates?.[today()]??'').catch(()=>{});
+    let updateNoticeShown=false;const showUpdate=async()=>{try{const manifest=window.desktop?.updateManifest?await window.desktop.updateManifest():null;const candidate=window.desktop?(await import('./updater.js')).validateUpdateManifest(manifest,'windows'):await checkUpdate('android',desktopInfo.version);if(!candidate||compareVersions(candidate.version,desktopInfo.version)<=0||updateNoticeShown)return;if($('#modal').open){setTimeout(showUpdate,5000);return;}updateNoticeShown=true;openModal(`${modalHead('更新可用',`发现新版本 ${candidate.version}`)}<p>当前版本 ${escape(desktopInfo.version)}。下载并安装最新版，原有本机记录会保留。</p><div class="modal-actions">${button('close-modal','稍后','','','secondary')}<button type="button" class="primary" data-action="update-download" data-url="${escape(candidate.url)}">下载最新版本</button></div>`,'update');}catch{ /* Offline or update service unavailable: app remains usable. */ }};
+    setTimeout(showUpdate,3500);
+    window.desktop?.onNotificationOpen?.(route=>{if(route?.route==='weekly-report'){page='history';historyTab='reports';if(route.weeklyStart){weeklyStart=route.weeklyStart;weeklyDay=weeklyStart;}}else page='today';if($('#modal').open)closeModal();renderContent(false,false,'page');});
+    const openNotificationRoute=route=>{if(route?.route==='weekly-report'){page='history';historyTab='reports';if(route.weeklyStart){weeklyStart=route.weeklyStart;weeklyDay=weeklyStart;}}else if(route?.route==='today')page='today';if($('#modal').open)closeModal();renderContent(false,false,'page');};
+    window.raterNative?.onNotificationOpen?.(openNotificationRoute);
+    const pendingRoute=await window.raterNative?.pendingRoute?.().catch?.(()=>null);if(pendingRoute?.route)openNotificationRoute(pendingRoute);
     setInterval(() => { if (appVisible() && syncEngine) syncEngine.run(); }, 60000);
     window.addEventListener('online', () => syncEngine?.run());
     setInterval(() => { if (page === 'today' && chosenDate !== today() && appVisible() && !$('#modal').open) $('#save-status').textContent = '香港日期已更新，可切换到今天'; }, 60000);
   } catch(error) { $('#app').innerHTML = `<div class="boot"><h1>数据尚未打开</h1><p>${escape(error.message)}</p><p>原数据保持；请保留数据目录后重试。</p><button id="retry-startup">重新打开</button></div>`; $('#retry-startup').onclick = () => location.reload(); }
   finally { await finishStartup(state ? motionMode() : (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'gentle' : 'full'), () => { if ($('#content')) pageMotion.play('page'); }); }
+  if (promptLoginOnStartup && !account && !$('#modal').open) {
+    openAccountDialog('login');
+    localStorage.setItem('rater-onboarding-seen', '1');
+  }
 })();
 
 window.addEventListener('rater-back', () => { if(document.querySelector('[popover]:popover-open')) { closeControlLayer(); return; } if($('#modal').open) { closeModal(); return; } if(page!=='today') { page='today'; renderContent(true,false,'page');window.scrollTo(0,0); return; } platform?.quit?.(); });

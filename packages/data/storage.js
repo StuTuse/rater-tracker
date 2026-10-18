@@ -52,8 +52,11 @@ export async function openStore(accountId = null) {
     tx.onabort = () => reject(failure ?? tx.error ?? new Error('同步保存失败'));
     tx.onerror = () => {};
   });
+  const auxiliary = name => `${key}:aux:${name}`;
+  const readAux = name => new Promise((resolve,reject)=>{const r=db.transaction('snapshots').objectStore('snapshots').get(auxiliary(name));r.onsuccess=()=>resolve(r.result??null);r.onerror=()=>reject(r.error);});
+  const writeAux = (name,value) => new Promise((resolve,reject)=>{const tx=db.transaction('snapshots','readwrite');tx.objectStore('snapshots').put(value,auxiliary(name));tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error??new Error('草稿保存失败'));tx.onerror=()=>{};});
   return {
-    read, write, close: () => db.close(),
+    read, write, close: () => db.close(), readAux, writeAux,
     clearAccount: expectedRevision => new Promise((resolve, reject) => {
       if (!accountId) { reject(new Error('不能通过账号清空操作删除未登录记录')); return; }
       const tx = db.transaction('snapshots', 'readwrite'), records = tx.objectStore('snapshots');
@@ -62,6 +65,7 @@ export async function openStore(accountId = null) {
       request.onsuccess = () => {
         if ((request.result?.revision ?? 0) !== expectedRevision) { conflict = true; tx.abort(); return; }
         records.delete(key); records.delete(metaKey);
+        const cursor=records.openCursor();cursor.onsuccess=()=>{const value=cursor.result;if(value){if(typeof value.key==='string'&&value.key.startsWith(`${key}:aux:`))value.delete();value.continue();}};
       };
       tx.oncomplete = () => resolve(); tx.onabort = () => reject(conflict ? new ConflictError() : tx.error ?? new Error('本机账号数据尚未清空')); tx.onerror = () => {};
     }),
@@ -113,6 +117,15 @@ export function validateState(s) {
   check(plain(s) && s.format === FORMAT_VERSION && s.rule === RULE_VERSION, '不支持的数据格式或规则版本');
   check(integer(s.revision) && integer(s.sequence), '版本序号无效');
   check(s.modifiedAt === undefined || timestamp(s.modifiedAt), '快照修改时间无效');
+  for (const name of ['dailyNotes', 'ratingNotes', 'businessUpdates']) if (s[name] !== undefined) {
+    check(plain(s[name]) && Object.keys(s[name]).length <= 50000, '附加记录结构无效');
+    for (const [date, value] of Object.entries(s[name])) {
+      validDate(date);
+      if (name === 'businessUpdates') check(timestamp(value), '业务更新时间无效');
+      else if (name === 'dailyNotes') check(plain(value) && str(value.note) && timestamp(value.updatedAt), '每日小结无效');
+      else { check(plain(value), '分项记录无效'); for (const [d,note] of Object.entries(value)) check(DIMENSIONS.includes(d) && plain(note) && str(note.note) && timestamp(note.updatedAt), '分项原因无效'); }
+    }
+  }
   check(plain(s.ratings) && plain(s.tasks) && Array.isArray(s.ledger) && Array.isArray(s.processed), '记录结构无效');
   check(s.ledger.length <= 500000 && Object.keys(s.tasks).length <= 50000 && Object.keys(s.ratings).length <= 50000, '记录数量超过本版本支持范围');
   const ids = new Set(), ledger = new Map();

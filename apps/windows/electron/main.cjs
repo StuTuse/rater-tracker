@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage, Notification } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
@@ -7,6 +7,11 @@ const accountSmoke = process.argv.includes('--account-smoke');
 const smoke = process.argv.includes('--smoke') || accountSmoke;
 const isolatedAcceptance = process.argv.includes('--acceptance-hold');
 const smokeDirectory = path.join(root, 'runtime-data', 'desktop-smoke');
+let reminderConfig={enabled:false,daily:true,followup:true,weekly:true,copies:[],sent:[],cycle:0,lastId:-1,todayUpdate:''};
+const reminderFile=()=>path.join(app.getPath('userData'),'reminders.json');
+function hkParts(){const d=new Date(),parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Hong_Kong',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',weekday:'short',hourCycle:'h23'}).formatToParts(d),p=Object.fromEntries(parts.map(x=>[x.type,x.value]));return{date:`${p.year}-${p.month}-${p.day}`,hour:+p.hour,minute:+p.minute,weekday:p.weekday};}
+function reminderCopy(){let remain=reminderConfig.remaining??[];if(!remain.length){remain=reminderConfig.copies.map((_,i)=>i);for(let i=remain.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[remain[i],remain[j]]=[remain[j],remain[i]];}if(remain.length>1&&remain[0]===reminderConfig.lastId)[remain[0],remain[1]]=[remain[1],remain[0]];reminderConfig.cycle++;}const id=remain.shift();reminderConfig.remaining=remain;reminderConfig.lastId=id;return reminderConfig.copies[id]??{title:'今天登录登记',body:'打开成长手记，记下今天的投入与进展。'};}
+async function checkReminder(){const p=hkParts();if(!reminderConfig.enabled||p.minute>15||![10,11].includes(p.hour))return;const slot=p.hour===10?'morning':'followup',key=`${p.date}/${slot}`;if(reminderConfig.sent.includes(key))return;if(slot==='followup'&&(!reminderConfig.daily||!reminderConfig.followup||reminderConfig.todayUpdate===p.date))return;if(slot==='morning'&&!reminderConfig.daily&&!(reminderConfig.weekly&&p.weekday==='Mon'))return;const weekly=slot==='morning'&&p.weekday==='Mon'&&reminderConfig.weekly;const copy=reminderCopy();const day=new Date(`${p.date}T00:00:00+08:00`),offset=(day.getUTCDay()+6)%7;day.setUTCDate(day.getUTCDate()-offset-7);const weeklyStart=day.toISOString().slice(0,10);const notice=new Notification({title:weekly?'上周周报已生成':copy.title,body:weekly?'点击查看上周评分曲线、记录与本周建议。':copy.body});notice.on('click',()=>{if(window){window.show();window.focus();window.webContents.send('notification:open',{route:weekly?'weekly-report':'today',weeklyStart});}});notice.show();reminderConfig.sent=[...reminderConfig.sent,key].slice(-60);await fs.writeFile(reminderFile(),JSON.stringify(reminderConfig));}
 if (smoke || isolatedAcceptance) app.setPath('userData', process.env.RATER_TEST_DATA ? path.resolve(process.env.RATER_TEST_DATA) : path.join(app.getPath('temp'), `rater-smoke-${Date.now()}`));
 else if (process.env.RATER_DEV_DIRECTORY) app.setPath('userData', path.resolve(process.env.RATER_DEV_DIRECTORY));
 else app.setPath('userData', path.join(app.getPath('appData'), 'RaterTracker'));
@@ -18,6 +23,7 @@ if (!singleton) app.quit();
 else {
   app.on('second-instance', () => { if (window) { if (window.isMinimized()) window.restore(); window.show(); window.focus(); } });
   app.whenReady().then(async () => {
+    try{reminderConfig={...reminderConfig,...JSON.parse(await fs.readFile(reminderFile(),'utf8'))};}catch{}
     protocol.handle('app', request => {
       const url = new URL(request.url), file = path.resolve(root, '.' + decodeURIComponent(url.pathname));
       const allowed = url.hostname === 'rater' && (file === path.join(root, 'index.html') || ['src', 'assets', 'packages'].some(dir => file.startsWith(path.join(root, dir) + path.sep)));
@@ -29,11 +35,16 @@ else {
     };
     const accounts = require('./account.cjs')(app.getPath('userData'), safeStorage);
     ipcMain.handle('account:current', secure(() => accounts.current()));
+    ipcMain.handle('account:touch', secure(() => window?.isFocused()?accounts.touch():undefined));
     ipcMain.handle('account:login', secure((name, password) => accounts.login(name, password)));
     ipcMain.handle('account:register', secure(values => accounts.register(values)));
     ipcMain.handle('account:verify-registration', secure((id, code) => accounts.verifyRegistration(id, code)));
     ipcMain.handle('account:logout', secure(() => accounts.logout()));
     ipcMain.handle('account:sync', secure(data => accounts.sync(data)));
+    ipcMain.handle('reminder:configure',secure(async value=>{if(!value||typeof value.enabled!=='boolean'||!Array.isArray(value.copies)||value.copies.length!==50)throw new Error('提醒设置无效');reminderConfig={...reminderConfig,...value};await fs.mkdir(app.getPath('userData'),{recursive:true});await fs.writeFile(reminderFile(),JSON.stringify(reminderConfig));return{granted:true};}));
+    ipcMain.handle('reminder:activity',secure(async date=>{if(typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)){reminderConfig.todayUpdate=date;await fs.writeFile(reminderFile(),JSON.stringify(reminderConfig));}}));
+    ipcMain.handle('desktop:external',secure(async url=>{const u=new URL(url);if(u.protocol!=='https:'||u.hostname!=='github.com'||!u.pathname.startsWith('/StuTuse/rater-tracker/releases'))throw new Error('仅允许打开项目官方发布页');await shell.openExternal(u.href);return true;}));
+    ipcMain.handle('desktop:update-check',secure(async()=>{const response=await net.fetch('https://raw.githubusercontent.com/StuTuse/rater-tracker/main/update-manifest.json',{headers:{'Cache-Control':'no-cache'}});if(!response.ok)throw new Error('检查更新暂不可用');return response.json();}));
     ipcMain.handle('desktop:info', secure(() => ({ version: app.getVersion(), dataDirectory: app.getPath('userData'), packaged: app.isPackaged })));
     ipcMain.handle('desktop:open-data', secure(() => shell.openPath(app.getPath('userData'))));
     ipcMain.handle('desktop:export', secure(async (contents, suggestedName) => {
@@ -68,6 +79,7 @@ else {
       window.showInactive();
     }
     await window.loadURL('app://rater/index.html');
+    setInterval(()=>checkReminder().catch(()=>{}),30000);
     if (accountSmoke) {
       try {
         const credentials = JSON.parse(await fs.readFile(process.env.RATER_ACCOUNT_TEST_FILE || path.join(root, 'runtime-data/cloud-test/account.json'), 'utf8'));
@@ -151,9 +163,26 @@ else {
             startupBlocksInput:document.querySelector('#app').inert&&getComputedStyle(document.querySelector('#app')).visibility==='hidden'};
         })()`);
         await fs.writeFile(path.join(directory, 'startup.png'), (await window.webContents.capturePage()).toPNG());
+        if (process.env.RATER_FIRST_LAUNCH_ONLY === '1') {
+          const firstLaunch = await window.webContents.executeJavaScript(`(async()=>{
+            await window.raterReady;
+            const dialog=document.querySelector('#modal');
+            const promptShown=dialog.open&&dialog.dataset.kind==='account'&&!!dialog.querySelector('#account-login');
+            dialog.querySelector('[data-action="close-modal"]')?.click();
+            await new Promise(resolve=>setTimeout(resolve,360));
+            return {promptShown,promptClosed:!dialog.open,offlineHomeAvailable:!!document.querySelector('#content')};
+          })()`);
+          await fs.writeFile(path.join(directory, 'first-launch-report.json'), JSON.stringify(firstLaunch, null, 2));
+          await fs.writeFile(path.join(directory, 'first-launch.png'), (await window.webContents.capturePage()).toPNG());
+          app.exit(firstLaunch.promptShown && firstLaunch.promptClosed && firstLaunch.offlineHomeAvailable ? 0 : 1);
+          return;
+        }
         const report = await window.webContents.executeJavaScript(`(async () => {
           await window.raterReady;
           const startupDismissed=!document.querySelector('#startup')&&!document.querySelector('#app').inert&&!document.body.classList.contains('is-starting');
+          const firstLaunchPrompt=document.querySelector('#modal').open&&document.querySelector('#modal').dataset.kind==='account';
+          if(${process.env.RATER_EXPECT_FIRST_LAUNCH === '1'}&&!firstLaunchPrompt)throw new Error('首次安装登录引导未显示');
+          if(firstLaunchPrompt){document.querySelector('#modal [data-action="close-modal"]').click();await new Promise(resolve=>setTimeout(resolve,360));}
           const core = await import('./src/core.js');
           const storage = await import('./src/storage.js');
           const store = await storage.openStore();
@@ -225,7 +254,7 @@ else {
           const layouts=[],patterns=[];
           for(const phase of phases.GROWTH_STAGES){phases.paintStage(probe,phase.from);const box=probe.querySelector('.level-emblem').getBBox();layouts.push(box.width>20&&box.height>20);patterns.push(getComputedStyle(probe.querySelector('.xp-fluid i')).animationName);}
           probe.remove();const tenStageEmblemsRender=layouts.length===10&&layouts.every(Boolean),tenStageFlowPatterns=new Set(patterns).size===10;
-          return { startupDismissed, title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, pageEntryAllFive, pageEntryLiftAndFade, pageEntry48Badges, pageEntryFourSettings, currentStageMatches, tenStageEmblemsRender, tenStageFlowPatterns, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
+          return { startupDismissed, firstLaunchPrompt, title:document.title, origin:location.origin, nodeIsolated:typeof require==='undefined', persisted:core.totalUnits(reloaded), backupRestored:valid, conflictRejected:conflict, assetLoaded:assets.every(Boolean) && generatedAssets.every(Boolean) && badgeAssets.every(Boolean), generatedAssetCount:generatedAssets.filter(Boolean).length, badgeAssetCount:badgeAssets.filter(Boolean).length, liquidLightMoving, xpTextReadable, customMenuInModal, customSelectCommitted, modalExitAnimated, segmentedAnimated, customCalendarVisible, scrollbarHidden, accountFrameMorph, accountDraftsPreserved, accountExitStable, accountSecretsCleared, pageEntryAllFive, pageEntryLiftAndFade, pageEntry48Badges, pageEntryFourSettings, currentStageMatches, tenStageEmblemsRender, tenStageFlowPatterns, motionMode:document.documentElement.dataset.motion, view:document.querySelector('main')?.innerText.slice(0,150), revision: reloaded.revision };
         })()`);
         Object.assign(report,startup);
         try {
@@ -263,7 +292,7 @@ else {
         await window.webContents.executeJavaScript(`(async () => { const {closeControlLayer}=await import('./src/controls.js');closeControlLayer({immediate:true});document.querySelector('[data-action="account-open"]').click();document.querySelector('[data-action="account-register-tab"]').click(); })()`);
         await new Promise(resolve => setTimeout(resolve, 500));
         await fs.writeFile(path.join(directory, 'account-motion.png'), (await window.webContents.capturePage()).toPNG());
-        app.exit(report.startupBackgroundMatches && report.startupIdentity && report.startupCreator && report.startupBlocksInput && report.startupDismissed && report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
+        app.exit(report.startupBackgroundMatches && report.startupIdentity && report.startupCreator && report.startupBlocksInput && report.startupDismissed && (process.env.RATER_EXPECT_FIRST_LAUNCH !== '1' || report.firstLaunchPrompt) && report.backupRestored && report.conflictRejected && report.nodeIsolated && report.assetLoaded && report.liquidLightMoving && report.xpTextReadable && report.customMenuInModal && report.customSelectCommitted && report.modalExitAnimated && report.segmentedAnimated && report.customCalendarVisible && report.scrollbarHidden && report.accountFrameMorph && report.accountDraftsPreserved && report.accountExitStable && report.accountSecretsCleared && report.pageEntryAllFive && report.pageEntryLiftAndFade && report.pageEntry48Badges && report.pageEntryFourSettings && report.currentStageMatches && report.tenStageEmblemsRender && report.tenStageFlowPatterns && report.badgeAwardSaved && report.badgeConfettiFinite && report.badgeNoExtraXP && report.launchLineOnTop ? 0 : 1);
       } catch (error) { console.error(error); app.exit(1); }
     }
   }).catch(error => { console.error(error); app.exit(1); });

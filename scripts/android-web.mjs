@@ -9,7 +9,7 @@ await cp(path.join(root,'apps/android/node_modules/@capacitor/core/dist/index.js
 await cp(path.join(root,'apps/android/mobile.css'),path.join(dest,'mobile.css'));
 await cp(path.join(root,'apps/android/bootstrap.js'),path.join(dest,'bootstrap.js'));
 await cp(path.join(root,'apps/android/touch-feedback.js'),path.join(dest,'touch-feedback.js'));
-const html=(await readFile(path.join(root,'index.html'),'utf8')).replace('width=device-width, initial-scale=1','width=device-width, initial-scale=1, viewport-fit=cover').replace('</head>','<link rel="stylesheet" href="mobile.css"></head>').replace('src="src/app.js"','src="bootstrap.js"');
+const html=(await readFile(path.join(root,'index.html'),'utf8')).replace('width=device-width, initial-scale=1','width=device-width, initial-scale=1, viewport-fit=cover').replace('</head>','<link rel="stylesheet" href="mobile.css"><link rel="stylesheet" href="packages/ui/experience.css"></head>').replace('src="src/app.js"','src="bootstrap.js"');
 await writeFile(path.join(dest,'index.html'),html);
 const version=(await readFile(path.join(root,'apps/android/VERSION'),'utf8')).trim();
 await writeFile(path.join(dest,'version.json'),JSON.stringify({version}));

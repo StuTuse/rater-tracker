@@ -127,10 +127,12 @@ export function transact(original, action, now = new Date().toISOString()) {
       const f = factor(date, now, true), d = action.dimension;
       const day = state.ratings[date] ??= {}, prev = day[d];
       if (action.stars === null) {
+        if (prev?.note) ((state.ratingNotes ??= {})[date] ??= {})[d] = { note: prev.note, updatedAt: now };
         if (prev) [prev.base, ...prev.batches].forEach(id => cancel(state, id, now));
         delete day[d];
       } else {
-        const rating = day[d] ??= { stars: 0, note: '', base: allocate(state, `${action.id}:base`, `${date}/${d}`, '评分基础', date, now, 5 * SCALE, f), batches: [] };
+        const rating = day[d] ??= { stars: 0, note: state.ratingNotes?.[date]?.[d]?.note ?? '', base: allocate(state, `${action.id}:base`, `${date}/${d}`, '评分基础', date, now, 5 * SCALE, f), batches: [] };
+        if (state.ratingNotes?.[date]) delete state.ratingNotes[date][d];
         while (rating.batches.length > action.stars) cancel(state, rating.batches.pop(), now);
         while (rating.batches.length < action.stars) {
           const id = `${action.id}:star:${rating.batches.length}`;
@@ -143,10 +145,18 @@ export function transact(original, action, now = new Date().toISOString()) {
       break;
     }
     case 'note': {
+      assert(DIMENSIONS.includes(action.dimension), '评分项目无效');
       factor(date, now, true);
       const r = state.ratings[date]?.[action.dimension];
-      assert(r, '请先选择星数，再保存原因');
-      r.note = text(action.note);
+      if ((r?.note ?? state.ratingNotes?.[date]?.[action.dimension]?.note ?? '') === text(action.note)) return original;
+      if (r) r.note = text(action.note);
+      else ((state.ratingNotes ??= {})[date] ??= {})[action.dimension] = { note: text(action.note), updatedAt: now };
+      break;
+    }
+    case 'journal': {
+      factor(date, now, true);
+      if ((state.dailyNotes?.[date]?.note ?? '') === text(action.note)) return original;
+      (state.dailyNotes ??= {})[date] = { note: text(action.note), updatedAt: now };
       break;
     }
     case 'createTask': {
@@ -248,6 +258,7 @@ export function transact(original, action, now = new Date().toISOString()) {
     }
     default: throw new Error('未知操作');
   }
+  if (['rate','createTask','progress','complete'].includes(action.type) && date === today && JSON.stringify(state) !== JSON.stringify(original)) (state.businessUpdates ??= {})[today] = now;
   state.processed.push(action.id);
   state.revision++;
   return state;
