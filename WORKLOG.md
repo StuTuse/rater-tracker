@@ -3,6 +3,10 @@
 
 日期统一使用香港时间。本文记录实际完成事项；历史讨论只按可核实阶段归纳，不补造具体时间、代码提交或检查结果。
 
+## W066 · 2026-10-18 · 1.0.0 发布回读与交接收尾
+
+1.0.0双平台prerelease `dual/2026.10.18.6`已正式发布并逐项回读：远端main/tag一致、非Draft、仓库PUBLIC；Windows EXE、Android APK和SHA256SUMS均显示uploaded，两个安装包的GitHub SHA-256 digest与本地构建清单一致。实际发布结果及链接补记于W065与SESSION_HANDOFF。此批只更新发布状态和交接，不变更应用功能或重建安装包；双端应用均保持1.0.0。桌面首启专项、Android离线AVD和真实账号／通知等验收边界照实保留。
+
 ## W065 · 2026-10-18 · 1.0.0 双端正式实现与验收
 
 **目标：** 将用户已确定的五轮产品与界面改动完成在Windows／Android 1.0.0中，保留旧经验和数据兼容。
@@ -13,7 +17,9 @@
 
 **发现并修复：** Android／桌面无本地凭证时仍查询CloudBase会话，SDK尝试读取空`refresh_token`。现在只有本地有可恢复身份／token才查询远端；新增纯函数测试。首次安装引导延至启动遮罩退场后显示。启动更新检查因此环境无法连GitHub，按离线捕获并保留离线功能。
 
-**未覆盖：** 隔离AVD重新wipe后设备持续offline，因此当前APK未安装复验首启（早先同布局截图不是最终包）；桌面完整历史smoke在旧选择器处失败，专项首启通过。实际云端账号／邮箱服务、Android真机通知送达／重启和电池策略、旧业务账号往返迁移、Windows覆盖安装升级未验。旧版需手动升级一次。远端`main=d8fd549...`，当天批次截至`.5`；本次`.6`仍待提交／推送／Release回读。
+**未覆盖：** 隔离AVD重新wipe后设备持续offline，因此当前APK未安装复验首启（早先同布局截图不是最终包）；桌面完整历史smoke在旧选择器处失败，专项首启通过。实际云端账号／邮箱服务、Android真机通知送达／重启和电池策略、旧业务账号往返迁移、Windows覆盖安装升级未验。旧版需手动升级一次。
+
+**发布回读补记（香港时间2026-10-18）：** 两个本地提交按原提交及树SHA安全快进到PUBLIC仓库`StuTuse/rater-tracker`，远端`main=ad57fa6f2b7396294ca61f5109552ccf98fbb76b`；附注tag `dual/2026.10.18.6`解引用到同一提交。GitHub prerelease已发布（非Draft），页面：[dual/2026.10.18.6](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.6)。远端三个资产均为uploaded：Windows安装包203,329,155字节／SHA256 `619989719542a2677f494f32dd714d7e0e76cae67c63034ce5ed11ffc1ac1535`；Android APK 98,215,045字节／SHA256 `5c5e8745b53be89c6b5f56c2a50cf961252e0a39eb366ed095c30d9deb0d5b09`；`SHA256SUMS.txt`。Release资产的GitHub digest与本地逐一一致，仓库保持PUBLIC。推送使用GitHub API进行原SHA、父提交和树对象核验；未强推或改写既有历史／标签。
 
 ## 当前摘要
 
@@ -21,7 +27,7 @@
 - Windows／Android应用入口均为1.0.0；Android VERSION_CODE=7、沿用原证书。Windows未签名。
 - 写记录、任务、历史／周报、提醒、账号续期、首启引导与更新检测已经实现；历史阶段的开发预览仍保留为旧记录。
 - `npm test` 69项、`npm run check` 56项通过。Windows首启专项与布局截图通过；真实邮件／云同步、通知送达、Android最终首启实测和完整旧Electron回归仍有明确未覆盖项，见W065。
-- 当前本地 `main` 与GitHub公开仓库采用用户授权流程；构建资产／SHA清单在ignored release目录，不进Git。
+- 本地及GitHub `main` 为 `ad57fa6`；双端1.0.0预览版已发布于 `dual/2026.10.18.6`，EXE/APK/SHA校验单及远端digest一致；仓库PUBLIC。安装产物仅在ignored release目录，不进Git。
 
 ## W001 · 方案讨论与机制形成 · 历史汇总
 
