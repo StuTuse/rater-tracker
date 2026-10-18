@@ -7,6 +7,12 @@ import { createHash } from 'node:crypto';
 const version = (await readFile('VERSION', 'utf8')).trim(), pkg = JSON.parse(await readFile('package.json', 'utf8'));
 assert.equal(pkg.version, version, 'VERSION and package version must agree');
 assert.equal(JSON.parse(await readFile('package-lock.json','utf8')).version, version, 'Lockfile version must agree');
+for (const platform of ['windows','android']) {
+  const base = `apps/${platform}`, platformVersion = (await readFile(`${base}/VERSION`, 'utf8')).trim();
+  assert.equal(JSON.parse(await readFile(`${base}/package.json`, 'utf8')).version, platformVersion, `${platform} package version must agree`);
+  if (platform === 'windows') assert.equal(platformVersion, version, 'Root version follows Windows');
+  else assert.equal(JSON.parse(await readFile(`${base}/package-lock.json`, 'utf8')).version, platformVersion, 'Android lockfile version must agree');
+}
 assert.equal(BADGES.length, 48);
 assert.equal(new Set(BADGES.map(b=>b.id)).size, 48);
 const svgs = await Promise.all(BADGES.map(b=>readFile(`assets/badges/${b.id}.svg`,'utf8')));

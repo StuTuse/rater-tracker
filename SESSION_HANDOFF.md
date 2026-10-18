@@ -1,4 +1,15 @@
-# 当前交接 · 2026-10-18
+# 当前交接 · 2026-10-19
+
+## 最新工作 · W068 · 1.0.1视觉对齐与动效
+
+本轮主工作区集成共享UI及Android键盘显示修复；Windows／Android均1.0.1，Android code8，规则1.3／JSON1及原证书不变。整理响应式级联、统一标题／操作／44px星级写字目标，平板评分与任务并排；手机首项任务＋查看全部、空任务后置。补齐记录展开收起、列表变化、历史切日／月及周报局部动效；稳定SVG和长输入节点，Android键盘避让。详见[验收](docs/UI对齐与动效验收.md)及W068。
+
+实际检查：69项单元／56项工程／46项隔离浏览器／14项最终打包Electron／7项最终Android正式APK原生操作通过；真实可见系统键盘和自动保存已截图，本轮初次安装登录可关闭，最终APK覆盖安装通过；Windows临时目录副本ASAR一致。双端发行包、版本与源码校验清单在忽略的release目录，目标批次[dual/2026.10.19.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.19.1)。Windows Setup SHA256为4b6c058f222983ad13f5c99a25d5f61e08ec3a425cb3365eb429d46f46da9304，Android为9bb8c185bd3c1d6bf6cf6ff25d284af2feca11d37b96793767e57cea54510997。
+
+命令：npm test；npm run check；Playwright CLI run-code --filename=scripts/ui-polish-acceptance.cjs；node scripts/desktop-polish-smoke.mjs <打包EXE路径>；ANDROID_ADB_SERVER_PORT=5038及RATER_ANDROID_SERIAL=emulator-5580时运行node scripts/android-polish-smoke.mjs。所有UI测试仅用隔离访客／虚构记录。正式APK不启用WebView调试；默认D盘EXE执行受限时复制完整包到普通临时目录并比对ASAR。
+
+本轮未测实体设备帧率、长期GPU、真实中文IME完整输入、云端账号服务、系统通知后台或Windows覆盖安装；Windows未签名。没有操作真实账号和其他worktree。后续按用户实际设备反馈继续，现行视觉规范v1.26、产品规范v1.32；历史1.0.0清单不能覆盖本轮结果。
+
 
 ## 最新工作 · W067 · 1.0.0 发布状态同步
 

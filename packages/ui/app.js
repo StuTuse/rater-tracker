@@ -11,6 +11,7 @@ import { createModalController } from './modal.js';
 import { growthStage, paintStage, stageUpgradeFrames } from './growth-stages.js';
 import { chooseLaunchLine, BadgeNoticeQueue } from './notices.js';
 import { createPageMotion } from './page-motion.js';
+import { createLayoutMotion } from './layout-motion.js';
 import { finishStartup } from './startup.js';
 import { buildWeeklyReport, mondayFor, previousWeek } from '../core/weekly-report.js';
 import { trendPanel, drawTrends, weeklyArchive, getWeeklyReport } from './history.js';
@@ -107,6 +108,7 @@ const modalUI = createModalController($('#modal'), motionMode, kind => {
 });
 const growthAnimations = new Set();
 const pageMotion = createPageMotion(() => $('#content'), motionMode);
+const layoutMotion = createLayoutMotion(motionMode, appVisible);
 const starAnimations = new Map();
 const drafts = new Map();
 const seriesNames = { stars: '星光', study: '求知', work: '创作', health: '活力', life: '日常', tasks: '达成' };
@@ -140,7 +142,7 @@ function flowState() {
   const growth = $('#growth');
   if (growth) growth.dataset.flow = motionMode() === 'full' && appVisible() && totalUnits(state) > 0 ? 'running' : 'paused';
 }
-function applyMotion() { document.documentElement.dataset.motion = motionMode(); if (motionMode() !== 'full') { pageMotion.cancel(); starAnimations.forEach(a => a.cancel()); starAnimations.clear(); } flowState(); }
+function applyMotion() { document.documentElement.dataset.motion = motionMode(); if (motionMode() !== 'full') { pageMotion.cancel(); layoutMotion.cancel(); starAnimations.forEach(a => a.cancel()); starAnimations.clear(); } flowState(); }
 function stopGrowthFeedback() {
   ++animationToken;
   cancelAnimationFrame(numberFrame); clearTimeout(celebrationTimer);
@@ -280,7 +282,7 @@ function todayPage() {
   const day = state.ratings[chosenDate] ?? {}, count = DIMENSIONS.filter(d => day[d]).length;
   const tasks = validTasks().filter(t => !t.archived && !t.hidden && !t.completion?.active).sort((a, b) => a.deadline.localeCompare(b.deadline));
   const s = stats(state);
-  return header(chosenDate === today() ? 'TODAY / 今日手记' : 'DAILY JOURNAL / 每日手记', chosenDate === today() ? '今日记录' : dateLabel(chosenDate), `${dateLabel(chosenDate)} · ${count === 4 ? '四项已全部记录' : `已记录 ${count} / 4 项`}`, datePicker()) + `<div class="today-layout"><section><div class="section-title"><h2>每日评分</h2><span>${count === 4 ? `${icon('check')}今日记录完成` : '空白 ≠ 0 星'}</span></div>${ratingCards(chosenDate)}${journalCard(chosenDate)}<div class="gentle-note">${icon('info')}0 星计入记录，未评分不计入。${chosenDate !== today() ? '<br>历史增量按补记时间折扣；原有经验保持。' : ''}</div></section><aside class="today-tasks"><div class="section-title"><h2>当前任务</h2>${button('new-task', '新建', 'plus', '', 'text-button')}</div><div class="task-stack">${tasks.slice(0, 4).map(t => taskCard(t, true)).join('') || empty('暂无任务', '', button('new-task', '新建任务', 'plus', '', 'secondary'))}</div>${tasks.length > 4 ? button('navigate', `查看全部 ${tasks.length} 项任务`, 'arrow', 'data-page="tasks"', 'text-button all-tasks') : ''}<div class="small-reflection"><span class="eyebrow">累计记录</span><div><strong>${s.recorded}</strong><span>记录天数</span><strong>${s.tasks}</strong><span>完成成果</span></div><p>${s.completeDays} 天完整评分 · ${s.stars} 颗有效星星</p></div></aside></div>`;
+  return header(chosenDate === today() ? 'TODAY / 今日手记' : 'DAILY JOURNAL / 每日手记', chosenDate === today() ? '今日记录' : dateLabel(chosenDate), `${dateLabel(chosenDate)} · ${count === 4 ? '四项已全部记录' : `已记录 ${count} / 4 项`}`, datePicker()) + `<div class="today-layout"><section><div class="section-title"><h2>每日评分</h2><span>${count === 4 ? `${icon('check')}今日记录完成` : '空白 ≠ 0 星'}</span></div>${ratingCards(chosenDate)}${journalCard(chosenDate)}<div class="gentle-note">${icon('info')}0 星计入记录，未评分不计入。${chosenDate !== today() ? '<br>历史增量按补记时间折扣；原有经验保持。' : ''}</div></section><aside class="today-tasks"><div class="section-title"><h2>当前任务</h2><div class="task-heading-actions">${tasks.length>1?button('navigate',`查看全部 ${tasks.length} 项`,'','data-page="tasks"','text-button phone-only'):''}${button('new-task', '新建', 'plus', '', 'text-button')}</div></div><div class="task-stack">${tasks.slice(0, 4).map(t => taskCard(t, true)).join('') || empty('暂无任务', '', button('new-task', '新建任务', 'plus', '', 'secondary'))}</div>${tasks.length > 4 ? button('navigate', `查看全部 ${tasks.length} 项任务`, 'arrow', 'data-page="tasks"', 'text-button all-tasks') : ''}<div class="small-reflection"><span class="eyebrow">累计记录</span><div><strong>${s.recorded}</strong><span>记录天数</span><strong>${s.tasks}</strong><span>完成成果</span></div><p>${s.completeDays} 天完整评分 · ${s.stars} 颗有效星星</p></div></aside></div>`;
 }
 function tasksPage() {
   const list = validTasks().filter(t => taskFilter === 'all' || taskFilter === 'active' && !t.completion?.active && !t.archived || taskFilter === 'completed' && t.completion?.active && !t.hidden || taskFilter === 'archived' && t.archived || taskFilter === 'hidden' && t.hidden).filter(t => `${t.title} ${t.goal}`.toLowerCase().includes(taskQuery.toLowerCase())).sort((a, b) => a.deadline.localeCompare(b.deadline));
@@ -357,18 +359,24 @@ function settingsPage() {
 }
 function renderContent(preserveInputs = true, animateChanges = false, entrance = '') {
   document.documentElement.dataset.page=page;
-  if (entrance) pageMotion.cancel();
+  if (entrance) { pageMotion.cancel(); layoutMotion.cancel(); }
   const referenceDraft = preserveInputs && $('#references-form') ? Object.fromEntries(new FormData($('#references-form'))) : null;
   const focus = document.activeElement;
   const focusId = focus?.id, start = focus?.selectionStart, end = focus?.selectionEnd;
   document.querySelectorAll('.nav-link').forEach(el => { el.classList.toggle('selected', el.dataset.page === page); el.setAttribute('aria-current', el.dataset.page === page ? 'page' : 'false'); });
   const content = $('#content');
+  const previousLayout = preserveInputs && !entrance ? layoutMotion.capture(content) : null;
   if (!animateChanges) {
     starAnimations.forEach(a => a.cancel()); starAnimations.clear();
     content.classList.add('static-update');
   }
   updateDOM(content, ({ today: todayPage, tasks: tasksPage, history: historyPage, rewards: rewardsPage, settings: settingsPage })[page](), { preserveInputs, starChanged: animateChanges ? animateStar : () => {} });
   enhanceControls(content);
+  content.querySelectorAll('textarea.rating-note').forEach(field => {
+    if (field !== document.activeElement && field.getClientRects().length) {
+      field.style.height = 'auto'; field.style.height = Math.max(80, field.scrollHeight + 2) + 'px';
+    }
+  });
   chartObserver.disconnect();content.querySelectorAll('.trend-chart').forEach(el=>chartObserver.observe(el));drawTrends(content,state,[...hiddenTrendSeries],historyTab==='reports'?weeklyDay:chosenDate);if(page==='history'&&historyTab==='reports')cacheWeeklyReport();
   if (!animateChanges) {
     const star = content.querySelector('.star-button .icon');
@@ -383,6 +391,7 @@ function renderContent(preserveInputs = true, animateChanges = false, entrance =
     if (next) { next.focus({ preventScroll: true }); next.setSelectionRange(start, end); }
   }
   if (entrance) pageMotion.play(entrance);
+  else if (previousLayout) layoutMotion.reconcile(content, previousLayout, animateChanges);
 }
 function animateStar(button, lit) {
   const svg = button.querySelector('svg'), previous = starAnimations.get(svg);
@@ -545,7 +554,7 @@ document.addEventListener('click', async event => {
   const b = event.target.closest('[data-action]'); if (!b || b.disabled || accountBusy) return;
   const action = b.dataset.action, taskId = b.dataset.task;
   try {
-    if(action==='write-note') {const key=`${b.dataset.date}/${b.dataset.dimension}`;editingNotes.add(key);const card=b.closest('.rating-card'),editor=card.querySelector('.reason-editor'),field=editor.querySelector('textarea');editor.hidden=false;card.querySelector('.rating-reason').hidden=true;b.setAttribute('aria-expanded','true');field.focus({preventScroll:true});field.setSelectionRange(field.value.length,field.value.length);field.style.height='auto';field.style.height=Math.max(80,field.scrollHeight+2)+'px';field.scrollIntoView({block:'nearest'});return;}
+    if(action==='write-note') {const key=`${b.dataset.date}/${b.dataset.dimension}`;editingNotes.add(key);const card=b.closest('.rating-card'),height=card.getBoundingClientRect().height,editor=card.querySelector('.reason-editor'),field=editor.querySelector('textarea');editor.hidden=false;card.querySelector('.rating-reason').hidden=true;b.setAttribute('aria-expanded','true');field.focus({preventScroll:true});field.setSelectionRange(field.value.length,field.value.length);field.style.height='auto';field.style.height=Math.max(80,field.scrollHeight+2)+'px';layoutMotion.resize(card,height);field.scrollIntoView({block:'nearest'});return;}
     if(['navigate','previous-date','next-date','calendar-date','account-open','account-logout'].includes(action))await flushTextDrafts();
     if (action === 'account-open') { openAccountDialog(); return; }
     if (action === 'account-login-tab') { openAccountDialog('login'); return; }
@@ -598,19 +607,19 @@ document.addEventListener('click', async event => {
       }, '备份并复制'); return;
     }
     switch (action) {
-      case 'history-tab': historyTab=b.dataset.tab;renderContent();break;
-      case 'weekly-day': weeklyDay=b.dataset.date;renderContent();$('#content .weekly-original')?.scrollIntoView({block:'nearest'});break;
+      case 'history-tab': {const changed=historyTab!==b.dataset.tab;historyTab=b.dataset.tab;renderContent(true,false,changed?'history':'');break;}
+      case 'weekly-day': {const changed=weeklyDay!==b.dataset.date;weeklyDay=b.dataset.date;renderContent(true,false,changed?'weekly-day':'');break;}
       case 'trend-series': hiddenTrendSeries.has(b.dataset.dimension)?hiddenTrendSeries.delete(b.dataset.dimension):hiddenTrendSeries.add(b.dataset.dimension);renderContent();break;
       case 'edit-day': page='today';renderContent();break;
       case 'navigate': { const changed = page !== b.dataset.page; page = b.dataset.page; renderContent(true, false, changed ? 'page' : ''); if(changed && window.raterNative)window.scrollTo(0,0); break; }
       case 'rate': await save({ type: 'rate', dimension: b.dataset.dimension, stars: Number(b.dataset.stars), date: chosenDate, ...(drafts.has(`${chosenDate}/${b.dataset.dimension}`) ? { note: drafts.get(`${chosenDate}/${b.dataset.dimension}`) } : {}) }, '评分已保存'); break;
       case 'clear-rating': confirmAction(`清空${LABELS[b.dataset.dimension]}评分？`, '这会撤回该项全部实际经验和星数，之后重新补记按新的录入时间结算。', () => { drafts.delete(`${chosenDate}/${b.dataset.dimension}`); save({ type: 'rate', dimension: b.dataset.dimension, stars: null, date: chosenDate }, '评分已清空'); }, '清空评分', true); break;
       case 'reference': openModal(`${modalHead('RATING GUIDE', `${LABELS[b.dataset.dimension]} · 评分参照`)}<p class="reference-text">${escape(state.settings.references[b.dataset.dimension])}</p>${button('close-modal', '知道了', '', '', 'primary')}`, 'reference'); break;
-      case 'previous-date': chosenDate = addDays(chosenDate, -1); month = chosenDate.slice(0, 7); renderContent(); break;
-      case 'next-date': chosenDate = addDays(chosenDate, 1); month = chosenDate.slice(0, 7); renderContent(); break;
-      case 'calendar-date': chosenDate = b.dataset.date; renderContent(); break;
-      case 'previous-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); month = d.toISOString().slice(0, 7); renderContent(); break; }
-      case 'next-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); month = d.toISOString().slice(0, 7); renderContent(); break; }
+      case 'previous-date': chosenDate = addDays(chosenDate, -1); month = chosenDate.slice(0, 7); renderContent(true,false,page==='history'?'recall':''); break;
+      case 'next-date': chosenDate = addDays(chosenDate, 1); month = chosenDate.slice(0, 7); renderContent(true,false,page==='history'?'recall':''); break;
+      case 'calendar-date': {const changed=chosenDate!==b.dataset.date;chosenDate = b.dataset.date; renderContent(true,false,changed?'recall':''); break;}
+      case 'previous-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); month = d.toISOString().slice(0, 7); renderContent(true,false,'calendar'); break; }
+      case 'next-month': { const d = new Date(`${month}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); month = d.toISOString().slice(0, 7); renderContent(true,false,'calendar'); break; }
       case 'task-filter': { const changed = taskFilter !== b.dataset.filter; taskFilter = b.dataset.filter; renderContent(true, false, changed ? 'tasks' : ''); break; }
       case 'trend-range': { const changed = trendRange !== Number(b.dataset.range); trendRange = Number(b.dataset.range); renderContent(true, false, changed ? 'trend' : ''); break; }
       case 'reward-tab': { const changed = rewardTab !== b.dataset.tab; rewardTab = b.dataset.tab; renderContent(true, false, changed ? 'rewards' : ''); break; }
@@ -653,11 +662,11 @@ document.addEventListener('change', event => {
   const el = event.target;
   if(el.id?.startsWith('reminder-')){
     const prefs={enabled:$('#reminder-enabled')?.checked??false,daily:$('#reminder-daily')?.checked??true,followup:$('#reminder-followup')?.checked??true,weekly:$('#reminder-weekly')?.checked??true};
-    const box=$('#content .reminder-options');if(box)box.hidden=!prefs.enabled;
+    const box=$('#content .reminder-options');if(box){const panel=box.closest('.panel'),height=panel.getBoundingClientRect().height;box.hidden=!prefs.enabled;layoutMotion.resize(panel,height);}
     applyReminders(platform,prefs,state.businessUpdates?.[today()]??'').then(result=>{const label=$('#reminder-status');if(label)label.textContent=prefs.enabled?(result?.granted===false?'通知权限未开启，请在系统设置中允许通知。':result?.exactAlarm===false?'提醒已保存。若精确提醒权限未开启，系统可能延后投递。':'提醒已保存。'): '提醒已关闭。';}).catch(error=>{const label=$('#reminder-status');if(label)label.textContent=`设置未生效：${error.message}`;});return;
   }
-  if (el.id === 'rating-date') { if (el.value && el.value <= today()) { chosenDate = el.value; month = chosenDate.slice(0, 7); renderContent(); } }
-  if(el.id==='weekly-picker'){weeklyStart=el.value;weeklyDay=weeklyStart;renderContent();}
+  if (el.id === 'rating-date') { if (el.value && el.value <= today()) { chosenDate = el.value; month = chosenDate.slice(0, 7); renderContent(true,false,page==='history'?'recall':''); } }
+  if(el.id==='weekly-picker'){weeklyStart=el.value;weeklyDay=weeklyStart;renderContent(true,false,'week');}
   if (el.id === 'motion-setting') save({ type: 'settings', motion: el.value }, '动效偏好已保存');
   if (el.dataset.stage) save({ type: 'stage', taskId: el.dataset.task, stageId: el.dataset.stage, done: el.checked }, '阶段已更新');
 });
@@ -699,14 +708,14 @@ document.addEventListener('submit', async event => {
 $('#modal').addEventListener('cancel', event => { event.preventDefault(); closeModal(); });
 $('#modal').addEventListener('click', event => { if (event.target === $('#modal')) { const rect = $('#modal').getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeModal(); } });
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { if (state) { applyMotion(); growthStatic(); } });
-document.addEventListener('visibilitychange', () => { if (state) { if (!appVisible()) { pageMotion.cancel(); growthStatic(); } else flowState(); } });
+document.addEventListener('visibilitychange', () => { if (state) { if (!appVisible()) { pageMotion.cancel(); layoutMotion.cancel(); growthStatic(); } else flowState(); } });
 window.raterReload = async () => { resetBadgeNotices(); state = validateState(await store.read()); growthStatic(); renderContent(); };
 window.raterReady = (async () => {
   let promptLoginOnStartup = false;
   try {
     store = await openStore(); state = validateState(await store.read());
     for(const[key,value]of Object.entries(await store.readAux('text-drafts')??{}))if(typeof value==='string')drafts.set(key,value);
-    desktopInfo = platform ? await platform.info() : { version: '0.1.0-alpha.19', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
+    desktopInfo = platform ? await platform.info() : { version: '1.0.1', dataDirectory: '浏览器预览 · 当前来源的 IndexedDB（与桌面数据独立）', packaged: false };
     applyMotion(); shell(); renderContent();
     const touch=()=>{if(account?.id)touchAccount().catch(()=>{});};
     let lastTouch=0;const activity=()=>{if(Date.now()-lastTouch<60000)return;lastTouch=Date.now();touch();};
@@ -737,5 +746,5 @@ window.raterReady = (async () => {
 })();
 
 window.addEventListener('rater-back', () => { if(document.querySelector('[popover]:popover-open')) { closeControlLayer(); return; } if($('#modal').open) { closeModal(); return; } if(page!=='today') { page='today'; renderContent(true,false,'page');window.scrollTo(0,0); return; } platform?.quit?.(); });
-window.addEventListener('rater-pause',()=>{if(state){pageMotion.cancel();growthStatic();$('.award-confetti')?.remove();}});
+window.addEventListener('rater-pause',()=>{if(state){pageMotion.cancel();layoutMotion.cancel();growthStatic();$('.award-confetti')?.remove();}});
 window.addEventListener('rater-resume', () => { if(store) window.raterReload().then(()=>syncEngine?.run()).catch(e=>toast(e.message)); });

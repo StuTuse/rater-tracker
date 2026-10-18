@@ -21,7 +21,21 @@ window.raterNative={
 };
 function safeArea(v){if(typeof v.active==='boolean')window.raterNative.active=v.active;document.documentElement.style.setProperty('--native-safe-top',(v.safeTop??24)+'px');document.documentElement.style.setProperty('--native-safe-bottom',(v.safeBottom??24)+'px');}
 safeArea(await nativeInfo().catch(()=>({})));Native.addListener('insets',safeArea);
-function viewport(){document.documentElement.style.setProperty('--visual-height',visualViewport.height+'px');document.documentElement.classList.toggle('keyboard-open',visualViewport.height<innerHeight-100);}
+let viewportFrame;
+function viewport(){
+ const visible=visualViewport;
+ document.documentElement.style.setProperty('--visual-height',visible.height+'px');
+ document.documentElement.classList.toggle('keyboard-open',visible.height<innerHeight-100);
+ cancelAnimationFrame(viewportFrame);
+ viewportFrame=requestAnimationFrame(()=>{
+  const field=document.activeElement;
+  if(!field?.matches('input,textarea')||!field.getClientRects().length)return;
+  const rect=field.getBoundingClientRect(),top=visible.offsetTop+12,bottom=visible.offsetTop+visible.height-16;
+  if(rect.top>=top&&rect.bottom<=bottom)return;
+  if(field.closest('dialog'))field.scrollIntoView({block:'nearest',behavior:'instant'});
+  else window.scrollBy({top:rect.height>bottom-top||rect.top<top?rect.top-top:rect.bottom-bottom,behavior:'instant'});
+ });
+}
 visualViewport?.addEventListener('resize',viewport);viewport();
 Native.addListener('back',()=>window.dispatchEvent(new Event('rater-back')));
 Native.addListener('inactive',()=>{window.raterNative.active=false;window.dispatchEvent(new Event('rater-pause'));});

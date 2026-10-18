@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前双平台版本：Windows 1.0.0；Android 1.0.0（VERSION_CODE=7）。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
+**当前双平台版本：Windows 1.0.1；Android 1.0.1（VERSION_CODE=8）。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
 
 ## 安装与使用
 
-下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.18.6)并选择`Rater-Tracker-1.0.0-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
+下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.19.1)并选择`Rater-Tracker-1.0.1-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
 
 自有贡献采用[MIT许可](LICENSE)，第三方保留[各自许可](docs/THIRD_PARTY_NOTICES.md)。用户已接受SignPath Foundation证书发布者，作者仍TuseCreation。见[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy／隐私说明](docs/PRIVACY.md)、[接入方案](docs/免费开源签名接入方案.md)和[申请资料](docs/SignPath申请草稿.md)。服务尚未申请／获批，现有安装包保持原状。
 
@@ -17,6 +17,14 @@
 5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
 未登录可完全离线使用；账号同步需要联网。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
+
+## 本轮界面对齐与动效
+
+1.0.1统一评分卡标题、写字按钮、日期栏、任务操作与周报卡片对齐。手机星级与写字按钮保留44px，首页有任务时只显示首项并提供查看全部；空任务区放在评分之后。700px起采用侧栏，窄平板评分单列与任务并排，足够宽后恢复双列。
+
+写记录展开／收起、任务列表重排、历史切日／切月、周报切换增加局部过渡。图表SVG原位更新，避免切日期先清空；长记录编辑遇到其他保存仍保留焦点和高度。Android系统软键盘展开后将正在编辑的字段移入可视区域。动效关闭与系统减少动态均生效。
+
+实际检查见[UI对齐与动效验收](docs/UI对齐与动效验收.md)。隔离浏览器先运行 npm run dev，再用 Playwright CLI 的 run-code --filename=scripts/ui-polish-acceptance.cjs。Windows打包专项：node scripts/desktop-polish-smoke.mjs <打包EXE路径>。Android正式包原生专项：设置 ANDROID_ADB_SERVER_PORT=5038、RATER_ANDROID_SERIAL=emulator-5580 后运行 node scripts/android-polish-smoke.mjs，仅接受 RaterSigningAcceptance 隔离AVD。
 
 ## 数据与更新
 
