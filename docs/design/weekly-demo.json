@@ -1,0 +1,1243 @@
+{
+  "fictional": true,
+  "clock": "2026-10-18",
+  "reports": [
+    {
+      "version": "weekly-design.1",
+      "key": "fictional-preview/2026-10-05",
+      "generatedAt": "2026-10-11T16:00:00Z",
+      "fingerprint": "0f2da49e69e85a55c2896bdad51ff297609f882f31439543f1589418cdf52e1d",
+      "start": "2026-10-05",
+      "end": "2026-10-11",
+      "dimensions": {
+        "study": {
+          "dimension": "study",
+          "label": "学习",
+          "count": 7,
+          "mean": 3.142857142857143,
+          "min": 2,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 6,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          }
+        },
+        "work": {
+          "dimension": "work",
+          "label": "作品",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          }
+        },
+        "health": {
+          "dimension": "health",
+          "label": "健康",
+          "count": 7,
+          "mean": 3,
+          "min": 0,
+          "max": 4,
+          "zeroDays": 1,
+          "pairs": 7,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          }
+        },
+        "life": {
+          "dimension": "life",
+          "label": "生活",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          }
+        }
+      },
+      "days": [
+        {
+          "date": "2026-10-05",
+          "scores": {
+            "study": 2,
+            "work": 3,
+            "health": 3,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "先把练习安排清楚，晚上整理了素材。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-06",
+          "scores": {
+            "study": 3,
+            "work": 3,
+            "health": 4,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "完成了一次练习，也给自己留了休息时间。",
+          "progress": [
+            {
+              "id": "p1",
+              "taskId": "demo",
+              "title": "短片初剪",
+              "note": "整理素材并完成粗剪。",
+              "date": "2026-10-06"
+            }
+          ],
+          "completed": []
+        },
+        {
+          "date": "2026-10-07",
+          "scores": {
+            "study": 3,
+            "work": 4,
+            "health": 0,
+            "life": 4
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "今天没有运动，按实际情况记录为0星。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "今天没有运动，记录实际情况，早点收工。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-08",
+          "scores": {
+            "study": 4,
+            "work": 3,
+            "health": 3,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "整理出短片结构，明天继续细化。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-09",
+          "scores": {
+            "study": 3,
+            "work": 4,
+            "health": 4,
+            "life": 4
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "初剪基本成形，标出了需要补拍的段落。",
+          "progress": [
+            {
+              "id": "p2",
+              "taskId": "demo",
+              "title": "短片初剪",
+              "note": "调整结构和节奏。",
+              "date": "2026-10-09"
+            }
+          ],
+          "completed": []
+        },
+        {
+          "date": "2026-10-10",
+          "scores": {
+            "study": 4,
+            "work": 4,
+            "health": 3,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "散步时想清了一个写作问题。",
+          "progress": [],
+          "completed": [
+            {
+              "taskId": "demo",
+              "title": "短片初剪",
+              "note": "交付一版可观看的短片。",
+              "date": "2026-10-10"
+            }
+          ]
+        },
+        {
+          "date": "2026-10-11",
+          "scores": {
+            "study": 3,
+            "work": 3,
+            "health": 4,
+            "life": 4
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "回看这一周，把下周要做的两件事写下来。",
+          "progress": [],
+          "completed": []
+        }
+      ],
+      "recordedDays": 7,
+      "completeDays": 7,
+      "ratedCount": 28,
+      "capacity": 28,
+      "journalDays": 7,
+      "overallState": "steady",
+      "quality": "sufficient",
+      "taskProgress": 2,
+      "completedTasks": 1,
+      "createdTasks": 1,
+      "effectiveXPUnits": 322000000,
+      "overall": {
+        "id": "overall.steady.6",
+        "text": "从完整记录中能看到这一周的日常节奏，下一步可逐项做小调整。"
+      },
+      "qualityText": {
+        "id": "quality.sufficient.2",
+        "text": "本周与上周有足够可比日期，具体原因仍需结合自己的文字。"
+      },
+      "sections": [
+        {
+          "dimension": "study",
+          "label": "学习",
+          "count": 7,
+          "mean": 3.142857142857143,
+          "min": 2,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 6,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.study.steady.2",
+            "text": "本周学习评分没有达到明显升降条件，可以继续观察学习方法。"
+          },
+          "advice": {
+            "id": "advice.study.steady.2",
+            "text": "选一个学习目标，并提前写清楚完成时怎样验证。"
+          }
+        },
+        {
+          "dimension": "work",
+          "label": "作品",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.work.steady.3",
+            "text": "本周创作线没有清晰的对照变化，实际成果和反馈仍是主要依据。"
+          },
+          "advice": {
+            "id": "advice.work.steady.3",
+            "text": "可以给每次创作留一条版本说明，让进展更容易辨认。"
+          }
+        },
+        {
+          "dimension": "health",
+          "label": "健康",
+          "count": 7,
+          "mean": 3,
+          "min": 0,
+          "max": 4,
+          "zeroDays": 1,
+          "pairs": 7,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.health.steady.3",
+            "text": "本周健康线暂时没有清晰的对照变化，不需要为分数强行调整。"
+          },
+          "advice": {
+            "id": "advice.health.steady.2",
+            "text": "可以把活动与休息都写进日程，看看哪种组合更合适。"
+          }
+        },
+        {
+          "dimension": "life",
+          "label": "生活",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 0,
+          "state": "steady",
+          "evidence": {
+            "recordedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ],
+            "pairedDates": [
+              "2026-10-05",
+              "2026-10-06",
+              "2026-10-07",
+              "2026-10-08",
+              "2026-10-09",
+              "2026-10-10",
+              "2026-10-11"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.life.steady.3",
+            "text": "本周生活线没有清晰的对照变化，具体日常仍比单个均分更重要。"
+          },
+          "advice": {
+            "id": "advice.life.steady.2",
+            "text": "可以固定一个轻量整理时段，让常见事务不再临时堆积。"
+          }
+        }
+      ],
+      "nextSteps": [
+        {
+          "dimension": "study",
+          "label": "学习",
+          "reason": "steady",
+          "advice": {
+            "id": "advice.study.steady.2",
+            "text": "选一个学习目标，并提前写清楚完成时怎样验证。"
+          }
+        },
+        {
+          "dimension": "work",
+          "label": "作品",
+          "reason": "steady",
+          "advice": {
+            "id": "advice.work.steady.3",
+            "text": "可以给每次创作留一条版本说明，让进展更容易辨认。"
+          }
+        }
+      ],
+      "closing": {
+        "id": "closing.continue.1",
+        "text": "下一周继续观察，不需要把所有计划同时加码。"
+      },
+      "templateIds": [
+        "overall.steady.6",
+        "quality.sufficient.2",
+        "dimension.study.steady.2",
+        "advice.study.steady.2",
+        "dimension.work.steady.3",
+        "advice.work.steady.3",
+        "dimension.health.steady.3",
+        "advice.health.steady.2",
+        "dimension.life.steady.3",
+        "advice.life.steady.2",
+        "closing.continue.1"
+      ]
+    },
+    {
+      "version": "weekly-design.1",
+      "key": "fictional-preview/2026-09-28",
+      "generatedAt": "2026-10-04T16:00:00Z",
+      "fingerprint": "bfcc27846654b2f151a46ac20006a9f009662ad75e5bc1b4ff5a41c0231f55ca",
+      "start": "2026-09-28",
+      "end": "2026-10-04",
+      "dimensions": {
+        "study": {
+          "dimension": "study",
+          "label": "学习",
+          "count": 6,
+          "mean": 3.1666666666666665,
+          "min": 2,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 6,
+          "delta": 1,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          }
+        },
+        "work": {
+          "dimension": "work",
+          "label": "作品",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 1,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          }
+        },
+        "health": {
+          "dimension": "health",
+          "label": "健康",
+          "count": 7,
+          "mean": 3,
+          "min": 0,
+          "max": 4,
+          "zeroDays": 1,
+          "pairs": 7,
+          "delta": 0.8571428571428572,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          }
+        },
+        "life": {
+          "dimension": "life",
+          "label": "生活",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 1,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          }
+        }
+      },
+      "days": [
+        {
+          "date": "2026-09-28",
+          "scores": {
+            "study": 2,
+            "work": 3,
+            "health": 3,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "先把练习安排清楚，晚上整理了素材。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-09-29",
+          "scores": {
+            "study": 3,
+            "work": 3,
+            "health": 4,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "完成了一次练习，也给自己留了休息时间。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-09-30",
+          "scores": {
+            "study": null,
+            "work": 4,
+            "health": 0,
+            "life": 4
+          },
+          "notes": {
+            "study": "",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "今天没有运动，按实际情况记录为0星。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "今天没有运动，记录实际情况，早点收工。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-01",
+          "scores": {
+            "study": 4,
+            "work": 3,
+            "health": 3,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "整理出短片结构，明天继续细化。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-02",
+          "scores": {
+            "study": 3,
+            "work": 4,
+            "health": 4,
+            "life": 4
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "初剪基本成形，标出了需要补拍的段落。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-03",
+          "scores": {
+            "study": 4,
+            "work": 4,
+            "health": 3,
+            "life": 3
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "散步时想清了一个写作问题。",
+          "progress": [],
+          "completed": []
+        },
+        {
+          "date": "2026-10-04",
+          "scores": {
+            "study": 3,
+            "work": 3,
+            "health": 4,
+            "life": 4
+          },
+          "notes": {
+            "study": "完成练习并整理了错题，记下还需要复习的概念。",
+            "work": "整理镜头与修改意见，留下一版可以继续推进的文件。",
+            "health": "按自己的状态安排活动与休息。",
+            "life": "处理日常事务，并留出与家人交流的时间。"
+          },
+          "journal": "回看这一周，把下周要做的两件事写下来。",
+          "progress": [],
+          "completed": []
+        }
+      ],
+      "recordedDays": 7,
+      "completeDays": 6,
+      "ratedCount": 27,
+      "capacity": 28,
+      "journalDays": 7,
+      "overallState": "rising",
+      "quality": "sufficient",
+      "taskProgress": 0,
+      "completedTasks": 0,
+      "createdTasks": 0,
+      "effectiveXPUnits": 311000000,
+      "overall": {
+        "id": "overall.rising.5",
+        "text": "多项自评在同星期对照中提高了，原因文字能帮助辨认具体变化。"
+      },
+      "qualityText": {
+        "id": "quality.sufficient.3",
+        "text": "数据支持本次短期对照，不代表已经形成长期趋势。"
+      },
+      "sections": [
+        {
+          "dimension": "study",
+          "label": "学习",
+          "count": 6,
+          "mean": 3.1666666666666665,
+          "min": 2,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 6,
+          "delta": 1,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.study.rising.1",
+            "text": "学习评分在可比日期中提高，可以看看是哪些练习更有效。"
+          },
+          "advice": {
+            "id": "advice.study.rising.3",
+            "text": "把顺手的方法写成两步流程，下周检验是否还能奏效。"
+          }
+        },
+        {
+          "dimension": "work",
+          "label": "作品",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 1,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.work.rising.1",
+            "text": "作品评分在可比日期中上升，可以回顾哪些制作环节更顺畅。"
+          },
+          "advice": {
+            "id": "advice.work.rising.3",
+            "text": "先保住当前交付节奏，再决定是否增加新的项目。"
+          }
+        },
+        {
+          "dimension": "health",
+          "label": "健康",
+          "count": 7,
+          "mean": 3,
+          "min": 0,
+          "max": 4,
+          "zeroDays": 1,
+          "pairs": 7,
+          "delta": 0.8571428571428572,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.health.rising.2",
+            "text": "同星期对照下健康评分上升，可以寻找更容易维持的生活节奏。"
+          },
+          "advice": {
+            "id": "advice.health.rising.2",
+            "text": "找出本周最容易维持的一项照顾方式，先稳定执行。"
+          }
+        },
+        {
+          "dimension": "life",
+          "label": "生活",
+          "count": 7,
+          "mean": 3.4285714285714284,
+          "min": 3,
+          "max": 4,
+          "zeroDays": 0,
+          "pairs": 7,
+          "delta": 1,
+          "state": "rising",
+          "evidence": {
+            "recordedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ],
+            "pairedDates": [
+              "2026-09-28",
+              "2026-09-29",
+              "2026-09-30",
+              "2026-10-01",
+              "2026-10-02",
+              "2026-10-03",
+              "2026-10-04"
+            ]
+          },
+          "assessment": {
+            "id": "dimension.life.rising.2",
+            "text": "同星期对照下生活自评上升，值得保留那些容易延续的小习惯。"
+          },
+          "advice": {
+            "id": "advice.life.rising.3",
+            "text": "继续给关系、家务或个人时间留出位置，选择最有用的一项。"
+          }
+        }
+      ],
+      "nextSteps": [
+        {
+          "dimension": "study",
+          "label": "学习",
+          "reason": "rising",
+          "advice": {
+            "id": "advice.study.rising.3",
+            "text": "把顺手的方法写成两步流程，下周检验是否还能奏效。"
+          }
+        },
+        {
+          "dimension": "work",
+          "label": "作品",
+          "reason": "rising",
+          "advice": {
+            "id": "advice.work.rising.3",
+            "text": "先保住当前交付节奏，再决定是否增加新的项目。"
+          }
+        }
+      ],
+      "closing": {
+        "id": "closing.continue.3",
+        "text": "挑一项有效做法继续做，其余变化留待下次回看。"
+      },
+      "templateIds": [
+        "overall.rising.5",
+        "quality.sufficient.3",
+        "dimension.study.rising.1",
+        "advice.study.rising.3",
+        "dimension.work.rising.1",
+        "advice.work.rising.3",
+        "dimension.health.rising.2",
+        "advice.health.rising.2",
+        "dimension.life.rising.2",
+        "advice.life.rising.3",
+        "closing.continue.3"
+      ]
+    }
+  ],
+  "reminders": [
+    {
+      "id": "reminder.01",
+      "title": "给今天留一笔",
+      "body": "打开成长手记，记下今天的投入与进展。"
+    },
+    {
+      "id": "reminder.02",
+      "title": "今天，从记录开始",
+      "body": "花一点时间登记，让今天的行动有迹可循。"
+    },
+    {
+      "id": "reminder.03",
+      "title": "来看看今天的自己",
+      "body": "学习、作品、健康、生活，想先记哪一项？"
+    },
+    {
+      "id": "reminder.04",
+      "title": "一件小事也值得记录",
+      "body": "不必等到完成大事，先记下已经做过的事情。"
+    },
+    {
+      "id": "reminder.05",
+      "title": "给今天一个落点",
+      "body": "打开软件，写下今天最想留下的一件事。"
+    },
+    {
+      "id": "reminder.06",
+      "title": "记录不必很长",
+      "body": "几颗星，一两句话，也能留下清楚的回忆。"
+    },
+    {
+      "id": "reminder.07",
+      "title": "今天的手记等你",
+      "body": "登记此刻的状态，晚些时候还可以继续补充。"
+    },
+    {
+      "id": "reminder.08",
+      "title": "把进展放进手记",
+      "body": "有新的学习或任务成果时，顺手记下来。"
+    },
+    {
+      "id": "reminder.09",
+      "title": "留住今天的细节",
+      "body": "一个念头、一次尝试，都可以成为今天的记录。"
+    },
+    {
+      "id": "reminder.10",
+      "title": "打开今天这一页",
+      "body": "按真实情况评分，再给自己留一句说明。"
+    },
+    {
+      "id": "reminder.11",
+      "title": "给成长留条线索",
+      "body": "今天做了什么？打开手记，简单回顾一下。"
+    },
+    {
+      "id": "reminder.12",
+      "title": "慢一点，记一笔",
+      "body": "不用写得漂亮，记录真实发生的事就好。"
+    },
+    {
+      "id": "reminder.13",
+      "title": "和今天打个照面",
+      "body": "打开登记页，看看四个方面现在的状态。"
+    },
+    {
+      "id": "reminder.14",
+      "title": "把行动记清楚",
+      "body": "写下做过的事情，让以后的回看更具体。"
+    },
+    {
+      "id": "reminder.15",
+      "title": "今天的小结从这里开始",
+      "body": "先留一个关键词，稍后有空再慢慢补全。"
+    },
+    {
+      "id": "reminder.16",
+      "title": "为今天留下依据",
+      "body": "评分之外，也可以写写为什么这样评价自己。"
+    },
+    {
+      "id": "reminder.17",
+      "title": "给任务补一段记录",
+      "body": "如果已有实际进展，把这次成果登记到任务里。"
+    },
+    {
+      "id": "reminder.18",
+      "title": "记录眼前这一步",
+      "body": "不需要和别人比较，只看今天走到了哪里。"
+    },
+    {
+      "id": "reminder.19",
+      "title": "让今天更容易回看",
+      "body": "打开软件，留下星级和一条具体的原因。"
+    },
+    {
+      "id": "reminder.20",
+      "title": "一次简短的自我回顾",
+      "body": "看看今天投入了什么，再决定如何评分。"
+    },
+    {
+      "id": "reminder.21",
+      "title": "轮到今天的记录了",
+      "body": "想记学习、作品，还是生活里的小变化？"
+    },
+    {
+      "id": "reminder.22",
+      "title": "小进步也有位置",
+      "body": "打开成长手记，把今天的一小步收进去。"
+    },
+    {
+      "id": "reminder.23",
+      "title": "给努力留个注脚",
+      "body": "做了哪些事、有什么感受，都可以简短写下。"
+    },
+    {
+      "id": "reminder.24",
+      "title": "看看今天的四个角落",
+      "body": "学习、作品、健康和生活，按各自情况登记。"
+    },
+    {
+      "id": "reminder.25",
+      "title": "记录可以很轻",
+      "body": "不必一次写全，先从最清楚的一项开始。"
+    },
+    {
+      "id": "reminder.26",
+      "title": "把今天放进时间里",
+      "body": "留下当天的事实，以后就不必只凭印象回想。"
+    },
+    {
+      "id": "reminder.27",
+      "title": "今天有什么值得留下",
+      "body": "一次休息、一次练习，也可以写进小结。"
+    },
+    {
+      "id": "reminder.28",
+      "title": "给自己一点回顾时间",
+      "body": "打开记录页，整理今天已经发生的事情。"
+    },
+    {
+      "id": "reminder.29",
+      "title": "让投入有一份备忘",
+      "body": "为今天的学习或创作，留下一条可以回看的记录。"
+    },
+    {
+      "id": "reminder.30",
+      "title": "新的一页，简单写写",
+      "body": "今天的记录不求完整，可以先写一件小事。"
+    },
+    {
+      "id": "reminder.31",
+      "title": "听听今天的真实状态",
+      "body": "评分可以高，也可以低，重要的是符合实际。"
+    },
+    {
+      "id": "reminder.32",
+      "title": "别让细节悄悄溜走",
+      "body": "打开手记，把刚刚完成的事情登记一下。"
+    },
+    {
+      "id": "reminder.33",
+      "title": "为今天做个标记",
+      "body": "用星级和说明，记下自己目前的状态。"
+    },
+    {
+      "id": "reminder.34",
+      "title": "从一条记录接上",
+      "body": "今天先登记一点，之后的进展再继续补充。"
+    },
+    {
+      "id": "reminder.35",
+      "title": "看见行动，也看见休息",
+      "body": "按自己的实际安排，记录今天各方面的投入。"
+    },
+    {
+      "id": "reminder.36",
+      "title": "写下今天的一个片段",
+      "body": "无需面面俱到，一条具体事实也很有价值。"
+    },
+    {
+      "id": "reminder.37",
+      "title": "给未来的自己留个提示",
+      "body": "今天做过什么，为什么这样评分？简单写下来。"
+    },
+    {
+      "id": "reminder.38",
+      "title": "今天的进展，今天记",
+      "body": "打开任务或评分页，留住现在还清楚的细节。"
+    },
+    {
+      "id": "reminder.39",
+      "title": "给这一天留点文字",
+      "body": "选好符合实际的星级，再记一句当天的情况。"
+    },
+    {
+      "id": "reminder.40",
+      "title": "停一下，回顾眼前",
+      "body": "登记已经发生的事，不用提前给整天作结论。"
+    },
+    {
+      "id": "reminder.41",
+      "title": "把零散收成一页",
+      "body": "今天的学习、工作与生活，都能找到各自的位置。"
+    },
+    {
+      "id": "reminder.42",
+      "title": "今天可以先记这一件",
+      "body": "挑一个最容易描述的行动，写进手记。"
+    },
+    {
+      "id": "reminder.43",
+      "title": "留一笔，再继续",
+      "body": "打开登记页记下当前进展，然后回到自己的节奏。"
+    },
+    {
+      "id": "reminder.44",
+      "title": "回看，从今天的记录开始",
+      "body": "为四项评分留一点依据，未来会更容易理解。"
+    },
+    {
+      "id": "reminder.45",
+      "title": "给日常一点可见的痕迹",
+      "body": "把今天具体做过的事情留下来，不必写成总结文章。"
+    },
+    {
+      "id": "reminder.46",
+      "title": "今天的状态值得被看见",
+      "body": "打开软件，如实登记目前的感受与行动。"
+    },
+    {
+      "id": "reminder.47",
+      "title": "为正在做的事留个坐标",
+      "body": "记录任务推进，也可以顺便写下下一步。"
+    },
+    {
+      "id": "reminder.48",
+      "title": "把这一步留在手记里",
+      "body": "哪怕只是完成一个小环节，也可以登记清楚。"
+    },
+    {
+      "id": "reminder.49",
+      "title": "今天，不妨记得具体一点",
+      "body": "与其只写忙碌，不如留下一件实际完成的事。"
+    },
+    {
+      "id": "reminder.50",
+      "title": "给今天一个回顾入口",
+      "body": "打开成长手记，按自己的情况评分和登记。"
+    }
+  ]
+}
