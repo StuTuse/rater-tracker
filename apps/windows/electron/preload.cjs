@@ -1,5 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('desktop', {
+  openExternal: url => ipcRenderer.invoke('desktop:open-external',url),
+  notify: data => ipcRenderer.invoke('desktop:notify',data),
+  onNotification: handler => {ipcRenderer.on('desktop:notification-route',(_event,value)=>handler(value));},
   accountCurrent: () => ipcRenderer.invoke('account:current'),
   accountLogin: (username, password) => ipcRenderer.invoke('account:login', username, password),
   accountRegister: values => ipcRenderer.invoke('account:register', values),

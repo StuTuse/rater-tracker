@@ -17,7 +17,7 @@ import java.security.KeyStore;
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 
-@CapacitorPlugin(name="RaterPlatform")
+@CapacitorPlugin(name="RaterPlatform",permissions={@Permission(alias="notifications",strings={android.Manifest.permission.POST_NOTIFICATIONS})})
 public class RaterPlatformPlugin extends Plugin {
  private boolean foreground=true;
  private static final int LIMIT=64*1024*1024;
@@ -68,6 +68,24 @@ public class RaterPlatformPlugin extends Plugin {
   call.resolve(r);
  }
  @PluginMethod public void sessionClear(PluginCall call){file().delete();call.resolve();}
+ @PluginMethod public void reminderSync(PluginCall call){try{call.resolve(JSObject.fromJSONObject(ReminderScheduler.sync(getContext(),call.getData())));}catch(Exception e){call.reject("提醒状态尚未保存，请重试");}}
+ @PluginMethod public void reminderPermission(PluginCall call){
+  ReminderScheduler.channel(getContext());
+  if(android.os.Build.VERSION.SDK_INT>=33 && getPermissionState("notifications")!=PermissionState.GRANTED)requestPermissionForAlias("notifications",call,"notificationResult");else notificationResult(call);
+ }
+ @PermissionCallback private void notificationResult(PluginCall call){try{call.resolve(JSObject.fromJSONObject(ReminderScheduler.status(getContext())));}catch(Exception e){call.reject("无法读取通知权限");}}
+ @PluginMethod public void exactReminderPermission(PluginCall call){
+  if(android.os.Build.VERSION.SDK_INT>=31){Intent intent=new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getContext().getPackageName()));getActivity().startActivity(intent);}call.resolve();
+ }
+ @PluginMethod public void consumeReminderRoute(PluginCall call){
+  Intent intent=getActivity().getIntent();JSObject result=new JSObject();
+  if(intent!=null && intent.hasExtra("raterRoute")){result.put("route",intent.getStringExtra("raterRoute"));result.put("scope",intent.getStringExtra("raterScope"));result.put("start",intent.getStringExtra("raterWeek"));intent.removeExtra("raterRoute");intent.removeExtra("raterScope");intent.removeExtra("raterWeek");}call.resolve(result);
+ }
+ @PluginMethod public void openExternal(PluginCall call){
+  String url=call.getString("url","");
+  if(!url.startsWith("https://github.com/StuTuse/rater-tracker/releases/")){call.reject("下载地址无效");return;}
+  try{getActivity().startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));call.resolve();}catch(Exception e){call.reject("无法打开浏览器，请手动访问项目发布页");}
+ }
  @PluginMethod public void quit(PluginCall call){getActivity().runOnUiThread(()->getActivity().moveTaskToBack(true));call.resolve();}
  public void insets(int top,int bottom){float d=getContext().getResources().getDisplayMetrics().density;JSObject r=new JSObject();r.put("safeTop",top/d);r.put("safeBottom",bottom/d);notifyListeners("insets",r,true);}
  public void back(){notifyListeners("back",new JSObject());}

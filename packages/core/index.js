@@ -1,3 +1,4 @@
+import { changeRecord, recordText, markBusinessUpdate } from './records.js';
 // Rules v1.3. Amounts are integer micro-XP; every allocation rounds half-up once.
 export const RULE_VERSION = '1.3';
 export const FORMAT_VERSION = 1;
@@ -122,15 +123,17 @@ export function transact(original, action, now = new Date().toISOString()) {
   const lock = () => { if (!task.frozen) task.frozen = taskPlan(task); };
   switch (action.type) {
     case 'rate': {
+      const previousText = recordText(state, date, action.dimension);
       assert(DIMENSIONS.includes(action.dimension), '评分项目无效');
       assert(action.stars === null || Number.isInteger(action.stars) && action.stars >= 0 && action.stars <= 5, '请使用 0～5 整数星');
       const f = factor(date, now, true), d = action.dimension;
       const day = state.ratings[date] ??= {}, prev = day[d];
       if (action.stars === null) {
         if (prev) [prev.base, ...prev.batches].forEach(id => cancel(state, id, now));
+        if (prev?.note) ((state.ratingNotes ??= {})[date] ??= {})[d] = { note: prev.note, updatedAt: now };
         delete day[d];
       } else {
-        const rating = day[d] ??= { stars: 0, note: '', base: allocate(state, `${action.id}:base`, `${date}/${d}`, '评分基础', date, now, 5 * SCALE, f), batches: [] };
+        const rating = day[d] ??= { stars: 0, note: previousText, base: allocate(state, `${action.id}:base`, `${date}/${d}`, '评分基础', date, now, 5 * SCALE, f), batches: [] };
         while (rating.batches.length > action.stars) cancel(state, rating.batches.pop(), now);
         while (rating.batches.length < action.stars) {
           const id = `${action.id}:star:${rating.batches.length}`;
@@ -138,16 +141,16 @@ export function transact(original, action, now = new Date().toISOString()) {
           rating.batches.push(id);
         }
         rating.stars = action.stars;
-        if (action.note !== undefined) rating.note = text(action.note);
+        if (action.note !== undefined) { assert(typeof action.note==='string' && action.note.length<=4000,'记录最多4000个字符');rating.note=action.note; }
       }
       break;
     }
-    case 'note': {
-      factor(date, now, true);
-      const r = state.ratings[date]?.[action.dimension];
-      assert(r, '请先选择星数，再保存原因');
-      r.note = text(action.note);
-      break;
+    case 'note': case 'journal': { changeRecord(state, action, now); break; }
+    case 'clearProgress': {
+      let next = original;
+      for (const p of task.progress.filter(p => p.active)) next = transact(next, { type: 'deleteProgress', taskId: task.id, progressId: p.id, id: `${action.id}/${p.id}` }, now);
+      if (next === original) return original;
+      next.processed.push(action.id); return next;
     }
     case 'createTask': {
       assert(!state.tasks[action.id], '任务标识重复');
@@ -248,6 +251,11 @@ export function transact(original, action, now = new Date().toISOString()) {
     }
     default: throw new Error('未知操作');
   }
+  const changed = action.type==='note' ? recordText(original,date,action.dimension)!==recordText(state,date,action.dimension)
+    : action.type==='journal' ? (original.dailyNotes?.[date]?.note??original.dailyReviews?.[date]?.note??'')!==action.note
+    : action.type==='rate' ? JSON.stringify(original.ratings[date]?.[action.dimension])!==JSON.stringify(state.ratings[date]?.[action.dimension])
+    : ['createTask','progress'].includes(action.type) || ['editTask','stage','complete'].includes(action.type) && JSON.stringify(original.tasks[action.taskId])!==JSON.stringify(state.tasks[action.taskId]);
+  if (changed) markBusinessUpdate(state, ['createTask','editTask','stage'].includes(action.type) ? today : date, now);
   state.processed.push(action.id);
   state.revision++;
   return state;

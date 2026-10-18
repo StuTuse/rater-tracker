@@ -27,6 +27,6 @@ for (const dir of ['src','electron','scripts','apps/windows/electron','packages/
   const result=spawnSync(process.execPath,['--check',`${dir}/${name}`],{encoding:'utf8'});
   assert.equal(result.status,0,result.stderr);
 }
-const tests=spawnSync(process.execPath,['--test','test/core.test.mjs','test/sync.test.mjs','test/registration.test.mjs','test/growth-stages.test.mjs','test/notices.test.mjs','test/session.test.mjs','test/native-registration.test.mjs'],{stdio:'inherit'});
+const tests=spawnSync(process.execPath,['--test','test/core.test.mjs','test/sync.test.mjs','test/registration.test.mjs','test/growth-stages.test.mjs','test/notices.test.mjs','test/session.test.mjs','test/native-registration.test.mjs','test/rebuild-records.test.mjs','test/reports.test.mjs','test/session-vault.test.mjs','test/update-release.test.mjs'],{stdio:'inherit'});
 if(tests.status!==0) process.exit(tests.status ?? 1);
 console.log(`Version ${version}; syntax; 48 SVG reference subjects; 51 distinct generated PNG assets; business tests passed.`);

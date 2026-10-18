@@ -2,29 +2,29 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前双平台版本：Windows 1.0.1；Android 1.0.1（VERSION_CODE=8）。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
+**当前双平台版本：Windows 1.0.0；Android 1.0.0（VERSION_CODE=9），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
 
 ## 安装与使用
 
-下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.19.1)并选择`Rater-Tracker-1.0.1-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
+下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.19.2)并选择`Rater-Tracker-1.0.0-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
 
-自有贡献采用[MIT许可](LICENSE)，第三方保留[各自许可](docs/THIRD_PARTY_NOTICES.md)。用户已接受SignPath Foundation证书发布者，作者仍TuseCreation。见[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy／隐私说明](docs/PRIVACY.md)、[接入方案](docs/免费开源签名接入方案.md)和[申请资料](docs/SignPath申请草稿.md)。服务尚未申请／获批，现有安装包保持原状。
+自有贡献采用[MIT许可](LICENSE)，第三方保留[各自许可](docs/THIRD_PARTY_NOTICES.md)。用户已接受SignPath Foundation证书发布者，作者仍TuseCreation。见[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy／隐私说明](docs/PRIVACY.md)、[接入方案](docs/免费开源签名接入方案.md)和[申请资料](docs/SignPath申请草稿.md)。签名服务尚未获批／接入，Windows安装包仍未签名。
 
 1. 在今日页选择学习、作品、健康、生活的 0～5 星；空白与 0 星分别处理。
-2. 展开原因与依据，离开输入框自动保存。切换日期可以补记、更正。
-3. 为独立成果新建任务，在详情里记录推进、阶段和最终交付；归档、恢复、隐藏、延期、撤销和删除各自处理。
+2. 点击板块的写字图标即可输入，内容自动保存并显示在星星下方；切换日期可以补记、更正。
+3. 为独立成果新建任务，日常使用推进／完成短窗；点击卡片管理阶段、历史、补记、归档、延期、撤销和删除。
 4. 历史页查看日历和 7／30 天趋势；奖励中心查看徽章、系数、明细、周期回顾与规则。
 5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
 未登录可完全离线使用；账号同步需要联网。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
 
-## 本轮界面对齐与动效
+## 1.0 重建
 
-1.0.1统一评分卡标题、写字按钮、日期栏、任务操作与周报卡片对齐。手机星级与写字按钮保留44px，首页有任务时只显示首项并提供查看全部；空任务区放在评分之后。700px起采用侧栏，窄平板评分单列与任务并排，足够宽后恢复双列。
+按用户要求先恢复最后preview d8fd549，再按五轮已确认文档重新实现。旧1.0及1.0.1发布已撤下，历史与preview保留；从1.0开始使用正式Release。实际检查与未覆盖项见[重建记录](docs/1.0重建记录.md)。
 
-写记录展开／收起、任务列表重排、历史切日／切月、周报切换增加局部过渡。图表SVG原位更新，避免切日期先清空；长记录编辑遇到其他保存仍保留焦点和高度。Android系统软键盘展开后将正在编辑的字段移入可视区域。动效关闭与系统减少动态均生效。
+浏览器：启动npm run dev后，用Playwright CLI的run-code --filename=scripts/rebuild-ui-acceptance.cjs。Windows打包检查：node scripts/desktop-rebuild-smoke.mjs，默认复制release/win-unpacked到独立临时目录，核对ASAR后运行。
 
-实际检查见[UI对齐与动效验收](docs/UI对齐与动效验收.md)。隔离浏览器先运行 npm run dev，再用 Playwright CLI 的 run-code --filename=scripts/ui-polish-acceptance.cjs。Windows打包专项：node scripts/desktop-polish-smoke.mjs <打包EXE路径>。Android正式包原生专项：设置 ANDROID_ADB_SERVER_PORT=5038、RATER_ANDROID_SERIAL=emulator-5580 后运行 node scripts/android-polish-smoke.mjs，仅接受 RaterSigningAcceptance 隔离AVD。
+Android正式包：设置ANDROID_ADB_SERVER_PORT=5038、RATER_ANDROID_SERIAL=emulator-5580后，运行node scripts/android-rebuild-smoke.mjs。**该脚本只接受专用RaterSigningAcceptance AVD，并清空该AVD中正式包的虚构测试数据，不用于实体手机。**
 
 ## 数据与更新
 
@@ -32,7 +32,7 @@
 
 提醒按每日10点发送，11点仅在当天尚无有效更新时补发；周一10点合并周报通知。用户需要先在设置里开启并授予系统通知权限。Android使用本地定时通知，Windows仅在应用运行时检查。提醒文本有50组；周报按真实周记录展示曲线、评分依据和原文，并从180条评价／指导模板中生成分项分析。系统通知送达仍受Android设备权限与后台策略影响。
 
-手机保留底栏，平板使用左侧导航；任务推进／完成使用短窗，复杂操作进入任务详情。首次安装启动显示可关闭的登录／注册窗口，关闭后仍可离线使用。登录凭证自动续期，连续30天未活动需再次登录。应用启动后检查新版本并打开官方Release页供下载。旧版本没有更新检查代码，因此需要用户先手动升级一次；之后才能看到更新提示。
+手机保留底栏，平板使用左侧导航；任务推进／完成使用短窗，复杂操作进入任务详情。首次安装启动显示可关闭的登录／注册窗口，关闭后仍可离线使用。登录凭证自动续期，连续30天未活动需再次登录。应用启动后在后台读取GitHub正式Release，跳过纯源码批次和其他平台包，发现更新后提供官方下载。旧版本没有更新检查代码，因此需要用户先手动升级一次；之后才能看到更新提示。
 
 安装目录与用户数据分离。正常桌面数据使用 `%APPDATA%\RaterTracker` 下的 Chromium IndexedDB；设置页显示本机实际路径，并提供打开入口。固定页面来源 `app://rater`，存储名 `rater-tracker`。
 
@@ -57,7 +57,7 @@ npm run dev               # 浏览器预览 http://127.0.0.1:4173
 npm test                  # 运行仓库配置的业务测试
 npm run check             # 当前项目版本、语法、素材与业务检查
 npm run build             # Windows x64 可运行目录 release/win-unpacked
-npm run dist              # 未签名预览 Windows x64 NSIS 安装包
+npm run dist              # 当前未签名 Windows x64 NSIS 安装包
 npm run dist:signed       # 要求真实代码签名；缺少证书时失败
 npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结果
 ```
@@ -70,17 +70,9 @@ npm run desktop:smoke     # 实际 Electron + 隔离测试数据、截图、结�
 
 若重复打包等待下载，先确认 node_modules/electron/dist/version 为 44.7.0，可使用本机正式运行时：`node node_modules/electron-builder/cli.js --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist`。本轮最终安装包采用此命令；仍需先通过 npm run check。
 
-检查打包应用与安装流程：
+当前打包验收使用 `npm run desktop:smoke` 或 `node scripts/desktop-rebuild-smoke.mjs`，默认输入release/win-unpacked，也可传入另一个已打包目录。它复制独立运行时、验证ASAR一致并仅使用runtime-data中的隔离数据。
 
-```powershell
-node scripts/desktop-smoke.mjs 'release/win-unpacked/Rater & Tracker.exe'
-& .\scripts\install-acceptance.ps1
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.5-Setup.exe'
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.10-Setup.exe'
-& .\scripts\install-acceptance.ps1 -PreviousInstaller 'release/Rater-Tracker-0.1.0-alpha.11-Setup.exe'
-```
-
-安装验收脚本先确认没有既有用户安装，再在工作区 `runtime-data/install-check` 测试安装、快捷方式、单实例、同版本重装；指定 `PreviousInstaller` 则先安装旧版，再安装当前版并检查数据保持。结束卸载测试副本。测试数据使用 `runtime-data/desktop-smoke`，不写入正常数据目录。如果检测到已有安装，脚本停止，避免覆盖它。
+旧install-acceptance.ps1保留历史；其中旧报告协议不作为1.0重建验收依据，本轮没有运行Windows安装／覆盖升级，不能把打包运行通过当作安装通过。
 
 浏览器验收使用 Playwright CLI（先 `npm run dev`），在专用测试浏览器执行：
 
@@ -219,3 +211,15 @@ alpha.2 将安卓按压反馈统一为桌面悬浮的暖色背景、金色描边
 启动同步专项命令：设置`RATER_PORT=4175`后运行`node scripts/serve.mjs`，在全新隔离Playwright会话运行`run-code --filename scripts/sync-startup-acceptance.cjs`。账号模块和RPC由虚构数据替换；结果与边界见[同步验收记录](docs/双端同步时间策略验收.md)。
 
 [当前双平台预览 Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.16.1)提供Windows alpha.21未签名预览安装程序和Android alpha.6签名APK。用户已要求每次完成改动都推送源码并创建新双平台Release；受影响平台上传新安装包，未改变平台链接最近版本，纯文档改动也发布源码但不重建应用。具体步骤见[双平台GitHub发布流程](docs/双平台GitHub发布流程.md)。
+
+### Android 原生提醒仪器测试
+
+`npm run android:build -- --instrument` 构建应用及`:app:assembleDebugAndroidTest`；工具用户目录位于忽略的runtime-data/android-user-home。仅在隔离AVD安装调试APK与app-debug-androidTest.apk后执行：
+
+```powershell
+adb -P 5038 -s emulator-5580 shell am instrument -w -e class local.ratertracker.android.ReminderIntegrationTest local.ratertracker.android.dev.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+该测试使用虚构镜像与可注入时钟，调用真实NotificationManager，覆盖周一合并、去重、11点最新状态、迟到／关闭、镜像损坏、修订与轮换。权限拒绝分支用ContextWrapper模拟，不在测试进程中撤权以免Android杀死测试；系统权限界面、重启／Doze和厂商送达仍需设备验收。
+
+Android键盘几何专项：先安装当前调试包并启动，在同一隔离ADB／AVD变量下执行`node scripts/android-viewport-acceptance.mjs`。此项用真实系统键盘、CDP几何和ADB原生截图核对输入框／纸色遮罩／推进保存可达；不使用CDP截图改变设备指标。不要与原生通知仪器测试并行。

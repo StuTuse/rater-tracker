@@ -1,3 +1,19 @@
+# 当前交接 · W070 · 2026-10-19 · 1.0重建正式发布
+
+用户明确要求放弃旧1.0及后续UI优化，回到最后preview重新开发，并将1.0及以后改为正式Release。已以向前提交a97b11e恢复d8fd549，再根据五轮权威文档重建；不要恢复W065～W068实现。GitHub旧.18.6／.7／.8和.19.1草稿已撤下，preview与Git标签保留。主工作区main由本会话集成完整双端，没有修改其他worktree、真实账号或用户数据。
+
+Windows1.0.0，Android1.0.0/code9，原证书／规则1.3／JSON1保持。新模块为packages/ui/journal-view、record-editor、review-view、layout.css、interaction-motion、reminder-controller、update-check；packages/data/session-vault、record-drafts；packages/core/records、reports等。正文自动保存、旧草稿兼容、任务分层、周报180条／提醒50条、原生定时、后台身份恢复／更新均已实现。详见[重建记录](docs/1.0重建记录.md)。
+
+最终检查：83项业务／工程，65项浏览器，61项最终打包Windows，8项正式APK原生操作／覆盖保留，8项原生通知仪器，3项真实键盘几何；双端各58个共享源码文件逐项一致。输入与推进保存按钮在实际IME上方，状态栏不穿透。键盘截图必须ADB screencap，不用会修改设备指标的CDP page.screenshot。
+
+产物：Windows SHA256 7830a2f71d204ba0365f49c0d60c5387ee0c02ee36273173c58db7e651860b28；APK SHA256 38b4b2acde9e48fb5bc9c24cf24da2e38986f8d34507365e7760b8165b0eb296。正式批次[dual/2026.10.19.2](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.19.2)，双端包与统一校验单；最终发布完成须以远端draft=false／prerelease=false、附件digest及main/tag回读为准。
+
+实际命令：npm run check；npm run desktop:smoke（默认release/win-unpacked，临时目录运行）；Playwright CLI run-code --filename=scripts/rebuild-ui-acceptance.cjs；Android设置ANDROID_ADB_SERVER_PORT=5038／RATER_ANDROID_SERIAL=emulator-5580后，node scripts/android-rebuild-smoke.mjs、node scripts/android-viewport-acceptance.mjs。后两者只接受RaterSigningAcceptance隔离AVD；正式smoke会清空该AVD正式包的虚构数据，不能用于实体设备。原生UI和仪器测试串行，命令见README。
+
+未覆盖：真实云服务／邮箱与30天自然时长，实体Android后台／Doze／重启长期送达和帧率，系统权限完整界面，Windows安装与跨版本覆盖；Windows未签名。当前不应再将被放弃版本的检查当作验收；后续按新正式发布政策和实际用户反馈继续。
+
+---
+
 # 当前交接 · 2026-10-19 · 1.0重新开发
 
 用户已明确放弃旧1.0及1.0.1 UI优化。应用／工程／测试已恢复到最后preview `d8fd549`，55项基线测试通过。GitHub旧1.0的.18.6／.7／.8和.19.1草稿已撤下，标签及历史保留。当前由本会话负责main完整重建；已确认的设计文档仍是需求，W065～W068仅属被放弃版本的历史结果。详见[重建记录](docs/1.0重建记录.md)。1.0及以后使用正式Release。下一步重新实现并做兼容、真实双端验收，尚未构建／发布重建版。

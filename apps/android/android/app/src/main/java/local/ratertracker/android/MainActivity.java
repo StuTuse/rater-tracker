@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
  @Override public void onCreate(Bundle savedInstanceState){
   registerPlugin(RaterPlatformPlugin.class);
   super.onCreate(savedInstanceState);
+  bridge.getWebView().setOverScrollMode(android.view.View.OVER_SCROLL_NEVER);
   bridge.getWebView().setVerticalScrollBarEnabled(false);
   bridge.getWebView().setHorizontalScrollBarEnabled(false);
   ViewCompat.setOnApplyWindowInsetsListener(getWindow().getDecorView(),(v,insets)->{
@@ -18,6 +19,7 @@ public class MainActivity extends BridgeActivity {
    @Override public void handleOnBackPressed(){ RaterPlatformPlugin p=(RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance();p.back(); }
   });
  }
+ @Override protected void onNewIntent(android.content.Intent intent){super.onNewIntent(intent);setIntent(intent);if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).active();}
  @Override public void onPause(){super.onPause();if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).inactive();}
  @Override public void onResume(){super.onResume();if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).active();}
 }

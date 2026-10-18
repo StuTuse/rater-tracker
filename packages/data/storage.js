@@ -54,6 +54,22 @@ export async function openStore(accountId = null) {
   });
   return {
     read, write, close: () => db.close(),
+    readAux: name => new Promise((resolve,reject)=>{const request=db.transaction('snapshots').objectStore('snapshots').get(`${key}:aux:${name}`);request.onsuccess=()=>resolve(request.result??null);request.onerror=()=>reject(request.error);}),
+    writeAux: (name,value) => new Promise((resolve,reject)=>{const tx=db.transaction('snapshots','readwrite');tx.objectStore('snapshots').put(value,`${key}:aux:${name}`);tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error);}),
+    inheritGuestIfEmpty: expectedRevision => new Promise((resolve,reject)=>{
+      if(!accountId){resolve(false);return;}
+      const tx=db.transaction('snapshots','readwrite'),records=tx.objectStore('snapshots');let inherited=false,failure;
+      const request=records.get(key);request.onsuccess=()=>{
+        const current=request.result??createState();
+        if(current.revision!==expectedRevision || current.ledger.length || Object.keys(current.tasks).length || Object.keys(current.ratingNotes??{}).length || Object.keys(current.dailyNotes??{}).length){resolve(false);return;}
+        const guestRequest=records.get('current');guestRequest.onsuccess=()=>{try{
+          const guest=guestRequest.result;if(!guest || !(guest.revision>0))return;validateState(guest);
+          records.put(structuredClone(current),`${key}:aux:before-inherit`);
+          const copied=structuredClone(guest);copied.revision=current.revision+1;copied.modifiedAt=new Date().toISOString();records.put(copied,key);
+          records.put({...defaults(),dirty:true},metaKey);inherited=true;
+        }catch(error){failure=error;tx.abort();}};
+      };tx.oncomplete=()=>resolve(inherited);tx.onabort=()=>reject(failure??tx.error);
+    }),
     clearAccount: expectedRevision => new Promise((resolve, reject) => {
       if (!accountId) { reject(new Error('不能通过账号清空操作删除未登录记录')); return; }
       const tx = db.transaction('snapshots', 'readwrite'), records = tx.objectStore('snapshots');
@@ -62,6 +78,7 @@ export async function openStore(accountId = null) {
       request.onsuccess = () => {
         if ((request.result?.revision ?? 0) !== expectedRevision) { conflict = true; tx.abort(); return; }
         records.delete(key); records.delete(metaKey);
+        const cursor=records.openCursor();cursor.onsuccess=()=>{const row=cursor.result;if(!row)return;if(typeof row.key==='string'&&row.key.startsWith(`${key}:aux:`))row.delete();row.continue();};
       };
       tx.oncomplete = () => resolve(); tx.onabort = () => reject(conflict ? new ConflictError() : tx.error ?? new Error('本机账号数据尚未清空')); tx.onerror = () => {};
     }),
@@ -115,6 +132,20 @@ export function validateState(s) {
   check(s.modifiedAt === undefined || timestamp(s.modifiedAt), '快照修改时间无效');
   check(plain(s.ratings) && plain(s.tasks) && Array.isArray(s.ledger) && Array.isArray(s.processed), '记录结构无效');
   check(s.ledger.length <= 500000 && Object.keys(s.tasks).length <= 50000 && Object.keys(s.ratings).length <= 50000, '记录数量超过本版本支持范围');
+  // Optional additions stay optional and unknown candidate fields round-trip unchanged.
+  for (const field of ['ratingNotes', 'dailyNotes', 'dailyReviews']) if (s[field] !== undefined) {
+    check(plain(s[field]) && Object.keys(s[field]).length <= 50000, '文字记录结构无效');
+    for (const [date, row] of Object.entries(s[field])) {
+      validDate(date); check(plain(row), '文字记录格式无效');
+      const rows = field === 'ratingNotes' ? Object.entries(row) : [['journal', row]];
+      for (const [dimension, note] of rows) {
+        check(field !== 'ratingNotes' || DIMENSIONS.includes(dimension), '文字记录板块无效');
+        check(plain(note) && str(field==='dailyReviews' ? note.note??note.summary??'' : note.note), '文字记录超限或无效');
+        check(note.updatedAt === undefined || timestamp(note.updatedAt), '文字记录时间无效');
+      }
+    }
+  }
+  if (s.businessUpdates !== undefined) { check(plain(s.businessUpdates), '更新日期结构无效'); for (const [date, at] of Object.entries(s.businessUpdates)) { validDate(date); check(timestamp(at), '更新日期无效'); } }
   const ids = new Set(), ledger = new Map();
   let total = 0;
   for (const e of s.ledger) {

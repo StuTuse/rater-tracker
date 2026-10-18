@@ -45,6 +45,7 @@ export class SyncEngine {
           return;
         }
       }
+      if (!cloud.state && local.state.ledger.length===0 && local.meta.baseVersion===0 && await this.store.inheritGuestIfEmpty?.(local.state.revision)) local = await this.store.readSync();
       const hasLocalData = local.state.revision > 0;
       if (localIsNewer || local.meta.dirty || local.meta.inFlight || (hasLocalData && !cloud.state)) {
         await this.store.preparePush(cloud.version, local.state.revision);

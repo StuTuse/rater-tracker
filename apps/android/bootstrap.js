@@ -5,6 +5,11 @@ async function nativeInfo(){let timer;try{return await Promise.race([Native.info
 document.documentElement.dataset.platform='android';
 window.raterNative={
  active:true,
+ reminderSync:data=>Native.reminderSync(data),
+ reminderPermission:()=>Native.reminderPermission(),
+ exactReminderPermission:()=>Native.exactReminderPermission(),
+ consumeReminderRoute:()=>Native.consumeReminderRoute(),
+ openExternal:url=>Native.openExternal({url}),
  info:()=>nativeInfo(),
  exportBackup:async(contents,name)=>(await Native.exportBackup({contents,name})).success===true,
  importBackup:async()=>{const r=await Native.importBackup();return r.cancelled?null:r.contents;},
@@ -16,8 +21,9 @@ window.raterNative={
 };
 function safeArea(v){if(typeof v.active==='boolean')window.raterNative.active=v.active;document.documentElement.style.setProperty('--native-safe-top',(v.safeTop??24)+'px');document.documentElement.style.setProperty('--native-safe-bottom',(v.safeBottom??24)+'px');}
 safeArea(await nativeInfo().catch(()=>({})));Native.addListener('insets',safeArea);
-function viewport(){document.documentElement.style.setProperty('--visual-height',visualViewport.height+'px');document.documentElement.classList.toggle('keyboard-open',visualViewport.height<innerHeight-100);}
-visualViewport?.addEventListener('resize',viewport);viewport();
+let keyboardWasOpen=false;
+function viewport(){const open=visualViewport.height<innerHeight-100;document.documentElement.style.setProperty('--visual-height',visualViewport.height+'px');document.documentElement.style.setProperty('--visual-top',visualViewport.offsetTop+'px');document.documentElement.classList.toggle('keyboard-open',open);if(keyboardWasOpen&&!open&&document.activeElement?.matches('[data-record-key]'))document.activeElement.blur();keyboardWasOpen=open;}
+visualViewport?.addEventListener('resize',viewport);visualViewport?.addEventListener('scroll',viewport);viewport();
 Native.addListener('back',()=>window.dispatchEvent(new Event('rater-back')));
 Native.addListener('inactive',()=>{window.raterNative.active=false;window.dispatchEvent(new Event('rater-pause'));});
 Native.addListener('active',()=>{window.raterNative.active=true;window.dispatchEvent(new Event('online'));window.dispatchEvent(new Event('rater-resume'));});

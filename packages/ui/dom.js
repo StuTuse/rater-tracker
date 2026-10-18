@@ -22,7 +22,7 @@ export function updateDOM(parent, markup, { preserveInputs = true, starChanged =
     const preview = isStar ? ['preview-lit', 'preview-dim'].filter(c => old.classList.contains(c)) : [];
     const preserveOpen = preserveInputs && old.tagName === 'DETAILS';
     for (const attr of [...old.attributes]) {
-      if (preserveOpen && attr.name === 'open' || attr.name === 'data-preview') continue;
+      if (preserveOpen && attr.name === 'open' || attr.name === 'data-preview' || attr.name === 'style' && old.matches('[data-record-key]')) continue;
       if (!next.hasAttribute(attr.name)) old.removeAttribute(attr.name);
     }
     for (const attr of next.attributes) {
@@ -35,7 +35,7 @@ export function updateDOM(parent, markup, { preserveInputs = true, starChanged =
         if (old.value !== next.value) old.value = next.value;
       }
     } else {
-      children(old, next);
+      if (!old.hasAttribute('data-owned-content')) children(old, next);
       if (old.tagName === 'INPUT' && old.type !== 'checkbox' && (!preserveInputs || document.activeElement !== old && !old.closest('#modal'))) {
         if (old.value !== next.value) old.value = next.value;
       }

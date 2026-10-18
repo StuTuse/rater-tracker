@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage } = require('electron');
+const { Notification, app, BrowserWindow, protocol, net, ipcMain, dialog, shell, Menu, safeStorage } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
@@ -34,6 +34,13 @@ else {
     ipcMain.handle('account:verify-registration', secure((id, code) => accounts.verifyRegistration(id, code)));
     ipcMain.handle('account:logout', secure(() => accounts.logout()));
     ipcMain.handle('account:sync', secure(data => accounts.sync(data)));
+    ipcMain.handle('desktop:open-external',secure(url=>{if(typeof url!=='string'||!url.startsWith('https://github.com/StuTuse/rater-tracker/releases/'))throw new Error('下载地址无效');return shell.openExternal(url);}));
+    ipcMain.handle('desktop:notify',secure(data=>{
+      if(!Notification.isSupported())return false;
+      if(typeof data?.title!=='string'||data.title.length>100||typeof data.body!=='string'||data.body.length>500)throw new Error('通知格式无效');
+      const note=new Notification({title:data.title,body:data.body,icon:path.join(root,'assets/app.png')});
+      note.on('click',()=>{window.show();window.focus();window.webContents.send('desktop:notification-route',{route:data.route,start:data.start,scope:data.scope});});note.show();return true;
+    }));
     ipcMain.handle('desktop:info', secure(() => ({ version: app.getVersion(), dataDirectory: app.getPath('userData'), packaged: app.isPackaged })));
     ipcMain.handle('desktop:open-data', secure(() => shell.openPath(app.getPath('userData'))));
     ipcMain.handle('desktop:export', secure(async (contents, suggestedName) => {

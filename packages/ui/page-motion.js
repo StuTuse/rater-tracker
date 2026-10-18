@@ -7,7 +7,9 @@ export function pageEntryGroups(root, scope = 'page') {
   if (scope === 'rewards') {
     roots = [];
     for (let node = root.querySelector('.reward-tabs')?.nextElementSibling; node; node = node.nextElementSibling) roots.push(node);
-  } else if (scope === 'tasks') roots = [...root.querySelectorAll(':scope>.tasks-grid,:scope>.empty')];
+  } else if (scope === 'day') roots = [...root.querySelectorAll('.day-review,.ratings-grid>.rating-card,.history-events')];
+  else if (scope === 'month') roots = [...root.querySelectorAll('.calendar-grid')];
+  else if (scope === 'tasks') roots = [...root.querySelectorAll(':scope>.tasks-grid,:scope>.empty')];
   else if (scope === 'badges') roots = [...root.querySelectorAll('.badge-grid')];
   else if (scope === 'trend') roots = [...root.querySelectorAll('.trend-panel')];
   const groups = [];
