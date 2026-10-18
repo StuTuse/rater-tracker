@@ -1,0 +1,184 @@
+<div id="rt-refined-preview">
+  <div class="viz-carousel" aria-label="已选导航与精简任务操作" data-previous-label="上一界面" data-next-label="下一界面">
+    <section data-variant="平板与电脑" aria-label="平板与电脑布局"><div class="rr-stage"><div class="rr-app" data-device="tablet" aria-label="平板任务与评分"></div></div></section>
+    <section data-variant="手机底栏" aria-label="手机底栏布局" hidden><div class="rr-stage"><div class="rr-app" data-device="phone" aria-label="手机底栏与任务操作"></div></div></section>
+  </div>
+  <style>
+    #rt-refined-preview{color-scheme:light dark}
+    #rt-refined-preview *{box-sizing:border-box}
+    #rt-refined-preview .rr-stage{height:814px;padding:8px 0 16px;display:flex;justify-content:center}
+    #rt-refined-preview .rr-app{--rr-bg:light-dark(#faf8f0,#24251f);--rr-card:light-dark(#fffef8,#30312a);--rr-ink:light-dark(#414a38,#eeeeda);--rr-muted:light-dark(#70745f,#b9bba3);--rr-line:light-dark(#e5dfcb,#545440);--rr-gold:light-dark(#ebc75c,#d4b349);--rr-soft:light-dark(#f7ebbb,#51492d);--rr-green:light-dark(#71845a,#b0bf91);--rr-shadow:light-dark(#665d2310,#00000020);--rr-veil:light-dark(#353c2f50,#00000090);font:14px/1.55 'Segoe UI','Microsoft YaHei',sans-serif;background:var(--rr-bg);color:var(--rr-ink);border:1px solid var(--rr-line);border-radius:22px;max-width:1000px;width:100%;height:790px;position:relative;isolation:isolate;display:grid;grid-template-columns:100px minmax(0,1fr);overflow:hidden;container-type:inline-size;--rr-gap:12px}
+    #rt-refined-preview button,#rt-refined-preview input,#rt-refined-preview textarea{font:inherit;color:inherit}
+    #rt-refined-preview button{border:0;background:transparent;padding:7px 10px;min-height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .18s,transform .22s;touch-action:manipulation}
+    #rt-refined-preview button:hover{background:var(--rr-soft)}
+    #rt-refined-preview button:active{transform:scale(.97)}
+    #rt-refined-preview button:focus-visible,#rt-refined-preview input:focus-visible,#rt-refined-preview textarea:focus-visible,#rt-refined-preview summary:focus-visible{outline:2px solid var(--rr-gold);outline-offset:2px}
+    #rt-refined-preview h1,#rt-refined-preview h2,#rt-refined-preview h3,#rt-refined-preview p{margin:0}
+    #rt-refined-preview h1{font-size:22px;font-weight:500}
+    #rt-refined-preview h2{font-size:16px;font-weight:500}
+    #rt-refined-preview h3{font-size:14px;font-weight:500}
+    #rt-refined-preview small{font-size:12px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-rail{display:flex;flex-direction:column;align-items:center;gap:25px;padding:22px 9px 12px;background:var(--rr-card);border-right:1px solid var(--rr-line)}
+    #rt-refined-preview .rr-brand{display:grid;place-items:center;width:40px;height:40px;border-radius:14px 17px 12px 16px;rotate:-5deg;background:var(--rr-gold);color:light-dark(#54461e,#322b12);font-size:23px}
+    #rt-refined-preview .rr-nav{display:flex;flex-direction:column;width:100%;gap:9px}
+    #rt-refined-preview .rr-nav button{justify-content:flex-start;color:var(--rr-muted);white-space:nowrap}
+    #rt-refined-preview .rr-nav button[aria-current=page]{background:var(--rr-soft);color:var(--rr-ink)}
+    #rt-refined-preview .rr-nav svg{width:18px;height:18px;flex:none}
+    #rt-refined-preview .rr-account{margin-top:auto;border:1px solid var(--rr-line);width:100%}
+    #rt-refined-preview .rr-main{padding:14px 20px 24px;min-width:0;overflow-y:auto;overscroll-behavior:none;scrollbar-width:thin;scrollbar-color:var(--rr-line) transparent}
+    #rt-refined-preview .rr-top{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:40px;margin-bottom:10px}
+    #rt-refined-preview .rr-top strong{font-weight:500;font-size:13px}
+    #rt-refined-preview .rr-status{font-size:11px;color:var(--rr-green);white-space:nowrap}
+    #rt-refined-preview .rr-growth{display:flex;gap:12px;align-items:center;padding:10px 14px;background:var(--rr-card);border:1px solid var(--rr-line);border-radius:15px;margin-bottom:16px}
+    #rt-refined-preview .rr-level{display:grid;place-items:center;align-content:center;flex:none;width:44px;height:46px;border-radius:15px;background:var(--rr-soft);font-weight:500}
+    #rt-refined-preview .rr-level small{font-size:11px}
+    #rt-refined-preview .rr-growth-body{flex:1;min-width:0}
+    #rt-refined-preview .rr-growth-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-meter{height:7px;border-radius:7px;background:var(--rr-soft);overflow:hidden;margin:6px 0}
+    #rt-refined-preview .rr-meter span{display:block;width:46.15%;height:100%;border-radius:inherit;background:var(--rr-gold)}
+    #rt-refined-preview .rr-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+    #rt-refined-preview .rr-layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;align-items:start;gap:16px}
+    #rt-refined-preview .rr-card{background:var(--rr-card);border:1px solid var(--rr-line);border-radius:15px;box-shadow:0 3px 10px var(--rr-shadow);min-width:0}
+    #rt-refined-preview .rr-rating{padding:8px 11px;position:relative}
+    #rt-refined-preview .rr-overall{width:100%;max-width:440px;margin:0 auto var(--rr-gap)}
+    #rt-refined-preview .rr-card-head{display:flex;align-items:center;gap:6px;padding-right:86px;min-height:44px}
+    #rt-refined-preview .rr-card-head h2{font-size:15px}
+    #rt-refined-preview .rr-card-head svg{width:18px;height:18px;flex:none;color:var(--rr-muted)}
+    #rt-refined-preview .rr-app .rr-zero{position:absolute;top:5px;right:49px;width:44px;padding:0;font-size:11px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-zero[aria-pressed=true]{background:var(--rr-soft);color:var(--rr-ink)}
+    #rt-refined-preview .rr-stars{display:flex;justify-content:center;min-height:44px}
+    #rt-refined-preview .rr-stars button{width:44px;height:44px;min-width:44px;padding:0;font-size:27px;color:var(--rr-line)}
+    #rt-refined-preview .rr-stars button[aria-pressed=true]{color:var(--rr-gold)}
+    #rt-refined-preview .rr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--rr-gap)}
+    #rt-refined-preview .rr-note{width:100%;padding:8px 10px;resize:vertical;min-height:50px;max-height:110px;border:1px solid var(--rr-line);border-radius:9px;background:var(--rr-bg);font-size:13px;line-height:1.6;display:block;margin-top:5px}
+    #rt-refined-preview .rr-overall .rr-card-head{padding:0 44px;justify-content:center}
+    #rt-refined-preview .rr-overall .rr-zero{right:5px}
+    #rt-refined-preview .rr-rating details summary{position:absolute;right:5px;top:5px;width:44px;height:44px;display:grid;place-items:center;font-size:0;list-style:none}
+    #rt-refined-preview .rr-rating details summary:after{content:'＋';font-size:18px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-rating details[open] summary:after{content:'−'}
+    #rt-refined-preview .rr-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+    #rt-refined-preview .rr-panel-head button{font-size:12px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-task-stack{display:grid;gap:10px}
+    #rt-refined-preview .rr-task-card{position:relative;padding:10px 12px}
+    #rt-refined-preview .rr-task-open{display:flex!important;align-items:flex-start!important;flex-direction:column;width:100%;text-align:left;padding:0!important;min-height:44px;border-radius:5px!important;gap:2px!important}
+    #rt-refined-preview .rr-task-open:after{content:'';position:absolute;inset:0;border-radius:15px}
+    #rt-refined-preview .rr-task-open strong{font-weight:500}
+    #rt-refined-preview .rr-task-meta{display:flex;justify-content:space-between;gap:8px;color:var(--rr-muted);font-size:11px;margin:5px 0}
+    #rt-refined-preview .rr-task-meta span:first-child{color:var(--rr-green)}
+    #rt-refined-preview .rr-task-progress{font-size:12px;color:var(--rr-muted);margin:8px 0}
+    #rt-refined-preview .rr-task-progress .rr-meter span{background:var(--rr-green);width:40%}
+    #rt-refined-preview .rr-task-actions{display:flex;gap:8px;justify-content:flex-end;position:relative;z-index:1;margin-top:8px}
+    #rt-refined-preview .rr-task-actions button{font-size:12px;min-width:70px}
+    #rt-refined-preview .rr-secondary{border:1px solid var(--rr-line)}
+    #rt-refined-preview .rr-app .rr-primary{background:var(--rr-gold);color:light-dark(#4b401d,#2a2513)}
+    #rt-refined-preview .rr-task-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    #rt-refined-preview .rr-shade{position:absolute;inset:0;background:var(--rr-veil);z-index:5;display:flex;align-items:center;justify-content:center;padding:18px}
+    #rt-refined-preview .rr-dialog{width:410px;max-width:100%;max-height:100%;overflow:auto;padding:19px;background:var(--rr-card);border:1px solid var(--rr-line);border-radius:20px;box-shadow:0 14px 45px var(--rr-shadow)}
+    #rt-refined-preview .rr-dialog-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+    #rt-refined-preview .rr-dialog-head h2{font-size:18px}
+    #rt-refined-preview .rr-dialog-head button{min-width:44px}
+    #rt-refined-preview .rr-dialog-title{font-size:16px;font-weight:500;overflow-wrap:anywhere}
+    #rt-refined-preview .rr-dialog-meta{display:flex;justify-content:space-between;gap:8px;margin:5px 0 10px;font-size:12px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-time{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--rr-muted);padding:9px 0;border-top:1px solid var(--rr-line);border-bottom:1px solid var(--rr-line)}
+    #rt-refined-preview .rr-recent{margin:12px 0}
+    #rt-refined-preview .rr-recent-row{display:flex;gap:10px;font-size:12px;margin:6px 0;color:var(--rr-muted)}
+    #rt-refined-preview .rr-recent-row time{flex:none}
+    #rt-refined-preview .rr-recent-row p{overflow-wrap:anywhere}
+    #rt-refined-preview .rr-field{display:flex;flex-direction:column;gap:6px;margin:12px 0;font-size:13px}
+    #rt-refined-preview .rr-field input{min-width:0;min-height:44px;border:1px solid var(--rr-line);border-radius:9px;background:var(--rr-bg);padding:9px}
+    #rt-refined-preview .rr-field .rr-note{margin:0;min-height:66px}
+    #rt-refined-preview .rr-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+    #rt-refined-preview .rr-dialog-actions button{min-width:80px}
+    #rt-refined-preview .rr-detail-section{margin-top:14px;border-top:1px solid var(--rr-line);padding-top:12px}
+    #rt-refined-preview .rr-detail-section summary{min-height:44px;display:flex;align-items:center;justify-content:space-between}
+    #rt-refined-preview .rr-detail-section summary:after{content:'＋';color:var(--rr-muted)}
+    #rt-refined-preview .rr-detail-section button{display:flex;justify-content:flex-start;width:100%;font-size:13px}
+    #rt-refined-preview .rr-management button{color:light-dark(#93623e,#e5b589)}
+    #rt-refined-preview .rr-settings{padding:14px 16px}
+    #rt-refined-preview .rr-setting{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rr-line)}
+    #rt-refined-preview .rr-setting:last-child{border:0}
+    #rt-refined-preview .rr-setting div{display:flex;flex-direction:column;gap:3px}
+    #rt-refined-preview .rr-chart{display:block;width:100%;margin:14px 0}
+    #rt-refined-preview .rr-chart text{font-size:12px;fill:var(--rr-muted)}
+    #rt-refined-preview .rr-chart .rr-chart-grid{stroke:var(--rr-line);stroke-width:1;fill:none}
+    #rt-refined-preview .rr-chart .rr-line-overall{stroke:var(--rr-gold);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    #rt-refined-preview .rr-chart .rr-line-study{stroke:var(--rr-green);stroke-width:2;fill:none;stroke-dasharray:5 5}
+    #rt-refined-preview .rr-chart circle{fill:var(--rr-gold)}
+    #rt-refined-preview .rr-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--rr-muted)}
+    #rt-refined-preview .rr-legend span:before{content:'';display:inline-block;width:16px;height:3px;background:var(--rr-gold);vertical-align:middle;margin-right:5px}
+    #rt-refined-preview .rr-legend span:last-child:before{background:var(--rr-green)}
+    #rt-refined-preview .rr-history-note{padding:14px 16px;margin-top:12px;display:flex;flex-direction:column;gap:7px}
+    #rt-refined-preview .rr-toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);max-width:90%;padding:9px 13px;border-radius:10px;background:var(--rr-ink);color:var(--rr-bg);font-size:12px;z-index:8;pointer-events:none;width:max-content}
+    #rt-refined-preview .rr-app[data-device=phone]{max-width:390px;border-radius:27px;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 70px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-main{grid-column:1;grid-row:1;padding:12px 12px 18px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-rail{grid-column:1;grid-row:2;border-right:0;border-top:1px solid var(--rr-line);padding:7px 6px 12px;display:block}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-brand{display:none}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-nav{flex-direction:row;gap:2px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-nav button{flex:1;flex-direction:column;justify-content:center;gap:1px;min-width:0;min-height:49px;padding:3px 0;font-size:11px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-account{position:absolute;top:11px;right:12px;width:44px;height:36px;min-height:36px;padding:0;font-size:11px;z-index:2}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-top{padding-right:52px;margin-bottom:8px;min-height:36px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-growth{margin-bottom:12px;padding:9px 11px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-grid,#rt-refined-preview .rr-app[data-device=phone] .rr-task-list{grid-template-columns:1fr}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-rating{padding:6px 12px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-card-head{min-height:44px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-card-head h2{font-size:14px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-heading h1{font-size:21px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-overall .rr-note{height:48px;min-height:48px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-toast{bottom:80px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-shade{padding:12px}
+    #rt-refined-preview .rr-app[data-device=phone] .rr-dialog{padding:16px}
+    @container(max-width:920px){#rt-refined-preview .rr-layout{grid-template-columns:minmax(0,1fr)}#rt-refined-preview .rr-task-stack{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @container(max-width:560px){#rt-refined-preview .rr-task-stack{grid-template-columns:1fr}#rt-refined-preview .rr-layout{gap:12px}#rt-refined-preview .rr-grid{grid-template-columns:1fr}#rt-refined-preview .rr-app[data-device=tablet] .rr-nav button{flex-direction:column;font-size:11px;padding:5px 0}#rt-refined-preview .rr-app[data-device=tablet]{grid-template-columns:54px minmax(0,1fr)}#rt-refined-preview .rr-app[data-device=tablet] .rr-main{padding-inline:12px}}
+    @media(prefers-reduced-motion:reduce){#rt-refined-preview *{animation:none!important;transition:none!important}}
+  </style>
+  <script>
+  (()=>{
+    const root=document.getElementById('rt-refined-preview');
+    const dims=[['study','学习','book-open',3],['work','作品','pencil-line',4],['health','健康','heart',2],['life','生活','sprout',3]];
+    const nav=[['today','今日','sun'],['tasks','任务','list-checks'],['history','历史','chart-no-axes-combined'],['rewards','奖励','award'],['settings','设置','settings']];
+    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const stamp=()=>{const d=new Date();return{iso:d.toISOString(),display:new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Hong_Kong',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)};};
+    const saved=window.openai?.widgetState?.modelContent?.preview;
+    const scoreOK=n=>n===null||(Number.isInteger(n)&&n>=0&&n<=5);
+    const models=[];
+    const xp=m=>dims.reduce((sum,[key])=>sum+5+2*m.scores[key],0);
+    const remember=m=>{if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{preview:{overall:m.scores.overall,note:m.note}},privateContent:null}).catch(()=>{});};
+    function rating(m,key,label,ico,overall=false){const n=m.scores[key];return `<section class="rr-card rr-rating ${overall?'rr-overall':''}" data-rating="${key}" aria-label="${label}"><div class="rr-card-head"><i data-lucide="${ico}" aria-hidden="true"></i><h2>${label}</h2></div><button class="rr-zero" data-zero="${key}" aria-label="${label}零星" aria-pressed="${n===0}">0 星</button><div class="rr-stars" role="group" aria-label="${label}星级">${Array.from({length:5},(_,i)=>`<button data-score="${key}" data-value="${i+1}" aria-label="${label}${i+1}星" aria-pressed="${n!==null&&i<n}">★</button>`).join('')}</div>${overall?`<textarea class="rr-note" aria-label="今日小结" placeholder="记下今天的一件小事…" maxlength="4000">${esc(m.note)}</textarea>`:`<details><summary aria-label="${label}原因与依据">原因与依据</summary><textarea class="rr-note" aria-label="${label}原因与依据" placeholder="简单记两句…"></textarea></details>`}</section>`;}
+    function taskCard(m,t){return `<article class="rr-card rr-task-card" data-task-card="${t.id}"><button class="rr-task-open" data-task-open="${t.id}" aria-label="查看${t.title}完整详情"><strong>${esc(t.title)}</strong><small>${esc(t.type)}</small></button><div class="rr-task-meta"><span>${t.completed?'已完成':'正在进行'}</span><span>${esc(t.deadline)}</span></div><div class="rr-task-progress">${t.stages?`<div class="rr-meter" role="progressbar" aria-label="${t.title}阶段完成进度" aria-valuemin="0" aria-valuemax="${t.stages.total}" aria-valuenow="${t.stages.done}"><span style="width:${t.stages.done/t.stages.total*100}%"></span></div><span>阶段 ${t.stages.done} / ${t.stages.total}</span>`:`<span>推进 ${t.logs.length} 次 · ${t.logs.length?'最近 '+esc(t.logs[0].when):'尚无推进记录'}</span>`}</div><div class="rr-task-actions">${t.completed?'<small>成果已保存</small>':`<button class="rr-secondary" data-progress="${t.id}">推进</button><button class="rr-primary" data-complete="${t.id}">完成</button>`}</div></article>`;}
+    function today(m){return `<div class="rr-heading"><h1>今日记录</h1><small>10 月 18 日 · 周日</small></div><div class="rr-layout"><section aria-label="评分区">${rating(m,'overall','今日评分','notebook-pen',true)}<div class="rr-grid">${dims.map(([key,label,ico])=>rating(m,key,label,ico)).join('')}</div></section><aside aria-label="当前任务与进度"><div class="rr-panel-head"><h2>当前任务</h2><button data-page="tasks">全部 →</button></div><div class="rr-task-stack">${m.tasks.map(t=>taskCard(m,t)).join('')}</div></aside></div>`;}
+    function history(m){return `<div class="rr-heading"><h1>历史记录</h1><small>最近 7 天</small></div><section class="rr-card rr-settings"><h2>评分趋势</h2><div class="rr-legend"><span>今日总体评分</span><span>学习</span></div><svg class="rr-chart" viewBox="0 0 340 210" role="img" aria-label="示例总体评分与学习趋势，缺失日期留空"><path class="rr-chart-grid" d="M30 20H315 M30 100H315 M30 180H315"/><text x="8" y="24">5</text><text x="8" y="104">2.5</text><text x="8" y="184">0</text><path class="rr-line-study" d="M30 116L75 84L120 116L165 52L210 84L255 52L300 ${180-m.scores.study*32}"/><path class="rr-line-overall" d="M30 84L75 52L120 84 M210 116L250 84L300 ${180-(m.scores.overall??0)*32}"/><text x="30" y="205">10/12</text><text x="145" y="205">10/15</text><text x="270" y="205">10/18</text></svg></section><section class="rr-card rr-history-note"><small>10月18日 · 今日小结</small><p>${esc(m.note||'尚未填写小结')}</p></section>`;}
+    function page(m){if(m.page==='today')return today(m);if(m.page==='history')return history(m);if(m.page==='tasks')return `<div class="rr-heading"><h1>任务</h1><small>正在进行</small></div><div class="rr-task-list">${m.tasks.map(t=>taskCard(m,t)).join('')}</div>`;if(m.page==='settings')return `<div class="rr-heading"><h1>设置</h1></div><section class="rr-card rr-settings"><div class="rr-setting"><div><h3>账号与同步</h3><small>登录后同步成长记录</small></div><button data-dialog="login">登录</button></div><div class="rr-setting"><div><h3>软件更新</h3><small>启动后在后台检查</small></div><button data-dialog="update">预览提示</button></div><div class="rr-setting"><div><h3>完整备份</h3><small>保存全部成长记录</small></div><button data-demo="备份入口示意">导出</button></div></section>`;return `<div class="rr-heading"><h1>奖励中心</h1></div><section class="rr-card rr-settings"><div class="rr-setting"><span>等级</span><span>Lv.8</span></div><div class="rr-setting"><span>今日四项评分经验</span><span>${xp(m)} XP</span></div><div class="rr-setting"><span>徽章</span><span>六系列 · 48枚</span></div></section>`;}
+    function icons(){globalThis.lucide?.createIcons({attrs:{width:18,height:18,'stroke-width':1.6}});}
+    function paint(m){m.el.innerHTML=`<aside class="rr-rail"><div class="rr-brand" aria-label="Rater & Tracker">✦</div><nav class="rr-nav" aria-label="主导航">${nav.map(([key,label,ico])=>`<button data-page="${key}" ${m.page===key?'aria-current="page"':''}><i data-lucide="${ico}" aria-hidden="true"></i><span>${label}</span></button>`).join('')}</nav><button class="rr-account" data-dialog="login" aria-label="打开登录界面">登录</button></aside><main class="rr-main"><header class="rr-top"><strong>Rater & Tracker</strong><span class="rr-status">示例预览</span></header><section class="rr-growth" aria-label="示例等级经验"><div class="rr-level"><small>Lv.</small>8</div><div class="rr-growth-body"><div class="rr-growth-line"><span>成长进度</span><span>30 / 65 XP</span></div><div class="rr-meter"><span></span></div><div class="rr-growth-line"><span>距 Lv.9 还需 35 XP</span><span data-day-xp>今日 ${xp(m)} XP</span></div></div></section><div class="rr-page">${page(m)}</div></main>`;icons();}
+    function toast(m,message){m.el.querySelector('.rr-toast')?.remove();const t=document.createElement('div');t.className='rr-toast';t.setAttribute('role','status');t.textContent=message;m.el.append(t);clearTimeout(m.timer);m.timer=setTimeout(()=>t.remove(),2300);}
+    function recent(t,all=false){return t.logs.slice(0,all?t.logs.length:2).map(log=>`<div class="rr-recent-row"><time>${esc(log.when)}</time><p>${esc(log.note)}</p></div>`).join('')||'<small>暂无推进记录</small>';}
+    function open(m,kind,id){m.el.querySelector('.rr-shade')?.remove();const t=m.tasks.find(task=>task.id===id)??m.tasks[0];const now=stamp();m.activeTask=t.id;m.activeKind=kind;
+      const heading={progress:'记录推进',complete:'完成任务',detail:'任务详情',login:'欢迎使用',update:'发现新版本'}[kind];
+      const taskIntro=`<h3 class="rr-dialog-title">${esc(t.title)}</h3><div class="rr-dialog-meta"><span>${esc(t.type)}</span><span>${t.completed?'已完成':'正在进行'}</span></div>`;
+      let content;
+      if(kind==='progress'||kind==='complete')content=`${taskIntro}<div class="rr-time"><span>${kind==='progress'?'记录时间':'完成时间'}</span><time datetime="${now.iso}" data-recorded-time>${now.display}</time></div>${kind==='progress'?`<section class="rr-recent"><h3>最近推进</h3>${recent(t)}</section>`:''}<label class="rr-field">成果说明<textarea class="rr-note" aria-label="成果说明" placeholder="${kind==='progress'?'这次完成了什么？':'记录最终交付的成果'}" rows="2" maxlength="4000">${esc(m.drafts[kind+'/'+t.id]??'')}</textarea></label><div class="rr-dialog-actions"><button data-close>取消</button><button class="rr-primary" data-save-action>${kind==='progress'?'保存推进':'确认完成'}</button></div>`;
+      else if(kind==='detail')content=`${taskIntro}<p><small>目标：完成一版可观看的短片，并整理修改意见。</small></p><section class="rr-detail-section"><h3>任务进度</h3><small>${t.stages?`已完成阶段 ${t.stages.done} / ${t.stages.total}`:`有效推进 ${t.logs.length} 次`}</small></section><details class="rr-detail-section" open><summary>推进历史</summary>${recent(t,true)}<button data-demo="历史补记入口示意，可在完整详情选择过去的实际日期">补记／更正记录</button></details><details class="rr-detail-section"><summary>计划与奖励明细</summary><small>计划日期、阶段管理、冻结额度与经验账本集中在此处。</small></details><details class="rr-detail-section rr-management"><summary>任务管理</summary><button data-demo="归档确认入口示意，未修改任务">放弃并归档</button><button data-demo="删除整段推进历史的确认入口示意，未删除数据">删除整个任务推进历史</button><button data-demo="删除任务的确认入口示意，未删除数据">删除整个任务</button></details><div class="rr-dialog-actions"><button data-close>关闭</button></div>`;
+      else if(kind==='update')content='<p>当前版本还有最新版本</p><div class="rr-dialog-actions"><button data-close>稍后再说</button><button class="rr-primary" data-demo="更新提示预览，不下载文件">下载最新版本</button></div>';
+      else content='<p><small>登录账号，在设备之间同步成长记录。</small></p><label class="rr-field">账号<input autocomplete="off" placeholder="示例账号，请勿填真实凭据"></label><label class="rr-field">密码<input type="password" autocomplete="off" placeholder="仅供界面预览"></label><div class="rr-dialog-actions"><button data-close>暂不登录</button><button class="rr-primary" data-demo="登录入口预览，不连接账号">登录</button></div>';
+      const shade=document.createElement('div');shade.className='rr-shade';shade.innerHTML=`<section class="rr-dialog" role="dialog" aria-modal="true" aria-label="${heading}"><div class="rr-dialog-head"><h2>${heading}</h2><button data-close aria-label="关闭">×</button></div>${content}</section>`;m.previousFocus=document.activeElement;m.el.append(shade);shade.querySelector('[data-close]').focus();}
+    function close(m){m.el.querySelector('.rr-shade')?.remove();m.previousFocus?.focus();}
+    root.querySelectorAll('.rr-app').forEach(el=>{const m={el,page:'today',scores:{overall:scoreOK(saved?.overall)?saved.overall:3,...Object.fromEntries(dims.map(([key,,,n])=>[key,n]))},note:typeof saved?.note==='string'?saved.note.slice(0,4000):'完成了短片初剪，也给自己留了一点休息时间。',drafts:{},tasks:[{id:'film',title:'完成短片初剪',type:'中任务 · 作品',deadline:'今天到期',stages:{done:2,total:5},logs:[{when:'10/17',note:'整理素材并完成粗剪'},{when:'10/16',note:'确定结构与脚本'}]},{id:'reading',title:'阅读与笔记',type:'长期任务 · 学习',deadline:'10/30 到期',stages:null,logs:[]}]};models.push(m);paint(m);
+      el.addEventListener('click',event=>{const b=event.target.closest('button');if(!b||!el.contains(b))return;
+        if(b.dataset.page){m.page=b.dataset.page;paint(m);return;}
+        const key=b.dataset.score??b.dataset.zero;if(key){m.scores[key]=b.dataset.zero?0:Number(b.dataset.value);const card=b.closest('[data-rating]');card.querySelectorAll('[data-score]').forEach(star=>star.setAttribute('aria-pressed',Number(star.dataset.value)<=m.scores[key]));card.querySelector('[data-zero]').setAttribute('aria-pressed',m.scores[key]===0);el.querySelector('[data-day-xp]').textContent=`今日 ${xp(m)} XP`;if(!matchMedia('(prefers-reduced-motion:reduce)').matches)b.animate([{transform:'scale(1)'},{transform:'scale(1.12)',offset:.4},{transform:'scale(1)'}],{duration:330,easing:'cubic-bezier(.22,.8,.25,1)'});remember(m);return;}
+        if(b.dataset.progress){open(m,'progress',b.dataset.progress);return;}
+        if(b.dataset.complete){open(m,'complete',b.dataset.complete);return;}
+        if(b.dataset.taskOpen){open(m,'detail',b.dataset.taskOpen);return;}
+        if(b.dataset.dialog){open(m,b.dataset.dialog);return;}
+        if(b.hasAttribute('data-close')){close(m);return;}
+        if(b.hasAttribute('data-save-action')){const field=el.querySelector('.rr-dialog textarea');if(!field.value.trim()){field.setCustomValidity('请填写成果说明');field.reportValidity();return;}field.setCustomValidity('');const t=m.tasks.find(task=>task.id===m.activeTask),now=stamp();if(m.activeKind==='progress')t.logs.unshift({when:now.display.slice(5,10).replace('-','/'),note:field.value.trim()});else t.completed=true;delete m.drafts[m.activeKind+'/'+t.id];close(m);paint(m);toast(m,'已更新示例任务 · 未写入应用数据');return;}
+        if(b.dataset.demo)toast(m,b.dataset.demo);
+      });
+      el.addEventListener('input',event=>{if(event.target.matches('.rr-overall textarea')){m.note=event.target.value;remember(m);}if(event.target.matches('.rr-dialog textarea')){m.drafts[m.activeKind+'/'+m.activeTask]=event.target.value;event.target.setCustomValidity('');}});
+      el.addEventListener('keydown',event=>{const shade=el.querySelector('.rr-shade');if(!shade)return;if(event.key==='Escape'){event.preventDefault();close(m);}if(event.key==='Tab'){const nodes=[...shade.querySelectorAll('button,input,textarea,summary')].filter(n=>n.getClientRects().length),first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}});
+      if(globalThis.Tweak){const design={gap:12};const tweak=new Tweak({container:el,onChange:()=>el.style.setProperty('--rr-gap',design.gap+'px')});tweak.addSlider(design,'gap',{label:'评分模块间距',min:8,max:16,unit:'px'});}
+    });
+    window.addEventListener('openai:set_globals',event=>{const next=event.detail?.globals?.widgetState?.modelContent?.preview;if(!next)return;models.forEach(m=>{if(scoreOK(next.overall))m.scores.overall=next.overall;if(typeof next.note==='string')m.note=next.note.slice(0,4000);if(!m.el.querySelector('.rr-shade'))paint(m);});});
+  })();
+  </script>
+</div>
