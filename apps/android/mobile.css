@@ -2,6 +2,8 @@
 /* Match desktop hover while held, then return to the saved/selected state.
    Disable WebView's blue tap overlay on all nodes, including nested SVGs. */
 html[data-platform=android] *{-webkit-tap-highlight-color:transparent}
+html[data-platform=android] body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html[data-platform=android] input,html[data-platform=android] textarea,html[data-platform=android] [contenteditable=true]{-webkit-user-select:text;user-select:text}
 html[data-platform=android] button,html[data-platform=android] summary{-webkit-user-select:none;user-select:none}
 html[data-platform=android] button[data-touch-pressed]:not(:disabled){transform:translateY(-1px);background:#f1efe3}
 html[data-platform=android] .primary[data-touch-pressed]:not(:disabled){background:#e7bc3e;box-shadow:0 4px 12px #ad83152b;transform:translateY(-1px)}
@@ -30,3 +32,5 @@ html[data-platform=android] .control-popover .calendar-day[data-touch-pressed]:n
 html[data-platform=android][data-motion=gentle] button[data-touch-pressed],html[data-platform=android][data-motion=off] button[data-touch-pressed],
 html[data-platform=android][data-motion=gentle] .badge-card[data-touch-pressed] img,html[data-platform=android][data-motion=off] .badge-card[data-touch-pressed] img{transform:none!important}
 @media(prefers-reduced-motion:reduce){html[data-platform=android] button[data-touch-pressed],html[data-platform=android] .badge-card[data-touch-pressed] img{transform:none!important}}
+/* Keep the hit target stationary from finger down through click dispatch. */
+html[data-platform=android] button[data-touch-pressed]:not(:disabled){transform:none}

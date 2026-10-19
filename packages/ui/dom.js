@@ -22,7 +22,7 @@ export function updateDOM(parent, markup, { preserveInputs = true, starChanged =
     const preview = isStar ? ['preview-lit', 'preview-dim'].filter(c => old.classList.contains(c)) : [];
     const preserveOpen = preserveInputs && old.tagName === 'DETAILS';
     for (const attr of [...old.attributes]) {
-      if (preserveOpen && attr.name === 'open' || attr.name === 'data-preview' || attr.name === 'style' && old.matches('[data-record-key]')) continue;
+      if (preserveOpen && attr.name === 'open' || attr.name === 'data-preview' || attr.name === 'data-touch-pressed' || attr.name === 'style' && old.matches('[data-record-key]')) continue;
       if (!next.hasAttribute(attr.name)) old.removeAttribute(attr.name);
     }
     for (const attr of next.attributes) {

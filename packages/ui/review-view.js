@@ -47,7 +47,7 @@ export function refreshCharts(root, state) {
   for (const node of root.querySelectorAll('.rating-chart')) {
     const dates = JSON.parse(node.dataset.chartDates), hidden = new Set(JSON.parse(node.dataset.chartHidden));
     const width = Math.max(220, Math.round(node.clientWidth)), height = 220, left = 28, right = width - 16, top = 14, bottom = height - 22;
-    const signature = JSON.stringify([width, dates.map(date => DIMENSIONS.map(d => state.ratings[date]?.[d]?.stars ?? null)), [...hidden]]);
+    const signature = JSON.stringify([width, dates, dates.map(date => DIMENSIONS.map(d => state.ratings[date]?.[d]?.stars ?? null)), [...hidden]]);
     if (node.chartSignature === signature) continue;
     node.chartSignature = signature;
     const x = i => left + i * (right - left) / (dates.length - 1), y = stars => bottom - stars / 5 * (bottom - top);

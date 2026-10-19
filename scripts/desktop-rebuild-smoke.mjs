@@ -19,12 +19,15 @@ try{
   if(!browser)throw Error('Packaged desktop did not start');
   const page=browser.contexts()[0].pages()[0];await page.waitForFunction(()=>Boolean(window.raterReady));await page.evaluate(()=>window.raterReady);
   const info=await page.evaluate(()=>window.desktop.info());
-  if(!info.packaged||info.version!=='1.0.0'||path.resolve(info.dataDirectory)!==path.resolve(dataDirectory))throw Error('Packaged environment/isolation mismatch');
+  if(!info.packaged||info.version!==(await readFile('VERSION','utf8')).trim()||path.resolve(info.dataDirectory)!==path.resolve(dataDirectory))throw Error('Packaged environment/isolation mismatch');
   const code=await readFile('scripts/rebuild-ui-acceptance.cjs','utf8');
   const run=(await import('node:vm')).runInThisContext('('+code+')');
   const report=await run(page);report.packaged=true;report.asarMatches=true;
+  const fixCode=await readFile('scripts/fix-ui-acceptance.cjs','utf8');
+  const fixRun=(await import('node:vm')).runInThisContext('('+fixCode+')');
+  report.fix=await fixRun(page);
   await writeFile('output/rebuild/desktop-report.json',JSON.stringify(report,null,2));
-  console.log(JSON.stringify({checks:report.checks.length,passed:report.checks.filter(c=>c.passed).length,packaged:true,asarMatches:true}));
+  console.log(JSON.stringify({checks:report.checks.length,passed:report.checks.filter(c=>c.passed).length,packaged:true,asarMatches:true,fixChecks:report.fix.checks.length}));
 }finally{
   await browser?.close().catch(()=>{});
   if(child.exitCode===null){try{execFileSync('taskkill',['/PID',String(child.pid),'/T','/F'],{stdio:'ignore',windowsHide:true});}catch{}}

@@ -1,3 +1,21 @@
+# 当前交接 · W071 · 2026-10-20 · 双端1.0.1反馈修复
+
+Windows1.0.1，Android1.0.1／code10；结算1.3、JSON1、原Android证书保持。本轮main统一集成共享UI／会话、Windows账号IPC、Android样式与测试／文档／发布，未修改其他worktree、真实用户账号或业务数据。用户已允许用Android Studio隔离模拟器实测。
+
+已修复手机任务筛选条／滑块拉伸、按压目标位移与触控中刷新、普通文字长按选择；历史图表／日历／回顾局部交叠，标题／按钮稳定。等级框／字体与四项图标比例调整，圆角盘点见专项。手机今日最多3项任务＋查看全部，桌面账号在左下版本号上方；窄桌面保留头像。登录续期与用户活动时间分离，30天闲置在运行中执行；网络挂起不阻碍本机活动时间落盘，SDK后台续期不得延长闲置。
+
+实际：90项业务／工程，65项Chrome回归＋42项专项，最终Windows实包61＋42项；Android原生UI15项、最终正式APK10项、真实CloudBase＋Keystore7项全部通过。包含两次杀进程免密恢复、访问到期续期及31天到期／清除原生凭证。只用虚构云账号，两个新建账号均删除；无业务上传。Windows63／Android58个应用源码逐文件一致。详细检查、圆角表、过程失败／重试与边界见[验收](docs/1.0.1修复验收.md)及WORKLOG W071。
+
+产物：Windows SHA256 `d8afb258732fd28e0e39818629222fd40fce0f117459e1700468f053720f6add`；APK SHA256 `f180fb88caa0c0849d6ceaa48d0876ef379c098e09b1e5e526b70d33581b47d7`。正式批次[dual/2026.10.20.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.20.1)，双端安装包和统一SHA256SUMS；发布收尾必须回读PUBLIC、main／附注tag、非draft／非prerelease和附件摘要，再报告成功。
+
+命令：npm run check；Playwright CLI run-code --filename=scripts/fix-ui-acceptance.cjs；node scripts/desktop-rebuild-smoke.mjs（最终包61＋42）；Android设置ANDROID_SDK_ROOT、ANDROID_ADB_SERVER_PORT=5038、RATER_ANDROID_SERIAL=emulator-5580，运行node scripts/android-fix-acceptance.mjs／android-fix-release-smoke.mjs／android-session-acceptance.mjs。只允许RaterSigningAcceptance AVD，都是虚构数据用例；session专项还需要本机私有合成账号fixture，不得改为真实账号。旧android-rebuild-smoke脚本仍固定历史1.0.0／code9，不用于本轮。
+
+Windows构建在忽略output脚本选择本地Electron与内置UninstallerReader（当前进程注入），未改依赖源；NSIS普通命令在本机可能受中间程序执行限制／网络影响。Android最终正式包不开放WebView调试；键盘截图用ADB。模拟器末轮退出后已重启并重验最终APK，不把中断当通过。
+
+未覆盖：自然30天（已做时间加速／真实服务续登）、实体Android厂商后台／长期帧率、Windows安装向导／跨版覆盖和SmartScreen；Windows未签名。无剩余已授权实现项，下一步按新反馈递增受影响平台版本并创建正式Release；不要重做或混用W065～W068已放弃实现。
+
+---
+
 # 当前交接 · W070 · 2026-10-19 · 1.0重建正式发布
 
 用户明确要求放弃旧1.0及后续UI优化，回到最后preview重新开发，并将1.0及以后改为正式Release。已以向前提交a97b11e恢复d8fd549，再根据五轮权威文档重建；不要恢复W065～W068实现。GitHub旧.18.6／.7／.8和.19.1草稿已撤下，preview与Git标签保留。主工作区main由本会话集成完整双端，没有修改其他worktree、真实账号或用户数据。

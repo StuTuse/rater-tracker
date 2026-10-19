@@ -15,6 +15,7 @@ const vault=desktop ? null : createSessionVault({auth,memory,
  clear:()=>native ? native.sessionClear() : Promise.resolve(localStorage.removeItem('rater-web-session'))
 });
 const registration=desktop ? null : createRegistration({signUp:async value=>checked(await auth.signUp(value)),signOut:async()=>checked(await auth.signOut())},label=>vault.verified(label));
+export const touchAccount=()=>desktop ? desktop.accountTouch() : vault.touch();
 export const currentAccount=()=>desktop ? desktop.accountCurrent() : vault.current();
 export const loginAccount=(name,password)=>desktop ? desktop.accountLogin(name,password) : vault.login(usernameForAuth(name),password,name);
 export const logoutAccount=async()=>{if(desktop)return desktop.accountLogout();registration.clear();await vault.logout();};

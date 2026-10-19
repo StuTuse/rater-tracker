@@ -10,6 +10,24 @@
 html,body {
   overscroll-behavior:none;
 }
+/* Shared geometry: surfaces 16px, cards 14px, controls 10px; emblems retain
+   their hand-drawn outlines. Never let decorative elements receive input. */
+.segmented>.segment-indicator {
+  flex:none;
+  max-width:100%;
+  pointer-events:none;
+}
+@media(min-width:1200px) {
+  .topbar #account-entry-slot { display:none; }
+}
+@media(min-width:700px) and (max-width:1199px) {
+  html:not([data-platform=android]) .topbar #account-entry-slot { display:none; }
+  html:not([data-platform=android]) .sidebar-bottom { display:block;padding:0; }
+  html:not([data-platform=android]) .sidebar-bottom .account-entry { width:44px;padding:5px; }
+  html:not([data-platform=android]) .sidebar-bottom .account-entry-text,
+  html:not([data-platform=android]) .sidebar-bottom .account-entry>.icon { display:none; }
+  html:not([data-platform=android]) .sidebar-bottom>small { font-size:10px; }
+}
 body {
   font-size:14px;
   line-height:1.65;
@@ -67,7 +85,9 @@ button[hidden],[hidden] {
   padding:14px 10px 0;
 }
 .sidebar-bottom .account-entry {
-  display:none;
+  display:flex;
+  width:100%;
+  margin-bottom:12px;
 }
 .workspace {
   margin-left:var(--side);
@@ -136,12 +156,13 @@ button[hidden],[hidden] {
   border-radius:16px;
 }
 .level-medallion {
-  width:62px;
-  height:64px;
+  width:68px;
+  height:76px;
   flex-shrink:0;
 }
 .level-medallion strong {
-  font-size:18px;
+  font-size:16px;
+  line-height:1.3;
 }
 #level-art {
   width:35px;
@@ -266,13 +287,13 @@ main {
   flex:1;
 }
 .category-icon {
-  width:30px;
-  height:32px;
+  width:36px;
+  height:36px;
   flex:none;
 }
 .category-icon .icon {
-  width:21px;
-  height:21px;
+  width:24px;
+  height:24px;
 }
 .write-button {
   width:44px;
@@ -499,7 +520,7 @@ main {
 }
 .panel {
   padding:22px;
-  border-radius:15px;
+  border-radius:16px;
   margin-bottom:18px;
 }
 .trend-panel {
@@ -1110,11 +1131,11 @@ dialog {
     gap:13px;
   }
   .level-medallion {
-    width:52px;
-    height:57px;
+    width:60px;
+    height:68px;
   }
   .level-medallion strong {
-    font-size:16px;
+    font-size:15px;
   }
   #level-art {
     width:30px;
@@ -1207,8 +1228,8 @@ dialog {
     min-height:26px;
   }
   .category-icon {
-    width:28px;
-    height:28px;
+    width:34px;
+    height:34px;
   }
   .write-button {
     height:44px;
@@ -1220,6 +1241,7 @@ dialog {
   .today-tasks .task-stack {
     grid-template-columns:1fr;
   }
+  .today-tasks:has(.task-card) { order:-1; }
   .task-card {
     padding:14px;
   }
@@ -1352,6 +1374,10 @@ dialog {
   .toolbar>.segmented {
     overflow:auto;
     max-width:100%;
+    align-self:flex-start;
+    width:max-content;
+    min-width:0;
+    flex-wrap:wrap;
   }
   .toolbar>.segmented button {
     font-size:11px;
@@ -1638,9 +1664,6 @@ html[data-platform=android] body::before {
   .mobile-task-summary>button {
     min-height:44px;
     font-size:12px;
-  }
-  .today-layout:has(.mobile-task-summary)>.today-tasks {
-    display:none;
   }
 }
 

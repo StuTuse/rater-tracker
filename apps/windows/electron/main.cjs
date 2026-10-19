@@ -29,6 +29,7 @@ else {
     };
     const accounts = require('./account.cjs')(app.getPath('userData'), safeStorage);
     ipcMain.handle('account:current', secure(() => accounts.current()));
+    ipcMain.handle('account:touch', secure(() => accounts.touch()));
     ipcMain.handle('account:login', secure((name, password) => accounts.login(name, password)));
     ipcMain.handle('account:register', secure(values => accounts.register(values)));
     ipcMain.handle('account:verify-registration', secure((id, code) => accounts.verifyRegistration(id, code)));

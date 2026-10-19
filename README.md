@@ -2,7 +2,7 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前双平台版本：Windows 1.0.0；Android 1.0.0（VERSION_CODE=9），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
+**当前双平台版本：Windows 1.0.1；Android 1.0.1（VERSION_CODE=10），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
 
 ## 安装与使用
 
@@ -17,6 +17,12 @@
 5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
 未登录可完全离线使用；账号同步需要联网。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
+
+## 1.0.1 反馈修复
+
+手机任务筛选条、触控与长按选择修正；今日最多3项任务＋查看全部。历史图表／日历／当天回顾局部交叠渐变；等级和四项图标比例调整；桌面用户中心在左下版本号上方。登录凭证加密保留，用户活动延续30天窗口，后台轮询不续闲置时间。实际检查与边界见[修复验收](docs/1.0.1修复验收.md)。
+
+专项：Playwright CLI `run-code --filename=scripts/fix-ui-acceptance.cjs`；Windows `node scripts/desktop-rebuild-smoke.mjs`（完整回归＋专项）；Android `node scripts/android-fix-acceptance.mjs`（隔离调试包）、`node scripts/android-fix-release-smoke.mjs`（正式APK覆盖／原生检查）。虚构CloudBase账号与私有fixture准备好后，`node scripts/android-session-acceptance.mjs`验证真实SDK与Keystore跨进程恢复；仅接受指定隔离AVD及合成账号。Android需设置`ANDROID_SDK_ROOT`、`ANDROID_ADB_SERVER_PORT=5038`、`RATER_ANDROID_SERIAL=emulator-5580`；仅允许RaterSigningAcceptance AVD中的虚构数据，不在实体手机运行这些写入用例。
 
 ## 1.0 重建
 

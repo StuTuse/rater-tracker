@@ -17,7 +17,7 @@ module.exports = function createAccountService(directory, safeStorage) {
     });
     const checked=r=>{if(r?.error)throw new Error(r.error.message||'账号操作失败');return r?.data??r;};
     const registration=require('./registration.cjs')(auth,label=>vault.verified(label));
-    return {current:()=>vault.current(),
+    return {current:()=>vault.current(),touch:()=>vault.touch(),
       login:(name,password)=>vault.login(usernameForAuth(name),password,name),
       register:values=>registration.begin(values),verifyRegistration:(id,code)=>registration.confirm(id,code),
       logout:async()=>{registration.clear();await vault.logout();},
@@ -27,5 +27,5 @@ module.exports = function createAccountService(directory, safeStorage) {
         return checked(await app.rdb().rpc('rater_sync',{p_type:data.type,p_base_version:data.baseVersion??0,p_request_id:data.requestId??null,p_state:data.state??null}));
       })};
   })();
-  return Object.fromEntries(['current','login','register','verifyRegistration','logout','sync'].map(method=>[method,async(...args)=>(await ready)[method](...args)]));
+  return Object.fromEntries(['current','touch','login','register','verifyRegistration','logout','sync'].map(method=>[method,async(...args)=>(await ready)[method](...args)]));
 };
