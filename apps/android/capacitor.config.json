@@ -9,7 +9,7 @@
   "android": {
     "backgroundColor": "#faf8ef",
     "allowMixedContent": false,
-    "captureInput": true
+    "captureInput": false
   },
   "plugins": {
     "CapacitorHttp": {

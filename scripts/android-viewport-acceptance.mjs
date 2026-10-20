@@ -8,6 +8,7 @@ try{
   await page.reload();await page.evaluate(()=>window.raterReady);
   if(await page.locator('#modal[open]').count())await page.locator('#modal [data-action=close-modal]').click();
   await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
+  await page.locator('[data-action=write-record][data-dimension=study]').scrollIntoViewIfNeeded();
   await tap('写学习记录');await page.waitForFunction(()=>document.documentElement.classList.contains('keyboard-open'));
   await page.waitForTimeout(700);
   const writing=await page.evaluate(()=>{const r=document.querySelector('textarea[data-dimension=study]').getBoundingClientRect(),v=visualViewport;return {input:{top:r.top,bottom:r.bottom},viewport:{top:v.offsetTop,height:v.height},overlay:parseFloat(getComputedStyle(document.body,'::before').top),visible:r.top>=v.offsetTop&&r.bottom<=v.offsetTop+v.height};});

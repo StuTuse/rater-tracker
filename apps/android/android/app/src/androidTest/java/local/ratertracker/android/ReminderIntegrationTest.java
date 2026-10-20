@@ -47,8 +47,19 @@ public class ReminderIntegrationTest {
   ReminderScheduler.prefs(context).edit().putString("mirror","broken").commit();ReminderScheduler.deliverAt(context,11,time("2026-10-19T11:00:00+08:00"));assertEquals(0,manager.getActiveNotifications().length);assertFalse(ReminderScheduler.prefs(context).contains("last"));
  }
  @Test public void closedAndLateSlotsNeverConsumeCopy()throws Exception{
-  ReminderScheduler.deliverAt(context,10,time("2026-10-19T10:16:00+08:00"));assertEquals(0,manager.getActiveNotifications().length);assertFalse(ReminderScheduler.prefs(context).contains("last"));
+  ReminderScheduler.deliverAt(context,10,time("2026-10-19T11:00:00+08:00"));assertEquals(0,manager.getActiveNotifications().length);assertFalse(ReminderScheduler.prefs(context).contains("last"));
   JSONObject off=config(false);off.getJSONObject("options").put("enabled",false);ReminderScheduler.sync(context,off);ReminderScheduler.deliverAt(context,10,time("2026-10-19T10:00:00+08:00"));assertEquals(0,manager.getActiveNotifications().length);
+ }
+ @Test public void delayedWithinSlotStillDeliversAfterDoze()throws Exception{
+  ReminderScheduler.deliverAt(context,10,time("2026-10-19T10:45:00+08:00"));delivered();
+  ReminderScheduler.deliverAt(context,10,time("2026-10-19T10:46:00+08:00"));assertEquals(1,manager.getActiveNotifications().length);
+ }
+ @Test public void enabledAlarmsArePersistedAndDisabledAlarmsAreCancelled()throws Exception{
+  JSONObject status=ReminderScheduler.status(context);assertTrue(status.getLong("next10")>System.currentTimeMillis());assertTrue(status.getLong("next11")>System.currentTimeMillis());
+  JSONObject off=config(false);off.getJSONObject("options").put("enabled",false);ReminderScheduler.sync(context,off);assertEquals(0,ReminderScheduler.status(context).getLong("next10"));
+ }
+ @Test public void systemBarsAreOnlyCountedWhereTheyOverlapWebView(){
+  assertEquals(24,RaterPlatformPlugin.overlap(24,0));assertEquals(0,RaterPlatformPlugin.overlap(24,24));assertEquals(0,RaterPlatformPlugin.overlap(24,40));assertEquals(12,RaterPlatformPlugin.overlap(24,12));
  }
  @Test public void staleRevisionCannotOverwriteNewerMirror()throws Exception{
   ReminderScheduler.sync(context,config(true).put("revision",10));ReminderScheduler.sync(context,config(false).put("revision",9));assertTrue(new JSONObject(ReminderScheduler.prefs(context).getString("mirror","{}")).getBoolean("updated"));

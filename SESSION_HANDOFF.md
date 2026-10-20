@@ -1,3 +1,21 @@
+# 当前交接 · W072 · 2026-10-21 · 1.0.2兼容／自动保存／后台提醒
+
+Windows1.0.2，Android1.0.2／code11；规则1.3、JSON1与原Android证书保持。main统一负责共享编辑器／控件／刷新、Android原生输入／安全区／系统提醒、测试和双端发布；没有派遣会话、修改其他worktree或真实用户数据。用户反馈为HarmonyOS NEXT／卓易通平板；本机只有隔离AVD，不把安卓模拟器当鸿蒙实机。
+
+每次输入同步暂存并立即串行保存，revision保护正在保存时的新草稿；组合期间保留恢复副本，结束／失焦补取遗漏事件后的文字，恢复后继续提交。关闭Android captureInput，RaterWebView以真实InputConnection提交旧式硬件字符事件，中文／引号／换行及选区均保留。纯文字保存不重置成长动画，原位更新不重设同一输入节点选区。安全区只计系统栏实际覆盖，侧栏同步避让，视口变化不主动blur；修复切页旧父容器残留的重复日期按钮。
+
+提醒仍为Android原生AlarmManager：精确权限可用用setExactAndAllowWhileIdle，否则setAndAllowWhileIdle；修正当小时重排到次日及休眠延迟丢弃，Android各槽本小时有效、跨小时不追发，handled避免无效槽循环。开启时引导准点权限，设置含通知／电池入口和实际状态。系统强停、关机、完全关闭卓易通不能保证送达；Windows仍仅运行期间提醒。
+
+实际检查：95项业务／工程；Chrome65＋42＋11，最终Windows实包61＋42＋11；Android通知／安全区11项、独立中文原生与持久保存1项、平板5项、真实IME几何3项、最终正式APK10项。进程被run-as结束且确认PID消失、进入Doze、实际10点系统唤醒并通知的7项通过（受控时间，结束恢复时钟／电池）。Windows64个、Android61个应用源码逐文件一致。过程失败、脚本修正、真实截图和边界见[验收](docs/1.0.2兼容与保存验收.md)。
+
+Windows包203334192字节，SHA256 d2ecc5b7a634cf2ed8288154707f201f604e7767845caab1a51def638efd0855，NotSigned；Android98245406字节，SHA256 4075733445c368c1190815d8b11950e201dfc171c35801a786c82eecd5deea7f，原648b3a…60448证书、v1/v2/v3。目标正式批次[dual/2026.10.21.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.21.1)，双包＋SHA256SUMS，完成须回读PUBLIC／main／附注tag／非draft非prerelease及远端digest。
+
+命令：npm run check；Playwright CLI run-code --filename=scripts/compat-ui-acceptance.cjs；node scripts/desktop-rebuild-smoke.mjs（新增11项）。Android先设置ANDROID_SDK_ROOT、ANDROID_ADB_SERVER_PORT=5038、RATER_ANDROID_SERIAL=emulator-5580，仅允许RaterSigningAcceptance：node scripts/android-build.mjs --instrument；原生ReminderIntegrationTest和KeyboardIntegrationTest分开串行，后者主动唤醒／防熄屏；node scripts/android-tablet-acceptance.mjs、android-viewport-acceptance.mjs、android-fix-release-smoke.mjs、android-background-reminder-acceptance.mjs。后台脚本临时改变AVD时间／Doze并恢复，绝不能用于真实设备。调整设备尺寸后要重启／前台应用，输入入口先滚动可见；截图用ADB，调试连接5秒超时，截图缓冲16MiB。Windows沿忽略output/build-nsis-reader.cjs使用本地Electron及内置NSIS读取器。
+
+未覆盖：HarmonyOS NEXT／卓易通实体内置键盘和宿主GPU／通知桥、实体厂商后台与自然多日／重启长期投递、云账号回归、Windows安装向导／跨版安装／SmartScreen。没有待审批实现项；后续按用户实际鸿蒙反馈继续，不承诺强停／容器关闭仍必达，不恢复已经放弃的W065～W068实现。
+
+---
+
 # 当前交接 · W071 · 2026-10-20 · 双端1.0.1反馈修复
 
 Windows1.0.1，Android1.0.1／code10；结算1.3、JSON1、原Android证书保持。本轮main统一集成共享UI／会话、Windows账号IPC、Android样式与测试／文档／发布，未修改其他worktree、真实用户账号或业务数据。用户已允许用Android Studio隔离模拟器实测。

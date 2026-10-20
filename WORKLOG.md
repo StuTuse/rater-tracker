@@ -840,3 +840,22 @@ build-weekly-demo.mjs从虚构三周评分生成两份已结束报告（9/28—1
 Windows1.0.1：203333712字节、SHA256 d8afb258732fd28e0e39818629222fd40fce0f117459e1700468f053720f6add，NotSigned。Android1.0.1／code10：98243095字节、SHA256 f180fb88caa0c0849d6ceaa48d0876ef379c098e09b1e5e526b70d33581b47d7，原648b3a…60448证书、v1／v2／v3。双端版本、锁文件入口、正式方案v1.34、视觉v1.28、README／CHANGELOG／版本规范与交接同步。详细结果在docs/1.0.1修复验收.md，实际命令见README；本轮按dual/2026.10.20.1正式批次推送／发布双端包与SHA256SUMS，最终结果须回读PUBLIC／main／附注tag／draft=false／prerelease=false与资产digest。
 
 未覆盖：自然30天时长（使用受控时间／私有会话加速）、实体Android及厂商后台／Doze／长期帧率、Windows安装向导／跨版本安装和SmartScreen；Windows未签名。云端撤销或失效的刷新令牌仍须重登。没有其他本轮功能待实现；后续按真实反馈继续，不将上述边界写成已实测。
+
+
+## W072 · 2026-10-21 · 双端1.0.2：鸿蒙兼容路径、文字即时保存与原生提醒
+
+接手main=985267f，工作区／暂存区干净；读取交接、近期日志、现行产品／视觉／提醒／版本规范。本轮main统一负责共享编辑器、原位刷新与控件、Android输入／系统栏／提醒、测试、双端构建和发布；未创建／派遣其他会话、未动其他worktree、实际账号或用户业务数据。用户附件仅作问题现象参考。
+
+修复输入后500ms才正式保存的窗口：每次input同步保存恢复副本并立即排入单个串行队列，revision防旧请求删新稿；组合期间保留草稿，结束／失焦补取最终字段值，重启／账号恢复继续提交。旧草稿兼容、4000字符、无评分不补0／XP保持。重复输入事件也正确落定保存状态，失败保留恢复副本。原位刷新不重复设置同一输入选区；纯文字保存不调用growthStatic打断成长动画。
+
+Android captureInput原true绕过标准WebView IME，改false；RaterWebView替代库中ACTION_MULTIPLE直接JS赋值分支，使用InputConnection.commitText保留选区、中文、引号／换行及input保存事件。不修改依赖。原生安全区按decor与WebView屏幕几何计算真实重叠，已避让部分不重复加padding，平板侧栏顶底保护；去掉仅凭viewport变化主动blur。真实平板截图另发现重复日期按钮来自旧父容器错误接受后代源输入，改直接子级匹配清理，双端加回归。
+
+Android精确闹钟保持，非精确回退改setAndAllowWhileIdle并处理撤权竞态；修复10点刷新把未送达闹钟改到明天；Android各槽本小时可去重发送，跨小时不追发，handled阻止无效槽循环。11点仍看最新成功业务镜像。设置新增通知／准点／后台电池入口，开启引导准点权限。强停、关机、卓易通完全关闭不承诺送达；Windows退出语义保持。
+
+实际检查：npm run check 95项；Chrome65＋42＋11项；最终Windows实包61＋42＋11项，临时隔离目录与ASAR一致。Android原生通知／安全区11项，独立中文原生提交与IndexedDB原文1项，真实平板5项，实际IME几何3项，正式签名APK10项覆盖／原文／键盘／重启／调试关闭。受控AVD翌日09:59:30，真实10点AlarmManager槽；run-as结束进程确认PID消失、强制Doze后，系统确实启动接收器并留下receipt及NotificationManager通知，7项通过，finally恢复设备时间／自动校时／电池及提醒选项。Windows64个、APK61个源码文件逐一匹配。截图用ADB且已目视，不能把锁屏截图冒称通知外观验收。
+
+过程如实记录：沙箱Gradle无法连守护进程，改授权本机执行；AVD须指定项目signature-avd-home。浏览器测试修正双今日入口选择器和旧兼容字段取值顺序。原生evaluateJavascript相对import解析about:blank造成假失败，改绝对源；初次导航／设备熄屏回调丢失增加等待、主动唤醒和防熄屏。手机多任务下评分按钮在屏幕下方，脚本先滚动后真实IME3项通过。CDP后台连接加5秒超时，ADB截图缓冲改16MiB。正式原生UI期间UIAutomator null root自动重试后完成；重复后台专项曾误用前次同一虚拟日期的旧回执，改选新日期并轮询通知服务后再验证，未把失败阶段当通过。详情见docs/1.0.2兼容与保存验收.md。
+
+Windows1.0.2：203334192字节，SHA256 d2ecc5b7a634cf2ed8288154707f201f604e7767845caab1a51def638efd0855，NotSigned。Android1.0.2/code11：98245406字节，SHA256 4075733445c368c1190815d8b11950e201dfc171c35801a786c82eecd5deea7f，原648b3a…60448证书、v1/v2/v3。版本、锁文件、正式v1.35／视觉v1.29、体验／提醒专项、README／CHANGELOG／规范及交接同步。按dual/2026.10.21.1正式Release批次推送／发布，收尾须核对远端PUBLIC、main和附注tag、draft=false／prerelease=false与EXE／APK／校验清单digest。
+
+未覆盖：鸿蒙NEXT／卓易通实体平板内置键盘、宿主GPU／通知桥、实体厂商后台与自然多日／重启长期投递、云账号回归、Windows安装向导／跨版覆盖／SmartScreen。系统强停或容器关闭需再次启动，不能保证系统禁止运行时准点。当前实现无待审批项，后续按升级后实体反馈继续。

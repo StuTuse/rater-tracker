@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前双平台版本：Windows 1.0.1；Android 1.0.1（VERSION_CODE=10），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
+**当前双平台版本：Windows 1.0.2；Android 1.0.2（VERSION_CODE=11），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
 
 ## 安装与使用
 
-下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.19.2)并选择`Rater-Tracker-1.0.0-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
+下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.21.1)并选择`Rater-Tracker-1.0.2-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
 
 自有贡献采用[MIT许可](LICENSE)，第三方保留[各自许可](docs/THIRD_PARTY_NOTICES.md)。用户已接受SignPath Foundation证书发布者，作者仍TuseCreation。见[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy／隐私说明](docs/PRIVACY.md)、[接入方案](docs/免费开源签名接入方案.md)和[申请资料](docs/SignPath申请草稿.md)。签名服务尚未获批／接入，Windows安装包仍未签名。
 
@@ -17,6 +17,14 @@
 5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
 未登录可完全离线使用；账号同步需要联网。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
+
+## 1.0.2 兼容与保存修复
+
+四项原文与每日小结每次输入立即暂存并排队落盘，失焦补取输入法最终文本，重启自动恢复并继续保存。Android关闭键盘捕获、保留标准中文IME与硬件字符提交；按WebView实际重叠避让系统栏，文字保存保留成长动画。
+
+手机在设置开启通知后，允许系统通知、准点提醒，并按需在后台与电池设置允许应用运行；卓易通宿主也需允许通知和后台。普通应用进程退出后由Android系统唤醒，系统强停、关闭卓易通、设备关机无法由应用保证提醒。Windows完全退出后的通知范围保持原约定。
+
+实际检查见[1.0.2验收](docs/1.0.2兼容与保存验收.md)。新增命令：`node --test test/record-editor.test.mjs`；Playwright CLI `run-code --filename=scripts/compat-ui-acceptance.cjs`；`node scripts/desktop-rebuild-smoke.mjs`包含新专项。Android沿用上述隔离SDK／ADB环境，新增`node scripts/android-tablet-acceptance.mjs`与`node scripts/android-background-reminder-acceptance.mjs`。后者**临时修改专用AVD时间、进入Doze并结束调试进程，finally恢复时间和电池**，仅允许RaterSigningAcceptance，不用于真实设备。原生`KeyboardIntegrationTest`应单独运行，首次页面导航后再读取脚本，不能与其他设备测试并发。
 
 ## 1.0.1 反馈修复
 

@@ -34,3 +34,6 @@ html[data-platform=android][data-motion=gentle] .badge-card[data-touch-pressed] 
 @media(prefers-reduced-motion:reduce){html[data-platform=android] button[data-touch-pressed],html[data-platform=android] .badge-card[data-touch-pressed] img{transform:none!important}}
 /* Keep the hit target stationary from finger down through click dispatch. */
 html[data-platform=android] button[data-touch-pressed]:not(:disabled){transform:none}
+/* Insets describe only system bars which actually overlap this WebView. */
+html[data-platform=android] body{padding-left:var(--native-safe-left,0px);padding-right:var(--native-safe-right,0px)}
+@media(min-width:700px){html[data-platform=android] .sidebar{padding-top:calc(30px + var(--safe-top));padding-bottom:calc(22px + var(--safe-bottom))}}

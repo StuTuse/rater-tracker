@@ -9,7 +9,7 @@ export async function attach(packageId='local.ratertracker.android.dev'){
   try{
    const pid=device('shell','pidof',packageId).trim();if(!pid)throw Error('App not running');
    device('forward','tcp:9225','localabstract:webview_devtools_remote_'+pid);
-   browser=await chromium.connectOverCDP('http://127.0.0.1:9225');
+   browser=await chromium.connectOverCDP('http://127.0.0.1:9225',{timeout:5000});
    const page=browser.contexts()[0].pages().find(p=>/^https?:/.test(p.url()))??browser.contexts()[0].pages()[0];
    if(!page)throw Error('WebView page not ready');
    page.setDefaultTimeout(15000);await page.waitForFunction(()=>!!window.raterReady,null,{timeout:5000});await page.evaluate(()=>window.raterReady);

@@ -26,8 +26,10 @@ try{
   const fixCode=await readFile('scripts/fix-ui-acceptance.cjs','utf8');
   const fixRun=(await import('node:vm')).runInThisContext('('+fixCode+')');
   report.fix=await fixRun(page);
+  const compatCode=await readFile('scripts/compat-ui-acceptance.cjs','utf8');
+  report.compat=await (await import('node:vm')).runInThisContext('('+compatCode+')')(page);
   await writeFile('output/rebuild/desktop-report.json',JSON.stringify(report,null,2));
-  console.log(JSON.stringify({checks:report.checks.length,passed:report.checks.filter(c=>c.passed).length,packaged:true,asarMatches:true,fixChecks:report.fix.checks.length}));
+  console.log(JSON.stringify({checks:report.checks.length,passed:report.checks.filter(c=>c.passed).length,packaged:true,asarMatches:true,fixChecks:report.fix.checks.length,compatChecks:report.compat.checks.length}));
 }finally{
   await browser?.close().catch(()=>{});
   if(child.exitCode===null){try{execFileSync('taskkill',['/PID',String(child.pid),'/T','/F'],{stdio:'ignore',windowsHide:true});}catch{}}

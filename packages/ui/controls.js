@@ -380,7 +380,7 @@ export function enhanceControls(root = document) {
     syncTrigger(source, trigger);
   });
   root.querySelectorAll('.control-trigger').forEach(trigger => {
-    if (!trigger.parentElement.querySelector(`[data-control-id="${CSS.escape(trigger.dataset.controlFor)}"]`)) trigger.remove();
+    if (!trigger.parentElement.querySelector(`:scope > [data-control-id="${CSS.escape(trigger.dataset.controlFor)}"]`)) trigger.remove();
   });
   enhanceSegmented(root);
 }

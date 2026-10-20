@@ -1,0 +1,41 @@
+async page => {
+ const report={checks:[]};const check=(name,value)=>{report.checks.push({name,passed:!!value});if(!value)throw Error(name);};
+ const read=()=>page.evaluate(async()=>{const {openStore}=await import('./packages/data/storage.js');const s=await openStore();const v=await s.read();s.close();return v;});
+ const text=s=>{const d=new Date(Date.now()+8*3600000).toISOString().slice(0,10);return s.ratings[d]?.study?.note??s.ratingNotes?.[d]?.study?.note??'';};
+ await page.route('https://api.github.com/**',r=>r.fulfill({status:404,body:'[]'})).catch(()=>{});
+ await page.reload();await page.evaluate(()=>window.raterReady);
+ if(await page.locator('#modal[open]').count()){await page.locator('#modal [data-action=close-modal]').click();await page.waitForTimeout(400);}
+ await page.locator('button[data-action=navigate][data-page=today]').click();
+ await page.getByRole('button',{name:'写学习记录',exact:true}).click();
+ const field=page.locator('textarea[data-dimension=study]');
+ await field.fill('即时保存，不需要停止输入');await page.waitForFunction(async()=>{const{openStore}=await import('./packages/data/storage.js');const s=await openStore(),v=await s.read();s.close();const d=document.querySelector('textarea[data-dimension=study]').dataset.date;return(v.ratings[d]?.study?.note??v.ratingNotes?.[d]?.study?.note)==='即时保存，不需要停止输入';},null,{timeout:2000});
+ check('input commits while still focused',await field.evaluate(n=>n===document.activeElement));
+ await page.evaluate(()=>{const old=Number(document.querySelector('[data-action=rate][data-dimension=study][aria-pressed=true]')?.dataset.stars??0);document.querySelector('[data-action=rate][data-dimension=study][data-stars="'+(old===3?4:3)+'"]').click();});
+ await page.waitForFunction(()=>document.querySelector('#growth').classList.contains('xp-changing'));
+ await page.evaluate(()=>window.compatGrowth=document.querySelector('#xp-fill').getAnimations().find(a=>a.effect.getKeyframes().some(f=>f.width)));
+ await field.fill('写字期间保留成长动画');await page.waitForTimeout(60);
+ check('text autosave preserves running XP feedback',await page.evaluate(()=>compatGrowth?.playState==='running'&&document.querySelector('#growth').classList.contains('xp-changing')));
+ await field.evaluate(n=>{window.compatInput=n;window.compatRangeCalls=0;const old=n.setSelectionRange.bind(n);n.setSelectionRange=(...args)=>{window.compatRangeCalls++;return old(...args);};n.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));n.value='中文选词尚未结束';n.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true}));});
+ await page.evaluate(()=>document.querySelector('[data-action=rate][data-dimension=work][data-stars="2"]').click());await page.waitForTimeout(180);
+ check('unrelated save never resets composing selection',await page.evaluate(()=>compatRangeCalls===0&&compatInput===document.activeElement));
+ check('partial composition not committed',text(await read())==='写字期间保留成长动画');
+ await field.evaluate(n=>{n.value='输入法遗漏结束事件也保留';n.blur();});await page.waitForTimeout(180);
+ check('blur captures final text without end event',text(await read())==='输入法遗漏结束事件也保留');
+ await page.getByRole('button',{name:'写学习记录',exact:true}).click();
+ await field.evaluate(n=>{n.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));n.value='中断重启草稿';n.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true}));});
+ await page.reload();await page.evaluate(()=>window.raterReady);
+ check('restart recovers and commits interrupted composition',text(await read())==='中断重启草稿');
+ await page.getByRole('button',{name:'写学习记录',exact:true}).click();
+ await page.evaluate(()=>{window.compatPut=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value,key){if(key==='current')throw new DOMException('isolated disk failure','QuotaExceededError');return compatPut.call(this,value,key);};});
+ await field.fill('磁盘失败后的原文');await page.waitForTimeout(180);
+ check('failed transaction preserves recovery copy',await page.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('rater-record-drafts:guest')).entries).includes('磁盘失败后的原文')));
+ check('failed transaction is not reported saved',await page.locator('#save-status').innerText()!=='已保存到本机');
+ await page.evaluate(()=>{IDBObjectStore.prototype.put=compatPut;});await page.reload();await page.evaluate(()=>window.raterReady);
+ check('restart retries failed write',text(await read())==='磁盘失败后的原文');
+ await page.getByRole('button',{name:'写学习记录',exact:true}).click();await field.fill('');await page.locator('[data-action=navigate][data-page=history]').click();await page.waitForTimeout(100);
+ check('navigation removes date trigger left under old parent',await page.locator('[data-control-for="id:rating-date"]').count()===1);
+ await page.reload();await page.evaluate(()=>window.raterReady);
+ check('clear and immediate navigation stay cleared',text(await read())==='');
+ await page.setViewportSize({width:1400,height:920});await page.screenshot({path:'output/playwright/compat102-desktop.png',fullPage:true});
+ return report;
+}

@@ -23,7 +23,7 @@ public class RaterPlatformPlugin extends Plugin {
  private static final int LIMIT=64*1024*1024;
  private static final String KEY="rater-session-v1";
  @PluginMethod public void info(PluginCall call){getActivity().runOnUiThread(()->{try{
-  JSObject r=new JSObject();r.put("version",BuildConfig.VERSION_NAME);r.put("dataDirectory",getContext().getApplicationInfo().dataDir);r.put("packaged",true);r.put("platform","android");r.put("active",foreground);androidx.core.view.WindowInsetsCompat wi=androidx.core.view.ViewCompat.getRootWindowInsets(getActivity().getWindow().getDecorView());if(wi!=null){androidx.core.graphics.Insets b=wi.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());float d=getContext().getResources().getDisplayMetrics().density;r.put("safeTop",b.top/d);r.put("safeBottom",b.bottom/d);}call.resolve(r);}catch(Exception e){call.reject("无法读取应用信息，请重试");}});
+  JSObject r=windowInsets();r.put("version",BuildConfig.VERSION_NAME);r.put("dataDirectory",getContext().getApplicationInfo().dataDir);r.put("packaged",true);r.put("platform","android");r.put("active",foreground);call.resolve(r);}catch(Exception e){call.reject("无法读取应用信息，请重试");}});
  }
  @PluginMethod public void exportBackup(PluginCall call){
   String text=call.getString("contents"),name=call.getString("name","Rater-Tracker-backup.json");
@@ -75,8 +75,11 @@ public class RaterPlatformPlugin extends Plugin {
  }
  @PermissionCallback private void notificationResult(PluginCall call){try{call.resolve(JSObject.fromJSONObject(ReminderScheduler.status(getContext())));}catch(Exception e){call.reject("无法读取通知权限");}}
  @PluginMethod public void exactReminderPermission(PluginCall call){
-  if(android.os.Build.VERSION.SDK_INT>=31){Intent intent=new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getContext().getPackageName()));getActivity().startActivity(intent);}call.resolve();
+  try{if(android.os.Build.VERSION.SDK_INT>=31){Intent intent=new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getContext().getPackageName()));getActivity().startActivity(intent);}call.resolve();}catch(Exception e){openAppSettings(call);}
  }
+ private void openAppSettings(PluginCall call){try{getActivity().startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getContext().getPackageName())));call.resolve();}catch(Exception e){call.reject("请在系统设置中允许本应用通知、闹钟和后台运行");}}
+ @PluginMethod public void notificationSettings(PluginCall call){try{getActivity().startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getContext().getPackageName()));call.resolve();}catch(Exception e){openAppSettings(call);}}
+ @PluginMethod public void batterySettings(PluginCall call){try{getActivity().startActivity(new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));call.resolve();}catch(Exception e){openAppSettings(call);}}
  @PluginMethod public void consumeReminderRoute(PluginCall call){
   Intent intent=getActivity().getIntent();JSObject result=new JSObject();
   if(intent!=null && intent.hasExtra("raterRoute")){result.put("route",intent.getStringExtra("raterRoute"));result.put("scope",intent.getStringExtra("raterScope"));result.put("start",intent.getStringExtra("raterWeek"));intent.removeExtra("raterRoute");intent.removeExtra("raterScope");intent.removeExtra("raterWeek");}call.resolve(result);
@@ -87,7 +90,21 @@ public class RaterPlatformPlugin extends Plugin {
   try{getActivity().startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(url)));call.resolve();}catch(Exception e){call.reject("无法打开浏览器，请手动访问项目发布页");}
  }
  @PluginMethod public void quit(PluginCall call){getActivity().runOnUiThread(()->getActivity().moveTaskToBack(true));call.resolve();}
- public void insets(int top,int bottom){float d=getContext().getResources().getDisplayMetrics().density;JSObject r=new JSObject();r.put("safeTop",top/d);r.put("safeBottom",bottom/d);notifyListeners("insets",r,true);}
+ static int overlap(int inset,int alreadyOutside){return Math.max(0,inset-Math.max(0,alreadyOutside));}
+ JSObject windowInsets(){
+  JSObject r=new JSObject();android.view.View decor=getActivity().getWindow().getDecorView(),web=getBridge().getWebView();
+  androidx.core.view.WindowInsetsCompat wi=androidx.core.view.ViewCompat.getRootWindowInsets(decor);
+  if(wi==null)return r;
+  androidx.core.graphics.Insets bars=wi.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars()|androidx.core.view.WindowInsetsCompat.Type.displayCutout());
+  int[] origin=new int[2],position=new int[2];decor.getLocationOnScreen(origin);web.getLocationOnScreen(position);
+  float d=getContext().getResources().getDisplayMetrics().density;
+  r.put("safeTop",overlap(bars.top,position[1]-origin[1])/d);
+  r.put("safeBottom",overlap(bars.bottom,origin[1]+decor.getHeight()-position[1]-web.getHeight())/d);
+  r.put("safeLeft",overlap(bars.left,position[0]-origin[0])/d);
+  r.put("safeRight",overlap(bars.right,origin[0]+decor.getWidth()-position[0]-web.getWidth())/d);
+  r.put("keyboardVisible",wi.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()));return r;
+ }
+ public void insets(){notifyListeners("insets",windowInsets(),true);}
  public void back(){notifyListeners("back",new JSObject());}
  public void inactive(){foreground=false;notifyListeners("inactive",new JSObject(),true);}
  public void active(){foreground=true;notifyListeners("active",new JSObject());}

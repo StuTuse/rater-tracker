@@ -8,6 +8,8 @@ window.raterNative={
  reminderSync:data=>Native.reminderSync(data),
  reminderPermission:()=>Native.reminderPermission(),
  exactReminderPermission:()=>Native.exactReminderPermission(),
+ notificationSettings:()=>Native.notificationSettings(),
+ batterySettings:()=>Native.batterySettings(),
  consumeReminderRoute:()=>Native.consumeReminderRoute(),
  openExternal:url=>Native.openExternal({url}),
  info:()=>nativeInfo(),
@@ -19,10 +21,10 @@ window.raterNative={
  openData:async()=>{},
  quit:()=>Native.quit()
 };
-function safeArea(v){if(typeof v.active==='boolean')window.raterNative.active=v.active;document.documentElement.style.setProperty('--native-safe-top',(v.safeTop??24)+'px');document.documentElement.style.setProperty('--native-safe-bottom',(v.safeBottom??24)+'px');}
+let nativeKeyboard=false;
+function safeArea(v){if(typeof v.active==='boolean')window.raterNative.active=v.active;for(const edge of ['Top','Bottom','Left','Right'])document.documentElement.style.setProperty('--native-safe-'+edge.toLowerCase(),(v['safe'+edge]??0)+'px');if(typeof v.keyboardVisible==='boolean')nativeKeyboard=v.keyboardVisible;viewport();}
 safeArea(await nativeInfo().catch(()=>({})));Native.addListener('insets',safeArea);
-let keyboardWasOpen=false;
-function viewport(){const open=visualViewport.height<innerHeight-100;document.documentElement.style.setProperty('--visual-height',visualViewport.height+'px');document.documentElement.style.setProperty('--visual-top',visualViewport.offsetTop+'px');document.documentElement.classList.toggle('keyboard-open',open);if(keyboardWasOpen&&!open&&document.activeElement?.matches('[data-record-key]'))document.activeElement.blur();keyboardWasOpen=open;}
+function viewport(){const view=window.visualViewport;const open=nativeKeyboard || (view?.height??innerHeight)<innerHeight-100;document.documentElement.style.setProperty('--visual-height',(view?.height??innerHeight)+'px');document.documentElement.style.setProperty('--visual-top',(view?.offsetTop??0)+'px');document.documentElement.classList.toggle('keyboard-open',open);}
 visualViewport?.addEventListener('resize',viewport);visualViewport?.addEventListener('scroll',viewport);viewport();
 Native.addListener('back',()=>window.dispatchEvent(new Event('rater-back')));
 Native.addListener('inactive',()=>{window.raterNative.active=false;window.dispatchEvent(new Event('rater-pause'));});

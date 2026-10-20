@@ -29,7 +29,7 @@ export function createReminderController({ state, scope, platform, route, status
   platform?.onNotification?.(route);
   return {
     get options(){return options;}, get nativeStatus(){return nativeStatus;}, refresh,
-    async configure(name,value){options={...options,[name]:value};localStorage.setItem('rater-reminders-v1',JSON.stringify(options));if(name==='enabled' && value && platform?.reminderPermission)nativeStatus=await platform.reminderPermission();await refresh();},
+    async configure(name,value){options={...options,[name]:value};localStorage.setItem('rater-reminders-v1',JSON.stringify(options));if(name==='enabled' && value && platform?.reminderPermission)nativeStatus=await platform.reminderPermission();await refresh();if(name==='enabled' && value && nativeStatus.allowed && !nativeStatus.exact)await platform?.exactReminderPermission?.();},
     async consumeRoute(){const value=await platform?.consumeReminderRoute?.();if(value?.route)route(value);}
   };
 }

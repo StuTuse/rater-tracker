@@ -36,13 +36,19 @@ public final class ReminderScheduler {
  public static synchronized void schedule(Context c){
   AlarmManager manager=c.getSystemService(AlarmManager.class);SharedPreferences p=prefs(c);JSONObject options=object(p.getString("options","{}"));
   for(int hour:new int[]{10,11}){
-   PendingIntent pi=alarm(c,hour);manager.cancel(pi);
-   if(!options.optBoolean("enabled",false))continue;
+   PendingIntent pi=alarm(c,hour);
+   if(!options.optBoolean("enabled",false)){manager.cancel(pi);p.edit().remove("next"+hour).apply();continue;}
    Calendar now=now(),next=(Calendar)now.clone();next.set(Calendar.HOUR_OF_DAY,hour);next.set(Calendar.MINUTE,0);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);
-   if(!next.after(now))next.add(Calendar.DAY_OF_YEAR,1);
+   // A foreground refresh at 10:00 must not cancel an undelivered 10:00 alarm
+   // and replace it with tomorrow. Recover this slot within its own hour.
+   String receipt=object(p.getString("mirror","{}")).optString("scope")+"/"+date(now)+"/"+hour;
+   boolean due=now.get(Calendar.HOUR_OF_DAY)==hour && !date(now).equals(p.getString("handled"+hour,"")) && !p.getStringSet("sent",Collections.emptySet()).contains(receipt);
+   if(!next.after(now)){if(due)next.setTimeInMillis(now.getTimeInMillis()+1000);else next.add(Calendar.DAY_OF_YEAR,1);}
    long at=next.getTimeInMillis();
-   if(Build.VERSION.SDK_INT<31 || manager.canScheduleExactAlarms())manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
-   else manager.setWindow(AlarmManager.RTC_WAKEUP,at,15*60*1000,pi);
+   boolean exact=Build.VERSION.SDK_INT<31 || manager.canScheduleExactAlarms();
+   try{if(exact)manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);else manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);}
+   catch(SecurityException denied){manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);exact=false;}
+   p.edit().putLong("next"+hour,at).putBoolean("scheduledExact",exact).apply();
   }
  }
  public static synchronized JSONObject sync(Context c,JSONObject input)throws JSONException{
@@ -57,14 +63,15 @@ public final class ReminderScheduler {
  }
  public static JSONObject status(Context c)throws JSONException{
   AlarmManager manager=c.getSystemService(AlarmManager.class);
-  return new JSONObject().put("allowed",allowed(c)).put("exact",Build.VERSION.SDK_INT<31||manager.canScheduleExactAlarms()).put("enabled",object(prefs(c).getString("options","{}")).optBoolean("enabled",false));
+  android.os.PowerManager power=c.getSystemService(android.os.PowerManager.class);
+  return new JSONObject().put("allowed",allowed(c)).put("exact",Build.VERSION.SDK_INT<31||manager.canScheduleExactAlarms()).put("batteryUnrestricted",power.isIgnoringBatteryOptimizations(c.getPackageName())).put("next10",prefs(c).getLong("next10",0)).put("next11",prefs(c).getLong("next11",0)).put("enabled",object(prefs(c).getString("options","{}")).optBoolean("enabled",false));
  }
  public static void deliver(Context c,int hour){deliverAt(c,hour,System.currentTimeMillis());}
  static synchronized void deliverAt(Context c,int hour,long milliseconds){
   try{
    SharedPreferences p=prefs(c);JSONObject options=object(p.getString("options","{}")),mirror=object(p.getString("mirror","{}"));
    Calendar now=now();now.setTimeInMillis(milliseconds);String date=date(now),scope=mirror.optString("scope");
-   if(!options.optBoolean("enabled")||!allowed(c)||now.get(Calendar.HOUR_OF_DAY)!=hour||now.get(Calendar.MINUTE)>15||!mirror.optBoolean("valid")||scope.isEmpty())return;
+   if(!options.optBoolean("enabled")||!allowed(c)||now.get(Calendar.HOUR_OF_DAY)!=hour||!mirror.optBoolean("valid")||scope.isEmpty())return;
    boolean daily=options.optBoolean("daily",true),weekly=hour==10&&now.get(Calendar.DAY_OF_WEEK)==Calendar.MONDAY&&options.optBoolean("weekly",true);
    if(hour==10&&!daily&&!weekly || hour==11&&(!daily||!options.optBoolean("followup",true)||date.equals(mirror.optString("date"))&&mirror.optBoolean("updated")))return;
    String receipt=scope+"/"+date+"/"+hour;
@@ -85,6 +92,6 @@ public final class ReminderScheduler {
    JSONArray remaining=new JSONArray();for(int i=0;i<bag.length();i++)if(bag.getInt(i)!=index)remaining.put(bag.getInt(i));
    p.edit().putStringSet("sent",sent).putString("bag",remaining.toString()).putInt("last",index).remove("pending").commit();
   }catch(Exception ignored){/* Invalid mirror is not evidence of an unrecorded day. */}
-  finally{schedule(c);}
+  finally{Calendar handled=now();handled.setTimeInMillis(milliseconds);prefs(c).edit().putString("handled"+hour,date(handled)).commit();schedule(c);}
  }
 }
