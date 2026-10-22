@@ -1,6 +1,6 @@
 {
   "name": "rater-tracker-windows",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "TuseCreation",
   "private": true,
   "main": "main.cjs",

@@ -22,5 +22,5 @@ public class MainActivity extends BridgeActivity {
  private void publishInsets(){if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).insets();}
  @Override protected void onNewIntent(android.content.Intent intent){super.onNewIntent(intent);setIntent(intent);if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).active();}
  @Override public void onPause(){super.onPause();if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).inactive();}
- @Override public void onResume(){super.onResume();ReminderScheduler.schedule(this);if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null)((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).active();}
+ @Override public void onResume(){super.onResume();ReminderScheduler.schedule(this);if(bridge!=null && bridge.getPlugin("RaterPlatform")!=null){((RaterPlatformPlugin)bridge.getPlugin("RaterPlatform").getInstance()).active();bridge.getWebView().post(()->ReminderService.reconcile(this,true));}}
 }

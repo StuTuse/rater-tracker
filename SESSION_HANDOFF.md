@@ -1,3 +1,19 @@
+# 当前交接 · W073 · 2026-10-23 · 常驻提醒／30天双端登录
+
+Windows1.0.3，Android1.0.3/code12；规则1.3／JSON1／原证书保持。用户明确常驻后台而非Push，又追加双端登录。main本会话集成Android ReminderService／Scheduler／接收器／桥接、共享session-vault／设置、测试和双端发布；无其他会话／worktree或个人数据操作。
+
+Android新增可关闭的specialUse前台服务及低打扰持续通知，与原生闹钟共同维护提醒；立即／一分钟后台测试及状态／渠道入口。强停、关机、卓易通关闭仍会中断，不承诺不可杀。云端原MaxDevice=1导致双端相互挤出，现实际改为10并回读；长期凭证30天、访问2小时保持。vault缓存恢复、轮换立即加密保存、清缓存重建、临时错误重试；仍核对UID、30天无操作再认证，已撤销旧凭证可能需重新登录一次。详见[验收](docs/1.0.3常驻提醒与登录保持验收.md)。
+
+实际：101业务／工程；Chrome65＋42＋11＋8；最终Windows61＋42＋11；Android仪器14、常驻后台8、真实双独立进程6阶段、Keystore登录8及最终正式APK覆盖10项及正式服务4项。Windows70／Android62源码逐文件一致；通知栏已看到两张真实卡片，后台一分钟实际投递。仅专用RaterSigningAcceptance／新虚构账号、无云端业务写入，测试账号已删除。
+
+产物：Windows203335041字节，SHA256 d95eaae48b97ce4209fe5eeebcfac37b19d7cc0f5cd57f013f1892bd48ee79e4，NotSigned；Android98251476字节，SHA256 32654ecc4da86ecd0e448158c0d18d186724fd6614c689db18266054853eceab，648b3a…60448原签名v1/v2/v3。正式批次[dual/2026.10.23.1](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.23.1)，双新包和SHA256SUMS；发布完成必须回读PUBLIC／main／附注tag／正式Release与三个附件digest。
+
+命令和过程见W073／README。Android固定实际SDK C:/Users/15817/AppData/Local/Android/Sdk，ADB5038，emulator-5580，所有设备脚本串行；新增android-service-acceptance、android-session103-acceptance、android-formal-service-acceptance。真实云测试先session-cloud-acceptance.cjs --keep，结束必须cleanup；本轮已经清理。Windows实际构建仍使用忽略output/build-nsis-reader.cjs的本地Electron／内置NSIS读取器。
+
+未覆盖鸿蒙实体及卓易通桥、实体省电／自然多日和30天、Windows安装向导及SmartScreen。用户更新后可先立即测试，再一分钟后台测试；已撤销旧grant需要一次重新登录，之后检查双端不互踢。无待审批方案，不重复询问Push注册。
+
+---
+
 # 当前交接 · W072 · 2026-10-21 · 1.0.2兼容／自动保存／后台提醒
 
 Windows1.0.2，Android1.0.2／code11；规则1.3、JSON1与原Android证书保持。main统一负责共享编辑器／控件／刷新、Android原生输入／安全区／系统提醒、测试和双端发布；没有派遣会话、修改其他worktree或真实用户数据。用户反馈为HarmonyOS NEXT／卓易通平板；本机只有隔离AVD，不把安卓模拟器当鸿蒙实机。

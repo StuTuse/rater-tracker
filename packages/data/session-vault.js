@@ -1,14 +1,24 @@
 import { sessionIdentity } from './session-identity.js';
 
 const IDLE = 30 * 86400000;
-const unwrap = result => { if (result?.error) throw new Error(result.error.message || '账号操作失败'); return result?.data ?? result; };
+const unwrap = result => { if (result?.error) { const error=new Error(result.error.message || '账号操作失败');error.code=result.error.code??result.error.error;throw error; } return result?.data ?? result; };
 const unavailable = error => /credentials not found|no session|unauthenticated|unauthorized|invalid.*token|refresh.*expired|invalid_grant|token.*expired|登录已过期/i.test(error.message ?? '');
+// Only an explicit rejection of the long-lived grant requires a password.
+// A missing SDK cache, short-lived access token or generic 401 is recoverable.
+const revoked = error => /invalid_grant|refresh[_ -]?token.*(?:expired|revoked|invalid)|(?:expired|revoked|invalid).*refresh[_ -]?token/i.test(`${error.code??''} ${error.message??''}`);
 
 // The SDK owns token renewal; the vault owns encrypted durable snapshots.
 // Serialize both renewal and disk writes so an older token cannot win a race.
 export function createSessionVault({ auth, read, write, clear, memory, now = () => Date.now() }) {
   let saved, loading, restoring, serial = Promise.resolve(), disk = Promise.resolve(), expired = false;
   const enqueue = fn => { const task = serial.then(fn); serial = task.catch(() => {}); return task; };
+  const renew = async () => {
+    try {return unwrap(await auth.refreshSession(saved.session.refresh_token));}
+    catch(error){
+      if(revoked(error)||!(/credentials not found|no session|no refresh token|cannot set properties of null|cannot read properties of null/i.test(error.message??'')))throw error;
+      return unwrap(await auth.setSession({access_token:saved.session.access_token,refresh_token:saved.session.refresh_token}));
+    }
+  };
   const persist = async (session, label = saved?.label ?? '') => {
     const identity = sessionIdentity({ session }, saved?.identity, label);
     if (expired || !session?.access_token || !identity) return null;
@@ -34,14 +44,22 @@ export function createSessionVault({ auth, read, write, clear, memory, now = () 
   function restore() {
     if (!restoring) restoring = (async () => {
       await load();if(!saved || expired)return;
-      try { unwrap(await auth.setSession({ access_token:saved.session.access_token, refresh_token:saved.session.refresh_token })); }
+      try {
+        // setSession rotates credentials in the bundled SDK. Reuse its encrypted
+        // cache first, then persist any renewal before continuing startup.
+        let data=saved.storage&&memory ? unwrap(await auth.getSession()) : null;
+        if(!data?.session)data=unwrap(await auth.setSession({ access_token:saved.session.access_token, refresh_token:saved.session.refresh_token }));
+        await persist(data.session);
+      }
       catch (error) {
         // An expired access token does not expire the remembered login. The SDK
         // must be allowed to rotate the durable refresh token first.
-        if (!unavailable(error)) return;
+        if (!unavailable(error)) {restoring=null;return;}
         if(saved.session.refresh_token) {
-          try { const data=unwrap(await auth.refreshSession(saved.session.refresh_token));await persist(data.session); }
-          catch(next) { if(unavailable(next))saved.needsLogin=true; }
+          // refreshSession in this SDK requires a cache entry; setSession can
+          // recover it after credentials_error cleared that entry.
+          try { const data=await renew();await persist(data.session); }
+          catch(next) { if(revoked(next))saved.needsLogin=true;else restoring=null; }
         } else saved.needsLogin=true;
       }
     })();
@@ -61,8 +79,8 @@ export function createSessionVault({ auth, read, write, clear, memory, now = () 
     if (await checkIdle() || saved?.needsLogin) throw new Error('登录已过期，请重新登录；本机记录仍保留');
     let data;
     try { data=unwrap(await auth.getSession()); }
-    catch(error){if(!unavailable(error)||!saved?.session?.refresh_token)throw error;data=unwrap(await auth.refreshSession(saved.session.refresh_token));}
-    if(!data?.session && saved?.session?.refresh_token)data=unwrap(await auth.refreshSession(saved.session.refresh_token));
+    catch(error){if(!unavailable(error)||!saved?.session?.refresh_token)throw error;data=await renew();}
+    if(!data?.session && saved?.session?.refresh_token)data=await renew();
     const token=data?.session;
     const expires=typeof token?.expires_at==='number' ? token.expires_at>1e12?token.expires_at:token.expires_at*1000 : Date.parse(token?.expires_at??'');
     if (Number.isFinite(expires) && expires <= now() + 60000 && token.refresh_token) data = unwrap(await auth.refreshSession(token.refresh_token));
@@ -82,7 +100,7 @@ export function createSessionVault({ auth, read, write, clear, memory, now = () 
       if(saved?.needsLogin)return {...saved.identity,needsLogin:true};
       await activity();
       try { const data = await session(); return sessionIdentity(data,saved?.identity,saved?.label); }
-      catch (error) { if(expired)return null;if(saved?.identity)return {...saved.identity,...(unavailable(error)?{needsLogin:true}:{})};if(unavailable(error))return null;throw error; }
+      catch (error) { if(expired)return null;if(saved?.identity)return {...saved.identity,...(saved.needsLogin||revoked(error)?{needsLogin:true}:{})};if(unavailable(error))return null;throw error; }
     }),
     login: (username,password,label=username) => enqueue(async () => { await restore(); const data=unwrap(await auth.signInWithPassword({username,password})); const identity=sessionIdentity(data,null); if(!identity)throw new Error('未获得已验证账号身份');expired=false;saved={identity,label,lastActive:now()};await persist(data.session,label);return saved.identity; }),
     verified: label => enqueue(async () => {const data=unwrap(await auth.getSession());const identity=sessionIdentity(data,null,label);if(!identity)throw new Error('未获得已验证账号身份');expired=false;saved={identity,label,lastActive:now()};await persist(data.session,label);return saved.identity; }),
@@ -94,7 +112,7 @@ export function createSessionVault({ auth, read, write, clear, memory, now = () 
       try{result=await operation(identity);}
       catch(error){
         if(!unavailable(error)||!saved?.session?.refresh_token)throw error;
-        data=unwrap(await auth.refreshSession(saved.session.refresh_token));const renewed=sessionIdentity(data,saved.identity,saved.label);
+        data=await renew();const renewed=sessionIdentity(data,saved.identity,saved.label);
         if(!renewed || renewed.id!==identity?.id)throw new Error('账号身份已变化，请重新登录后同步');
         await persist(data.session);result=await operation(renewed);
       }

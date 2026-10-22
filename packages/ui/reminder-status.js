@@ -1,0 +1,7 @@
+const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clock=value=>Number.isFinite(value)&&value>0?new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Hong_Kong',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(value):'尚未安排';
+const stages={none:'尚无触发记录',disabled:'提醒已关闭',notifications_blocked:'系统通知或提醒渠道未允许',slot_expired:'系统触发时已超过提醒时段',mirror_unavailable:'缺少可靠的本机提醒状态',not_needed:'根据当日记录无需补发',posted:'提醒已提交系统',test_posted:'测试通知已提交系统',post_failed:'系统通知提交失败'};
+export function nativeReminderStatus(s={}){
+ const service=s.serviceRunning?'运行中':s.serviceRequested?'尚未运行，请检查下方权限后重新开启':'未开启';
+ return `<div class="reminder-service-state" data-ui-key="native-reminder-status"><p class="field-hint" role="status"><strong>常驻服务：${service}</strong>${s.serviceError?`<br>${escape(s.serviceError)}`:''}<br>通知权限：${s.allowed?'已允许':'尚未允许'}；准点调度：${s.exact?'可用':'未允许，可能延迟'}<br>提醒渠道：${s.channelImportance>=4?'允许横幅':s.channelImportance>0?'通知栏显示，横幅需在渠道设置开启':'尚未读取或已关闭'}；提示音：${s.channelSound?'已配置':'未配置'}<br>下次10点：${clock(s.next10)}；11点：${clock(s.next11)}<br>最近状态：${escape(stages[s.lastStage]??'尚无触发记录')}${s.lastAttemptAt?' · '+clock(s.lastAttemptAt):''}${s.testScheduledAt?'<br>后台测试计划：'+clock(s.testScheduledAt):''}</p><p class="field-hint">提交系统不代表已被你看到。请用测试按钮实际检查通知栏。常驻服务不需要一直打开软件页面；系统强停、关机或完全关闭卓易通仍会中断服务。</p><p class="field-hint">卓易通用户还需在「我的 → 应用管理 → 本应用 → 通知管理」允许通知，并保持宿主获准运行。</p></div>`;
+}

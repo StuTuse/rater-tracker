@@ -19,15 +19,15 @@ public class ReminderIntegrationTest {
  void shell(String command)throws Exception{try(android.os.ParcelFileDescriptor fd=InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command);java.io.InputStream in=new android.os.ParcelFileDescriptor.AutoCloseInputStream(fd)){while(in.read()!=-1){}}}
  JSONObject config(boolean updated)throws Exception{
   JSONArray copies=new JSONArray();for(int i=0;i<50;i++)copies.put(new JSONObject().put("id","test-"+i).put("title","隔离提醒 "+i).put("body","仅用于本机通知验收 "+i));
-  return new JSONObject().put("scope","guest").put("date","2026-10-19").put("updated",updated).put("revision",1).put("copies",copies).put("options",new JSONObject().put("enabled",true).put("daily",true).put("followup",true).put("weekly",true));
+  return new JSONObject().put("scope","guest").put("date","2026-10-19").put("updated",updated).put("revision",1).put("copies",copies).put("options",new JSONObject().put("enabled",true).put("persistent",false).put("daily",true).put("followup",true).put("weekly",true));
  }
  @Before public void before()throws Exception{
-  context=InstrumentationRegistry.getInstrumentation().getTargetContext();manager=context.getSystemService(NotificationManager.class);prior=new HashMap<>(ReminderScheduler.prefs(context).getAll());ReminderScheduler.prefs(context).edit().clear().commit();
+  context=InstrumentationRegistry.getInstrumentation().getTargetContext();manager=context.getSystemService(NotificationManager.class);prior=new HashMap<>(ReminderScheduler.prefs(context).getAll());context.stopService(new Intent(context,ReminderService.class));for(int i=0;i<30&&ReminderService.running;i++)Thread.sleep(100);ReminderScheduler.prefs(context).edit().clear().commit();
   if(Build.VERSION.SDK_INT>=33)shell("pm grant "+context.getPackageName()+" android.permission.POST_NOTIFICATIONS");
   ReminderScheduler.channel(context);manager.cancelAll();ReminderScheduler.sync(context,config(false));
  }
  @After public void after()throws Exception{
-  manager.cancelAll();SharedPreferences.Editor edit=ReminderScheduler.prefs(context).edit().clear();
+  context.stopService(new Intent(context,ReminderService.class));for(int i=0;i<30&&ReminderService.running;i++)Thread.sleep(100);manager.cancelAll();SharedPreferences.Editor edit=ReminderScheduler.prefs(context).edit().clear();
   for(Map.Entry<String,?> entry:prior.entrySet()){Object v=entry.getValue();String k=entry.getKey();if(v instanceof String)edit.putString(k,(String)v);else if(v instanceof Integer)edit.putInt(k,(Integer)v);else if(v instanceof Boolean)edit.putBoolean(k,(Boolean)v);else if(v instanceof Long)edit.putLong(k,(Long)v);else if(v instanceof Set)edit.putStringSet(k,(Set<String>)v);}edit.commit();ReminderScheduler.schedule(context);
  }
  void delivered()throws Exception{for(int i=0;i<20&&manager.getActiveNotifications().length==0;i++)Thread.sleep(100);assertEquals(1,manager.getActiveNotifications().length);}
@@ -71,5 +71,26 @@ public class ReminderIntegrationTest {
   if(Build.VERSION.SDK_INT<33)return;
   Context denied=new ContextWrapper(context){@Override public int checkSelfPermission(String permission){return permission.equals(android.Manifest.permission.POST_NOTIFICATIONS)?android.content.pm.PackageManager.PERMISSION_DENIED:super.checkSelfPermission(permission);}};
   ReminderScheduler.deliverAt(denied,10,time("2026-10-19T10:00:00+08:00"));assertEquals(0,manager.getActiveNotifications().length);assertFalse(ReminderScheduler.prefs(context).contains("last"));
+ }
+ @Test public void realForegroundServiceHasOngoingSystemNotificationAndStopsWhenDisabled()throws Exception{
+  JSONObject on=config(false);on.getJSONObject("options").put("persistent",true);ReminderScheduler.sync(context,on);
+  InstrumentationRegistry.getInstrumentation().runOnMainSync(()->ReminderService.reconcile(context,true));
+  for(int i=0;i<50&&!ReminderService.running;i++)Thread.sleep(100);assertTrue(ReminderService.running);
+  Notification card=null;for(android.service.notification.StatusBarNotification entry:manager.getActiveNotifications())if(entry.getId()==ReminderService.ID)card=entry.getNotification();
+  assertNotNull(card);assertTrue((card.flags&Notification.FLAG_FOREGROUND_SERVICE)!=0);assertTrue((card.flags&Notification.FLAG_ONGOING_EVENT)!=0);
+  assertTrue(ReminderScheduler.status(context).getBoolean("serviceRunning"));assertTrue(ReminderScheduler.prefs(context).getLong("serviceHeartbeat",0)>0);
+  on.getJSONObject("options").put("persistent",false);ReminderScheduler.sync(context,on);ReminderService.reconcile(context,true);
+  for(int i=0;i<30&&ReminderService.running;i++)Thread.sleep(100);assertFalse(ReminderService.running);
+  for(android.service.notification.StatusBarNotification entry:manager.getActiveNotifications())assertNotEquals(ReminderService.ID,entry.getId());
+ }
+ @Test public void testNotificationUsesSystemChannelWithoutConsumingDailyReceipt()throws Exception{
+  Set<String> sent=new HashSet<>(ReminderScheduler.prefs(context).getStringSet("sent",Collections.emptySet()));String bag=ReminderScheduler.prefs(context).getString("bag","");
+  assertTrue(ReminderScheduler.test(context,0).getBoolean("posted"));delivered();
+  assertEquals("提醒通道测试",manager.getActiveNotifications()[0].getNotification().extras.getString(Notification.EXTRA_TITLE));
+  assertEquals(sent,ReminderScheduler.prefs(context).getStringSet("sent",Collections.emptySet()));assertEquals(bag,ReminderScheduler.prefs(context).getString("bag",""));assertEquals("test_posted",ReminderScheduler.status(context).getString("lastStage"));
+ }
+ @Test public void backgroundTestPersistsAnActualAlarm()throws Exception{
+  long before=System.currentTimeMillis();JSONObject scheduled=ReminderScheduler.test(context,60);assertFalse(scheduled.getBoolean("posted"));assertTrue(scheduled.getLong("scheduledAt")>=before+60000);assertEquals(scheduled.getLong("scheduledAt"),ReminderScheduler.status(context).getLong("testScheduledAt"));
+  PendingIntent pi=PendingIntent.getBroadcast(context,6202,new Intent(context,ReminderTestReceiver.class),PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_IMMUTABLE);assertNotNull(pi);context.getSystemService(AlarmManager.class).cancel(pi);
  }
 }

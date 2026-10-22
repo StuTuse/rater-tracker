@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import { createSessionVault } from '../packages/data/session-vault.js';
+import { memoryAuthStorage } from '../packages/data/memory-auth-storage.js';
 const start=Date.parse('2026-10-19T10:00:00+08:00');
 function fixture(saved,{offline=false}={}){
   let current=saved?.session??null,clock=start,listener,refreshes=0;const writes=[];
@@ -25,3 +26,25 @@ test('RPC authorization expiry refreshes once and retries with the verified subj
  const f=fixture(old());let calls=0;const result=await f.vault.withSession(async identity=>{assert.equal(identity.id,'same-user');if(++calls===1)throw Error('unauthorized');return 'synced';});assert.equal(result,'synced');assert.equal(calls,2);assert.equal(f.saved.session.refresh_token,'rotated');
 });
 test('display casing survives canonical authentication',async()=>{const f=fixture(null);assert.equal((await f.vault.login('testuser','fake-password','TestUser')).name,'TestUser');});
+
+test('restore persists the rotated grant even if the next SDK read loses connectivity',async()=>{
+ let row=old(),reads=0;const rotated={...row.session,access_token:'valid',refresh_token:'rotated-on-restore',expires_at:start/1000+3600};
+ const vault=createSessionVault({now:()=>start,read:async()=>row,write:async v=>{row=structuredClone(v);},clear:async()=>assert.fail(),auth:{setSession:async()=>({data:{session:rotated}}),getSession:async()=>{reads++;throw Error('network failed');}}});
+ assert.equal((await vault.current()).needsLogin,undefined);assert.equal(row.session.refresh_token,'rotated-on-restore');assert.equal(reads,1);
+});
+test('restored SDK cache avoids a needless cold-launch grant rotation',async()=>{
+ let row={...old(),storage:{fixture:'encrypted-cache'}},sets=0;const session={...row.session,expires_at:start/1000+3600};
+ const vault=createSessionVault({memory:memoryAuthStorage(),now:()=>start,read:async()=>row,write:async v=>row=v,clear:async()=>assert.fail(),auth:{getSession:async()=>({data:{session}}),setSession:async()=>{sets++;throw Error('should reuse cache');}}});
+ assert.equal((await vault.current()).id,'same-user');assert.equal(sets,0);
+});
+test('generic authorization failure is retried rather than permanently requiring a password',async()=>{
+ const f=fixture(old());const original=f.auth.refreshSession;let offline=true;
+ f.auth.setSession=async()=>{throw Error('unauthorized');};f.auth.getSession=async()=>{throw Error('credentials not found');};f.auth.refreshSession=async token=>{if(offline)throw Error('unauthorized');return original(token);};
+ assert.equal((await f.vault.current()).needsLogin,undefined);assert.equal(f.saved.session.refresh_token,'old-refresh');offline=false;
+ assert.equal((await f.vault.current()).needsLogin,undefined);assert.equal(f.saved.session.refresh_token,'rotated');
+});
+test('SDK-cleared credentials recover through setSession without losing durable grant',async()=>{
+ const f=fixture(old());let sets=0;f.auth.setSession=async()=>{sets++;if(sets===1)throw Error('credentials not found');return {data:{session:{...old().session,refresh_token:'cache-restored',expires_at:start/1000+3600}}};};
+ f.auth.getSession=async()=>{throw Error('network failed');};f.auth.refreshSession=async()=>{throw TypeError("Cannot set properties of null (setting 'refresh_token')");};
+ assert.equal((await f.vault.current()).needsLogin,undefined);assert.equal(f.saved.session.refresh_token,'cache-restored');assert.equal(sets,2);
+});

@@ -68,7 +68,9 @@ public class RaterPlatformPlugin extends Plugin {
   call.resolve(r);
  }
  @PluginMethod public void sessionClear(PluginCall call){file().delete();call.resolve();}
- @PluginMethod public void reminderSync(PluginCall call){try{call.resolve(JSObject.fromJSONObject(ReminderScheduler.sync(getContext(),call.getData())));}catch(Exception e){call.reject("提醒状态尚未保存，请重试");}}
+ @PluginMethod public void reminderSync(PluginCall call){try{ReminderScheduler.sync(getContext(),call.getData());ReminderService.reconcile(getContext(),foreground);Runnable reply=()->{try{call.resolve(JSObject.fromJSONObject(ReminderScheduler.status(getContext())));}catch(Exception e){call.reject("提醒状态尚未读取，请重试");}};if(ReminderService.requested(getContext())&&!ReminderService.running)new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(reply,350);else reply.run();}catch(Exception e){call.reject("提醒状态尚未保存，请重试");}}
+ @PluginMethod public void reminderTest(PluginCall call){int delay=call.getInt("delay",0);if(delay!=0&&delay!=60){call.reject("测试延时只能为0或60秒");return;}try{call.resolve(JSObject.fromJSONObject(ReminderScheduler.test(getContext(),delay)));}catch(Exception e){call.reject("测试提醒尚未安排，请重试");}}
+ @PluginMethod public void reminderChannelSettings(PluginCall call){try{getActivity().startActivity(new Intent(android.provider.Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getContext().getPackageName()).putExtra(android.provider.Settings.EXTRA_CHANNEL_ID,ReminderScheduler.CHANNEL));call.resolve();}catch(Exception e){notificationSettings(call);}}
  @PluginMethod public void reminderPermission(PluginCall call){
   ReminderScheduler.channel(getContext());
   if(android.os.Build.VERSION.SDK_INT>=33 && getPermissionState("notifications")!=PermissionState.GRANTED)requestPermissionForAlias("notifications",call,"notificationResult");else notificationResult(call);

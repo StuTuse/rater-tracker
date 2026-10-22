@@ -1,0 +1,7 @@
+{
+  "EnvId": "rater-tracker-sync-d3cx88f64aea2",
+  "Id": "rater-tracker-sync-d3cx88f64aea2",
+  "RefreshTokenExpiresIn": 2592000,
+  "AccessTokenExpiresIn": 7200,
+  "MaxDevice": 10
+}

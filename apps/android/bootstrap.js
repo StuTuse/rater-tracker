@@ -6,6 +6,8 @@ document.documentElement.dataset.platform='android';
 window.raterNative={
  active:true,
  reminderSync:data=>Native.reminderSync(data),
+ reminderTest:delay=>Native.reminderTest({delay}),
+ reminderChannelSettings:()=>Native.reminderChannelSettings(),
  reminderPermission:()=>Native.reminderPermission(),
  exactReminderPermission:()=>Native.exactReminderPermission(),
  notificationSettings:()=>Native.notificationSettings(),

@@ -859,3 +859,22 @@ Android精确闹钟保持，非精确回退改setAndAllowWhileIdle并处理撤�
 Windows1.0.2：203334192字节，SHA256 d2ecc5b7a634cf2ed8288154707f201f604e7767845caab1a51def638efd0855，NotSigned。Android1.0.2/code11：98245406字节，SHA256 4075733445c368c1190815d8b11950e201dfc171c35801a786c82eecd5deea7f，原648b3a…60448证书、v1/v2/v3。版本、锁文件、正式v1.35／视觉v1.29、体验／提醒专项、README／CHANGELOG／规范及交接同步。按dual/2026.10.21.1正式Release批次推送／发布，收尾须核对远端PUBLIC、main和附注tag、draft=false／prerelease=false与EXE／APK／校验清单digest。
 
 未覆盖：鸿蒙NEXT／卓易通实体平板内置键盘、宿主GPU／通知桥、实体厂商后台与自然多日／重启长期投递、云账号回归、Windows安装向导／跨版覆盖／SmartScreen。系统强停或容器关闭需再次启动，不能保证系统禁止运行时准点。当前实现无待审批项，后续按升级后实体反馈继续。
+
+
+## W073 · 2026-10-22～23 · 常驻提醒及双端登录保持
+
+接手main=d3b18da且原工作区干净；读W072交接、最近日志、提醒／数据契约／正式及版本规范。用户澄清无需Push注册，只要常驻后台通道，并追加双端30天登录保持。主工作区统一负责Android原生通知与桥接、共享会话／设置、测试、构建和发布；没有派遣会话、改其他worktree或使用个人数据。
+
+Android1.0.3/code12，Windows因共享登录修复同步1.0.3；规则1.3／JSON1及原648b3a…60448签名保持。增加specialUse前台服务和低打扰持续通知，START_STICKY、移除页面不主动停止，30秒当小时检查与原生AlarmManager并行；无永久唤醒锁或网络保活。设置可关闭常驻，提供立即／一分钟后台测试、渠道／精确／运行和提交状态。旧渠道不擅自升级用户设置，不把系统提交说成用户收到。强停、关机及卓易通关闭的边界明确。
+
+实际云端DescribeClient发现MaxDevice=1，跨端登录踢出旧会话；长期令牌已30天、访问2小时。按用户要求以ModifyClient改MaxDevice=10，保持2592000／7200并回读一致，脱敏策略入cloud/auth-client-policy.json。共享vault优先恢复加密SDK缓存、恢复轮换立即串行保存、缓存清空可重建；普通401或网络错误不永久要求密码，明确长期grant拒绝、身份不一致及30天无活动仍再认证。已吊销旧grant无法复活，可能需再登录一次。
+
+实际检查：101业务／工程；Chrome65＋42＋11＋8、最终Windows61＋42＋11；Android原生14、常驻后台8、真实双设备独立进程6阶段和Android Keystore8项全部通过。正式APK从1.0.2覆盖10项通过；Windows70／Android62个应用源码逐项一致。系统通知栏真实截图已目视看到服务与测试卡片；关闭页面一分钟后原生接收器通知与实际回执确认。仅隔离RaterSigningAcceptance及新虚构账号，无云业务写入，账号已经删除。模拟29／31天不是自然30天验收。初次控件文案定位和过时revision测试失败已修正重验；正式APK原生树短暂null由既有重试通过。详见docs/1.0.3常驻提醒与登录保持验收.md。
+
+Windows203335041字节、SHA256 d95eaae48b97ce4209fe5eeebcfac37b19d7cc0f5cd57f013f1892bd48ee79e4，NotSigned；Android98251476字节、SHA256 32654ecc4da86ecd0e448158c0d18d186724fd6614c689db18266054853eceab，原证书v1/v2/v3。目标正式批次dual/2026.10.23.1，双新包＋SHA256SUMS；远端完成以PUBLIC／main／附注tag／非draft非prerelease和三个资产digest回读为准。
+
+真实命令：npm run check；node output/build-nsis-reader.cjs；node scripts/android-build.mjs --instrument；node scripts/desktop-rebuild-smoke.mjs；Playwright CLI run-code --filename=scripts/reminder-ui-acceptance.cjs及既有三套回归。Android设置SDK、5038、emulator-5580后，ReminderIntegrationTest、android-service-acceptance.mjs、android-session103-acceptance.mjs、android-fix-release-smoke.mjs串行；新脚本session-cloud-acceptance.cjs --keep创建虚构账号，完成后cleanup已删除。构建和凭证、截图、运行日志不入库。
+
+未覆盖实体HarmonyOS NEXT／卓易通宿主桥、实体厂商后台、多日自然投递／重启和自然30天、Windows安装向导／SmartScreen；没有引入Push，不声称服务不可被系统停止。后续按实体更新反馈继续，不改旧标签、不强推，不恢复W065～W068废弃实现。
+
+收尾补验：最终原签名正式APK的常驻服务真实系统界面4项通过，精确组件记录、离开页面保持及两张通知卡片截图已目视核对。初次只向下滚动未找到上方总开关，修正双向滚动后重跑通过；AVD正式包提醒已关闭。101项最终检查再次通过。

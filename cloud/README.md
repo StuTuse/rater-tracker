@@ -72,3 +72,8 @@ node node_modules/@cloudbase/cli/bin/tcb fn invoke rater-health -e rater-tracker
 
 以上探针记录是接入历史；本版已另行完成账号与桌面检查。不要把个人数据库设置为公共读写，不将部署凭证纳入仓库。
 官方依据：https://docs.cloudbase.net/cli-v1/quick-start
+
+
+## 1.0.3 长期会话策略（2026-10-23）
+
+默认客户端原为MaxDevice=1，跨设备登录会撤销旧会话。本轮以ModifyClient改为10并DescribeClient回读；长期令牌2592000秒（30天）、访问令牌7200秒（2小时）保持。可审阅配置见[auth-client-policy.json](auth-client-policy.json)，没有密钥。客户端负责加密保存和自动续期，不能复活已撤销的旧grant。双独立进程虚构账号互不挤出、冷启动和到期访问续期6阶段及Android Keystore8项通过；没有写云端业务，测试账号已删除。本机时间模拟不能等同自然30天验收。

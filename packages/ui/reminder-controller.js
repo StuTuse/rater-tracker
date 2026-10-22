@@ -2,11 +2,11 @@ import { hongKong, DIMENSIONS } from '../core/index.js';
 import { reminderDecision, takeReminder } from '../core/reports.js';
 import { reminderCopy } from '../core/reminder-copy.js';
 
-const defaults = { enabled:false, daily:true, followup:true, weekly:true };
+const defaults = { enabled:false, daily:true, followup:true, weekly:true, persistent:true };
 export function hasTodayUpdate(state, date) {
   return Boolean(state.businessUpdates?.[date] || DIMENSIONS.some(d=>state.ratings[date]?.[d] || state.ratingNotes?.[date]?.[d]?.note?.trim()) || state.dailyNotes?.[date]?.note?.trim() || Object.values(state.tasks).some(t=>!t.deleted && (hongKong(t.createdAt).date===date || t.progress.some(p=>p.active && p.date===date) || t.completion?.active && t.completion.date===date)));
 }
-export function createReminderController({ state, scope, platform, route, status }) {
+export function createReminderController({ state, scope, platform, route, status, onStatus }) {
   let options, nativeStatus={}, busy=false, pending=false;
   try { options={...defaults,...JSON.parse(localStorage.getItem('rater-reminders-v1')??'{}')}; } catch { options={...defaults}; }
   async function refresh() {
@@ -15,7 +15,7 @@ export function createReminderController({ state, scope, platform, route, status
       do {
         pending=false;
         const current=state(), date=hongKong().date;
-        if(platform?.reminderSync) nativeStatus=await platform.reminderSync({options,scope:scope(),date,updated:hasTodayUpdate(current,date),revision:current.revision,copies:reminderCopy});
+        if(platform?.reminderSync) {nativeStatus=await platform.reminderSync({options,scope:scope(),date,updated:hasTodayUpdate(current,date),revision:current.revision,copies:reminderCopy});onStatus?.();}
         else if (platform?.notify) {
           const key='rater-reminder-receipts', saved=JSON.parse(localStorage.getItem(key)??'{"sent":[]}');
           const decision=reminderDecision({now:new Date().toISOString(),enabled:options.enabled,dailyEnabled:options.daily,followupEnabled:options.followup,weeklyEnabled:options.weekly,accountScope:scope(),hasTodayBusinessUpdate:hasTodayUpdate(current,date),sent:saved.sent});

@@ -2,11 +2,11 @@
 
 个人使用的每日评分与任务成长记录器。黄色主题，少量叶绿点缀；提供 Windows 桌面版与 Android 安装版。未登录时可离线使用，账号同步需要联网。
 
-**当前双平台版本：Windows 1.0.2；Android 1.0.2（VERSION_CODE=11），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
+**当前双平台版本：Windows 1.0.3；Android 1.0.3（VERSION_CODE=12），从最后preview重新开发，采用正式Release。** 登录账号启动后后台读取云端，并按快照修改时间自动保留较新一端；云端较新则下载，本机较新则上传。每次成功本机保存后自动同步，断网后自动续传。两端使用规则1.3／JSON格式1，不合并账本或重算结算。
 
 ## 安装与使用
 
-下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.21.1)并选择`Rater-Tracker-1.0.2-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
+下载Windows安装程序请打开[当前双平台GitHub Release](https://github.com/StuTuse/rater-tracker/releases/tag/dual%2F2026.10.23.1)并选择`Rater-Tracker-1.0.3-Setup.exe`；Android签名APK也在同一Release附件中。双击安装Windows程序，选择安装目录；安装后从桌面`Rater & Tracker`快捷方式打开。程序包含运行时，无需安装Node，也无需启动服务。作者为TuseCreation。Windows包未签名，SmartScreen仍需受信任签名身份解决；Android沿用原签名，详见[签名与安装排查](docs/应用签名与安装排查.md)。
 
 自有贡献采用[MIT许可](LICENSE)，第三方保留[各自许可](docs/THIRD_PARTY_NOTICES.md)。用户已接受SignPath Foundation证书发布者，作者仍TuseCreation。见[Code signing policy](docs/CODE_SIGNING_POLICY.md)、[Privacy policy／隐私说明](docs/PRIVACY.md)、[接入方案](docs/免费开源签名接入方案.md)和[申请资料](docs/SignPath申请草稿.md)。签名服务尚未获批／接入，Windows安装包仍未签名。
 
@@ -17,6 +17,14 @@
 5. 设置页编辑评分参照，选择完整／柔和／关闭动效，并导出完整 JSON 备份。恢复前会先要求成功导出当前数据，再覆盖恢复。
 
 未登录可完全离线使用；账号同步需要联网。关闭窗口即退出，重复启动聚焦原实例；应用打开时提示临近截止／逾期任务。
+
+## 1.0.3 常驻提醒与登录保持
+
+Android在设置开启通知及“常驻提醒服务”，通知栏保留低打扰的运行卡片，退出页面继续维护原生闹钟；可关闭常驻选项。新增“立即测试通知”“一分钟后台测试”和服务／渠道状态。卓易通另需在“我的 → 应用管理 → 本应用 → 通知管理”允许通知；强停、关机或完全关闭宿主仍会中断服务。Windows仍仅在运行期间提醒。
+
+双端加密保留30天长期凭证并自动续期，暂时断网不要求密码。云端原来只允许1个设备会话，另一端登录会挤出旧会话，现已调整为10个；此前已撤销的凭证可能需要重新登录一次。实际用户活动延续30天窗口；长时间完全未使用及明确撤销时再认证。详情见[本轮验收](docs/1.0.3常驻提醒与登录保持验收.md)。
+
+新增命令：`node scripts/android-service-acceptance.mjs`验证专用AVD的持续服务和一分钟后台测试；`node scripts/android-formal-service-acceptance.mjs`在正式APK真实系统界面验证常驻／测试通知，结束关闭专用AVD提醒；`node scripts/session-cloud-acceptance.cjs --keep`创建虚构账号并验证双设备只读续登；`node scripts/android-session103-acceptance.mjs`验证同一虚构账号的Android Keystore恢复。完成后必须运行`node scripts/session-cloud-acceptance.cjs cleanup`删除虚构账号。Playwright CLI `run-code --filename=scripts/reminder-ui-acceptance.cjs`检查新增设置；隔离环境要求与下文相同。
 
 ## 1.0.2 兼容与保存修复
 
